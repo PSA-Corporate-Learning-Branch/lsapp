@@ -95,10 +95,13 @@ function compileResponses($file) {
             elseif ($response_map[$question]['inputType'] == 'radio') {
                 if (!array_key_exists($question, $responses)) {
                     $responses[$question] = array();
+                    $responses[$question]['total'] = 0;
                 } elseif (!array_key_exists($answer, $responses[$question])) {
                     $responses[$question][$answer] = 1;
+                    $responses[$question]['total']++;
                 } else {
                     $responses[$question][$answer]++;
+                    $responses[$question]['total']++;
                 }
             }
 
@@ -181,20 +184,19 @@ function createChartForRadio($question, $responses) {
     
 }
 
-// test chart
-$test_chart = createChartForRadio('iIntendToApplyTheKnowledgeAndSkillsIGainedFromThisLearningBackOnTheJob', $compiled_responses);
 
 
 
 
 
 
-$labels = array();
-$data = array();
-foreach ($compiled_responses['iIntendToApplyTheKnowledgeAndSkillsIGainedFromThisLearningBackOnTheJob'] as $key => $value) {
-    $labels[] = $key;
-    $data[] = $value;
-} 
+
+// $labels = array();
+// $data = array();
+// foreach ($compiled_responses['iIntendToApplyTheKnowledgeAndSkillsIGainedFromThisLearningBackOnTheJob'] as $key => $value) {
+//     $labels[] = $key;
+//     $data[] = $value;
+// } 
 
 
 ?>
@@ -223,71 +225,15 @@ foreach ($compiled_responses['iIntendToApplyTheKnowledgeAndSkillsIGainedFromThis
         
         <div class="col-4">
             
-            <?php echo $test_chart; //test chart output ?>
+            
 
-
-            <div class="card my-3" >
-                <h2 class="m-3">I know where to go for resources and support.</h2>
-                <div class="mt-3">
-                    <canvas id="pie-one"></canvas>
-                </div>
-                <div class="card-body">
-                    <!-- <h5 class="card-title my-3">I know where to go for resources and support.</h5> -->
-                    <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p> -->
-                    <!-- <a href="#" class="btn btn-primary">Go somewhere</a> -->
-                    <div  class="row align-items-center">
-                        <div class="col-4">
-                            <p style="font-size: smaller;">Strongly Agree</p>
-                        </div>
-                        <div class="col-8">
-                            <div class="progress" role="progressbar" aria-label="Success example" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar text-bg-success" style="width: 72%">72%</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div  class="row align-items-center">
-                        <div class="col-4">
-                            <p style="font-size: smaller;">Agree</p>
-                        </div>
-                        <div class="col-8">
-                            <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar text-bg-success" style="width: 20%">20%</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div  class="row align-items-center">
-                        <div class="col-4">
-                            <p style="font-size: smaller;">Neutral</p>
-                        </div>
-                        <div class="col-8">
-                            <div class="progress" role="progressbar" aria-label="Warning example" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar text-bg-success" style="width: 5%">5%</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div  class="row align-items-center">
-                        <div class="col-4">
-                            <p style="font-size: smaller;">Disagree</p>
-                        </div>
-                        <div class="col-8">
-                            <div class="progress" role="progressbar" aria-label="Warning example" aria-valuenow="3" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar text-bg-success" style="width: 3%">3%</div>
-                            </div>
-                        </div>
-                    </div>  
-                    <div  class="row align-items-center">
-                        <div class="col-4">
-                            <p style="font-size: smaller;">Strongly Disagree</p>
-                        </div>
-                        <div class="col-8">
-                            <div class="progress" role="progressbar" aria-label="Warning example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar text-bg-success" style="width: 0%">0%</div>
-                            </div>
-                        </div>
-                    </div>  
-                </div>
-            </div>
-
+            <?php
+            foreach($compiled_responses as $question => $response) {
+                if ($response_map[$question]['inputType'] == 'radio') {
+                    echo createChartForRadio($question, $compiled_responses);
+                }
+            }
+            ?>
         </div>
 
         <div class="col-4">
@@ -321,27 +267,7 @@ foreach ($compiled_responses['iIntendToApplyTheKnowledgeAndSkillsIGainedFromThis
     <?php echo $chart_scripts; ?>
 
 
-    // example pie chart data
-    const pieChart = document.getElementById('pie-one');
 
-    new Chart(pieChart, {
-        type: 'pie',
-        data: {
-            labels: <?= json_encode($labels) ?>,   
-            datasets: [{
-                label: 'Test Pie Chart',
-                data: <?= json_encode($data) ?>,
-                backgroundColor: [
-                'rgb(255, 99, 132)',
-                'rgb(54, 162, 235)',
-                'rgb(255, 205, 86)',
-                'rgba(32, 185, 57, 1)',
-                'rgba(157, 47, 167, 1)',
-                ],
-                hoverOffset: 4
-            }]
-        }
-    });
 
 </script>
 
