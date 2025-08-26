@@ -192,7 +192,7 @@ function createTextResponses($question, $responses) {
     global $response_map;
 
     $html =    '<div class="card my-3" >';
-    $html .=        '<h2 class="m-3">What was tricky?</h2>';
+    $html .=        '<h2 class="m-3">' . $response_map[$question]['label'] . '</h2>';
     $html .=        '<details>';
     $html .=            '<summary class="m-3">View responses <span class="badge text-bg-secondary">' . count($responses[$question]) . '</span></summary>';
     $html .=            '<ul class="list-group m-3">';
@@ -207,17 +207,6 @@ function createTextResponses($question, $responses) {
 
 }
 
-
-
-
-
-
-// $labels = array();
-// $data = array();
-// foreach ($compiled_responses['iIntendToApplyTheKnowledgeAndSkillsIGainedFromThisLearningBackOnTheJob'] as $key => $value) {
-//     $labels[] = $key;
-//     $data[] = $value;
-// } 
 
 
 ?>
@@ -241,9 +230,23 @@ function createTextResponses($question, $responses) {
 
 
 
-<div class="container-lg p-lg-5 p-4 bg-light-subtle shadow-sm">
-    <h1>Courses Evaluation Report</h1>
+<div class="container-lg p-lg-5 p-4 bg-light-subtle rounded">
+    <h1 class="mb-5">Courses Evaluation Report</h1>
      
+    <div class="row justify-content-md-center">
+        <div class="col-8 my-3 py-3 bg-secondary-subtle text-secondary-emphasis rounded shadow-sm">
+            <p>Select class code to view responses</p>
+            <select class="form-select" aria-label="select data">
+                <option selected>All</option>
+                <option value="1">One</option>
+                <option value="2">Two</option>
+                <option value="3">Three</option>
+            </select>
+
+
+        </div>
+    </div>
+
     <?php
     foreach($compiled_responses as $question => $response) {
         if ($response_map[$question]['inputType'] == 'radio') {
