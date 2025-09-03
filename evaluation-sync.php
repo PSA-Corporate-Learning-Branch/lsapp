@@ -96,20 +96,21 @@ foreach ($config as $form_config) {
     $output_config[] = $form_config;
 }
 
-$questions = [];
-function processVersionQuestions($array) {
-    global $questions;
-
+function processVersionQuestions(array $array, array &$return_array = []) {
+    
     foreach ($array as $key => $value) {
-
+        // check if the value is an array
         if (is_array($value)) {
+            // if it is an array, check if it has the inputType key that lets us know it's 
+            // a question and not another type of component
             if (array_key_exists('inputType', $value)) {
+                // once we've determined it's a question, determine the type and process accordingly
                 if ($value['inputType'] == 'radio') {
                     $value_options = [];
                     foreach ($value['values'] as $option) {
                         $value_options[$option['value']] = $option['label'];
                     }
-                    $questions[$value['key']] = [
+                    $return_array[$value['key']] = [
                         'label' => $value['label'],
                         'values' => $value_options,
                         'inputType' => $value['inputType']
@@ -117,31 +118,35 @@ function processVersionQuestions($array) {
                     continue;
                 }
                 else if ($value['inputType'] == 'text') {
-                    $questions[$value['key']] = [
+                    $return_array[$value['key']] = [
                         'label' => $value['label'],
                         'inputType' => $value['inputType']
                     ];
                     continue;
                 }
+                // TODO: add checkbox type, possibly others
             }
-            processVersionQuestions($value);
-            
+            // if we determine it's not a question, process the array looking for
+            // questions within as they can be nested in a layout component
+            $return_array = processVersionQuestions($value, $return_array);
         }
     }
+    return $return_array;
 }
+
 
 // testing version
 $version_contents = file_get_contents('data/surveys/test-version.json');
 $versionData = json_decode($version_contents, true);
 
 echo '<pre>';
-// print_r($versionData);
+print_r($versionData);
 echo '</pre>';
 
-processVersionQuestions($versionData);
+// $test_result = processVersionQuestions($versionData);
 
 echo '<pre>';
-print_r($questions);
+// print_r($test_result);
 echo '</pre>';
 
 
