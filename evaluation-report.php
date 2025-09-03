@@ -62,6 +62,57 @@ $response_map = [
 
 $chart_scripts = '';
 
+function compileResponsesByClass($file) {
+    global $response_map;
+    global $chart_scripts;
+
+    // open and decode file
+    $file_contents = file_get_contents($file);
+    $response_data = json_decode($file_contents, true);
+    
+    // output array
+    $responses = array();
+    
+    foreach ($response_data as $response) {
+        if (!array_key_exists($response['classCode'], $responses)) {
+                $responses[$response['classCode']] = array();
+            }
+        foreach ($response as $question => $answer) {
+            // ignore fields we don't need
+            if ($question == 'form' || $question == 'lateEntry' || $question == 'classCode' || $question == 'courseCode') {
+                continue;
+            } 
+            // don't capture the information from empty question responses
+            elseif (empty($answer)) {
+                continue;
+            }
+            // for text type responses store as an array of answers
+            elseif ($response_map[$question]['inputType'] == 'text') {
+                if (!array_key_exists($question, $responses[$response['classCode']])) {
+                    $responses[$response['classCode']][$question] = array();
+                } else {
+                    $responses[$response['classCode']][$question][] = $answer;
+                }
+            } 
+            // for radio type responses add a count of the response option
+            elseif ($response_map[$question]['inputType'] == 'radio') {
+                if (!array_key_exists($question, $responses[$response['classCode']])) {
+                    $responses[$response['classCode']][$question] = array();
+                    $responses[$response['classCode']][$question]['total'] = 0;
+                } elseif (!array_key_exists($answer, $responses[$response['classCode']][$question])) {
+                    $responses[$response['classCode']][$question][$answer] = 1;
+                    $responses[$response['classCode']][$question]['total']++;
+                } else {
+                    $responses[$response['classCode']][$question][$answer]++;
+                    $responses[$response['classCode']][$question]['total']++;
+                }
+            }
+
+        }
+    }
+    return $responses;
+}
+
 function compileResponses($file) {
     global $response_map;
     global $chart_scripts;
@@ -109,7 +160,7 @@ function compileResponses($file) {
     }
     return $responses;
 }
-$compiled_responses = compileResponses('data/test-data.json');
+$compiled_responses = compileResponses('data/surveys/test-data.json');
 
 
 
@@ -221,11 +272,14 @@ function createTextResponses($question, $responses) {
 <body>
 <?php getNavigation() ?>
 
+<?php
+$test_responses = compileResponsesByClass('data/surveys/test-data.json')
 
+?>
 
 
 <pre>
-    <?php //print_r($compiled_responses) ?>
+    <?php print_r($test_responses) ?>
 </pre>
 
 
@@ -236,11 +290,13 @@ function createTextResponses($question, $responses) {
     <div class="row justify-content-md-center">
         <div class="col-8 my-3 py-3 bg-secondary-subtle text-secondary-emphasis rounded shadow-sm">
             <p>Select class code to view responses</p>
-            <select class="form-select" aria-label="select data">
+            <select class="form-select" aria-label="select data" multiple>
                 <option selected>All</option>
                 <option value="1">One</option>
                 <option value="2">Two</option>
                 <option value="3">Three</option>
+                <option value="4">Four</option>
+                <option value="5">Five</option>
             </select>
 
 
