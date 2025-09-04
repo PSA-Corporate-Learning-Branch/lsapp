@@ -3,101 +3,105 @@ opcache_reset();
 $path = './inc/lsapp.php';
 require($path); 
 
-$formid = '7b6cd68b-85b9-41c3-b725-97339b06cc6e';
-$formpass = '3aa4980f-26ca-49e5-9136-2456de8c2ad9';
-$formVersionId = '';
+/**
+ * Using the provided config, reach out to form endpoint
+ * update basic info field, and determine if version sync is required
+ * to update the question mapping
+ */
+function syncForm($config) {
+    // take the provided config, sync with the form endpoint
+    // and determine if version needs to sync
+    $return_config = $config;
+    $form_id = $config['formId'];
+    $secret = $config['formSecret'];
 
-$credentials = base64_encode($formid . ':' . $formpass);
-
-// enpoints
-// overall form information.  can be used to see current versions
-$endpoint_form_details = 'https://submit.digital.gov.bc.ca/app/api/v1/forms/' . $formid;
-
-// get a specific form version.  used to determine questions and types to create data map
-$endpoint_form_version = 'https://submit.digital.gov.bc.ca/app/api/v1/forms/{formId}/versions/{formVersionId}';
-
-// get responses.  requires additional parameters: format, type, and version
-$endpoint_submissions_export = 'https://submit.digital.gov.bc.ca/app/api/v1/forms/{formId}/export';
-
-
-$options = [
+    $form_endpoint = 'https://submit.digital.gov.bc.ca/app/api/v1/forms/' . $form_id;
+    $credentials = base64_encode($form_id . ':' . $secret);
+    $options = [
     'http' => [
         'method' => 'GET', 
         'header' => 'Authorization: Basic ' . $credentials
         ]
     ];
+    $context = stream_context_create($options);
 
-$context = stream_context_create($options);
+    // reach out to form endpoint and get data
+    $response = file_get_contents($form_endpoint, false, $context);
+    $form_data = json_decode($response, true);
 
-$params = [
-    'format' => 'json',
-    'type' => 'submissions'
-];
+    // update from form
+    $return_config['lastUpdated'] = $form_data['updatedAt'];
 
-// $response = file_get_contents($endpoint_form_details, false, $context);
-// $formData = json_decode($response, true);
+    $return_config['name'] = $form_data['name'];
+    
+    $return_config['description'] = $form_data['description'];
+    
+    if ($return_config['responseFile'] !== $form_data['snake']) {
+        // if we're using the snake for the responses filename
+        // we'll need do something to the old file if we create a new one
+        $return_config['responses'] = $form_data['snake'];
+    }
 
-// testing form
-$form_contents = file_get_contents('data/surveys/test-form.json');
-$formData = json_decode($form_contents, true);
+    // versions change? 
+    foreach ($form_data['versions'] as $version) {
+        // check if it's the published version
+        if ($version['published'] == true) {
+            // check if it matches our published version, and if not,
+            // update our values and opt in to syncing the version
+            if ($return_config['publishedVersion'] !== $version['version']) {
+                $return_config['publishedVersion'] = $version['version'];
+                $return_config['publishedVersionId'] = $version['id'];
+                
+                // reach out to version endpoint get the form version json
+                $version_data = getVersion($return_config);
 
+                // process the version and extract questions to create our questions map
+                $questions_map = processVersionQuestions($version_data);
 
-// open and decode config file
-$config_file = 'data/surveys/config.json';
-$file_contents = file_get_contents($config_file);
-$config = json_decode($file_contents, true);
-
-
-
-// assume we don't need to sync the version endpoint unless we determine
-// the version has changed
-$sync_version = false;
-
-$output_config = [];
-
-// check if form exists in config table, and if not add relevant details
-foreach ($config as $form_config) {
-    // if form exists, check for any changes to form or published version
-    if ($form_config['formId'] == $formData['id']) {
-        
-        // currently looking at each value, but should the number of things we're looking at
-        // increase significantly we could restructure to only do additional processing if
-        // updatedAt changes
-        if ($form_config['lastUpdated'] !== $formData['updatedAt']) {
-            $form_config['lastUpdated'] = $formData['updatedAt'];
-        }
-
-        if ($form_config['name'] !== $formData['name']) {
-            $form_config['name'] = $formData['name'];
-        }
-
-        if ($form_config['description'] !== $formData['description']) {
-            $form_config['description'] = $formData['description'];
-        }
-        
-        if ($form_config['responses'] !== $formData['snake']) {
-            $form_config['responses'] = $formData['snake'];
-        }
-
-        // versions change? 
-        foreach ($formData['versions'] as $version) {
-            // check if it's the published version
-            if ($version['published'] == true) {
-                // check if it matches our published version, and if not,
-                // update our values and opt in to syncing the version
-                if ($form_config['publishedVersion'] !== $version['version']) {
-                    $form_config['publishedVersion'] = $version['version'];
-                    $form_config['publishedVersionId'] = $version['id'];
-                    $sync_version = true;
-                }
+                $return_config['questions'] = $questions_map;
             }
         }
     }
-    $output_config[] = $form_config;
+
+    return $return_config;
+
 }
 
-function processVersionQuestions(array $array, array &$return_array = []) {
+/**
+ * Return the version json/array so it can be parsed
+ * by processVersionQuestions() to pull out the questions for mapping
+ */
+function getVersion($config) {
     
+    $form_id = $config['formId'];
+    $secret = $config['formSecret'];
+    $version_id = $config['publishedVersionId'];
+
+    $version_endpoint = 'https://submit.digital.gov.bc.ca/app/api/v1/forms/' . $form_id . '/versions/' . $version_id;
+
+    $credentials = base64_encode($form_id . ':' . $secret);
+    $options = [
+    'http' => [
+        'method' => 'GET', 
+        'header' => 'Authorization: Basic ' . $credentials
+        ]
+    ];
+    $context = stream_context_create($options);
+
+    // reach out to form endpoint and get data
+    $response = file_get_contents($version_endpoint, false, $context);
+    $version_data = json_decode($response, true);
+
+    return $version_data;
+}
+
+
+/**
+ * Takes the form version json as an array, and returns
+ * an array mapping of the questions, types, response options, and labels
+ */
+function processVersionQuestions(array $array, array &$return_array = []) {
+
     foreach ($array as $key => $value) {
         // check if the value is an array
         if (is_array($value)) {
@@ -133,6 +137,61 @@ function processVersionQuestions(array $array, array &$return_array = []) {
     }
     return $return_array;
 }
+
+
+function getResponses($config) {
+
+    // get responses.  requires additional parameters: format, type, and version
+    $submissions_export_endpoint = 'https://submit.digital.gov.bc.ca/app/api/v1/forms/{formId}/export';
+
+    $form_id = $config['formId'];
+    $secret = $config['formSecret'];
+
+    $credentials = base64_encode($form_id . ':' . $secret);
+
+    $options = [
+    'http' => [
+        'method' => 'GET', 
+        'header' => 'Authorization: Basic ' . $credentials
+        ]
+    ];
+
+    $context = stream_context_create($options);
+
+    $params = [
+        'format' => 'json',
+        'type' => 'submissions'
+    ];
+
+    $response = file_get_contents($submissions_export_endpoint, false, $context);
+    $response_data = json_decode($response, true);
+
+}
+
+// $response = file_get_contents($endpoint_form_details, false, $context);
+// $formData = json_decode($response, true);
+
+// testing form
+$form_contents = file_get_contents('data/surveys/test-form.json');
+$formData = json_decode($form_contents, true);
+
+
+// open and decode config file
+$config_file = 'data/surveys/config.json';
+$file_contents = file_get_contents($config_file);
+$config = json_decode($file_contents, true);
+// create config backup file
+
+
+
+
+// check if form exists in config table, and if not add relevant details
+foreach ($config as $form_config) {
+    // sync the form
+
+    
+}
+
 
 
 // testing version
