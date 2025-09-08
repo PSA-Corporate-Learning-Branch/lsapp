@@ -100,7 +100,7 @@ foreach($c as $row) {
 
 ?>
 <?php getHeader() ?>
-<title>Upcoming Classes offered by the BC Public Service Agency Learning Centre</title>
+<title>Upcoming Classes offered by the BC Public Service Agency Corporate Learning Branch</title>
 <link href="/lsapp/css/summernote-bs4.css" rel="stylesheet">
 <style>
 .newannouce {

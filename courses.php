@@ -182,7 +182,7 @@ function getFilterLink($filters, $key, $value = null) {
 
 ?>
 <?php getHeader() ?>
-<title>Learning Centre Course Catalog</title>
+<title>Corporate Learning Branch Course Catalog</title>
 <?php getScripts() ?>
 
 <body>

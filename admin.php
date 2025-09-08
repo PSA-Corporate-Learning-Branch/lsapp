@@ -1,6 +1,6 @@
 <?php require('inc/lsapp.php') ?>
 <?php getHeader() ?>
-<title>The Learning Centre | PSA | Learning Support Application</title>
+<title>Admin Dashboard</title>
 <link href="/lsapp/css/summernote-bs4.css" rel="stylesheet">
 <?php getScripts() ?>
 <body>
