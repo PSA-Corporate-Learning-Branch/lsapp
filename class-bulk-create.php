@@ -22,10 +22,6 @@ foreach($dates as $date) {
 		// Opted to default to same as StartDate while we determine future state incorporating sessions
 		// multi-day consecutive offerings are less common, so this change should result in less frequent changes needed to the end date
 		// while still letting the ClassDays field to be used as it has been
-	// $coursedays = $course[6];
-	// if($coursedays < 1) $coursedays = 1;
-	// $coursecorrect = $coursedays - 1;
-	// $enddate = date("Y-m-d", strtotime($date . ' + ' . $coursecorrect . ' days'));
 	$coursedays = 1;
 	$enddate = $date;
 
