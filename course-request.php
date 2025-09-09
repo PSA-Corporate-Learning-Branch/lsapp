@@ -77,12 +77,18 @@ $reportinglist = getReportingList();
                 <select name="LearningHubPartner" id="LearningHubPartner" class="form-select" required>
                     <option value="" disabled selected>Select one</option>
                     <?php foreach($partners as $partner): ?>
-                        <option value="<?= sanitize($partner['name']) ?>"><?= sanitize($partner['name']) ?></option>
+                        <option value="<?= sanitize($partner['id']) ?>"><?= sanitize($partner['name']) ?></option>
                     <?php endforeach ?>
                 </select>
             </div>
             <div class="col-md-4 mb-3">
-                <label for="Platform" class="form-label">Platform</label>
+                <label for="Platform" class="form-label">
+                    Registration Platform
+                    <i class="bi bi-question-circle text-muted" 
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="top" 
+                       title="Set this to 'PSA Learning System' unless learners actually register through another platform."></i>
+                </label>
                 <select name="Platform" id="Platform" class="form-select" required>
                     <option value="" disabled selected>Select one</option>
                     <?php foreach($platforms as $platform): ?>
@@ -337,6 +343,12 @@ $reportinglist = getReportingList();
 <?php require('templates/javascript.php') ?>
 <script>
 $(document).ready(function(){
+    // Initialize Bootstrap tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+    
     // Platform-based field visibility
     $('#Platform').on('change', function() {
         if($(this).val() === 'PSA Learning System') {

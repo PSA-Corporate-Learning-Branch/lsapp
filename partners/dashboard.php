@@ -127,7 +127,15 @@ endif;
         <?php foreach($filteredCourses as $course): ?>
         <tr>
             <td><a href="../course.php?courseid=<?php echo urlencode($course[0]); ?>"><?php echo htmlspecialchars($course[2]); ?></a></td>
-            <td><a href="view.php?slug=<?php echo urlencode($partnerMap[$course[36]]); ?>"><?php echo htmlspecialchars($course[36]); ?></a></td>
+            <td>
+                <?php 
+                $partnerInfo = getPartnerById($course[36]);
+                if ($partnerInfo): ?>
+                    <a href="view.php?slug=<?php echo urlencode($partnerInfo['slug']); ?>"><?php echo htmlspecialchars($partnerInfo['name']); ?></a>
+                <?php else: ?>
+                    <?php echo htmlspecialchars($course[36]); ?>
+                <?php endif; ?>
+            </td>
             <td><?php echo htmlspecialchars($course[1]); ?></td>
             <td><?php echo htmlspecialchars($course[14]); ?></td>
             <td><?php echo htmlspecialchars($course[15]); ?></td>

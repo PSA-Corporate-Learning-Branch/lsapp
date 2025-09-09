@@ -300,7 +300,7 @@ $reportinglist = getReportingList();
                 <select name="LearningHubPartner" id="LearningHubPartner" class="form-select" required>
                     <option value="" disabled <?= empty($deets[36]) ? 'selected' : '' ?>>Select one</option>
                     <?php foreach($partners as $partner): ?>
-                        <option value="<?= sanitize($partner['name']) ?>" <?= ($partner['name'] == $deets[36]) ? 'selected' : '' ?>>
+                        <option value="<?= sanitize($partner['id']) ?>" <?= ($partner['id'] == $deets[36]) ? 'selected' : '' ?>>
                             <?= sanitize($partner['name']) ?>
                         </option>
                     <?php endforeach ?>
