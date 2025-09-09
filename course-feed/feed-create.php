@@ -1,5 +1,6 @@
 <?php
 opcache_reset();
+require('../inc/lsapp.php');
 
 if (($handle = fopen("../data/courses.csv", "r")) !== false) {
     $csvs = [];
@@ -59,6 +60,9 @@ foreach ($datas as $course) {
             $persistent = 'yes';
         }
         
+        // Convert partner ID to name for the feed
+        $partnerName = getPartnerNameById($course['LearningHubPartner']);
+        
         $courseItem = [
             "id" => !empty($course['ItemCode']) ? $course['ItemCode'] : ($course['CourseID'] ?? ''),
             "title" => $course['CourseName'] ?? '',
@@ -70,10 +74,10 @@ foreach ($datas as $course) {
             "_audience" => $course['Audience'] ?? '',
             "_topic" => $course['Topics'] ?? '',
             "_slug" => $course['CourseNameSlug'] ?? '',
-            "_learning_partner" => $course['LearningHubPartner'] ?? '',
+            "_learning_partner" => $partnerName,
             "_platform" => $course['Platform'] ?? '',
             "_persistent" => $persistent,
-            "author" => $course['LearningHubPartner'] ?? '',
+            "author" => $partnerName,
             "date_published" => $createdDate,
             "date_modified" => $modifiedDate,
             "tags" => rtrim(trim($course['Category'] ?? ''), ','),
