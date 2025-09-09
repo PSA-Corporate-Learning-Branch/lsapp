@@ -23,7 +23,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // ADD or EDIT a Partner
     $partnerIndex = -1;
-    if (!empty($_POST["slug"])) {
+    
+    // First try to find by ID (for editing existing partners)
+    if (!empty($_POST["id"])) {
+        foreach ($existingData as $index => $partner) {
+            if ($partner["id"] == $_POST["id"]) {
+                $partnerIndex = $index;
+                break;
+            }
+        }
+    }
+    
+    // Fallback to finding by slug (for legacy compatibility)
+    if ($partnerIndex === -1 && !empty($_POST["slug"])) {
         foreach ($existingData as $index => $partner) {
             if ($partner["slug"] === $_POST["slug"]) {
                 $partnerIndex = $index;
@@ -87,18 +99,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    // Generate slug from name - always regenerate if name has changed
-    $nameChanged = false;
-    if ($partnerIndex !== -1 && $existingData[$partnerIndex]["name"] !== $_POST["name"]) {
-        $nameChanged = true;
-    }
-    
-    // Use existing slug if no name change, otherwise generate new slug from name
-    if ($partnerIndex !== -1 && !$nameChanged && !empty($existingData[$partnerIndex]["slug"])) {
-        $slug = $existingData[$partnerIndex]["slug"];
-    } else {
-        $slug = createSlug($_POST["name"]);
-    }
+    // Always regenerate slug from name for all updates
+    $slug = createSlug($_POST["name"]);
 
     // Construct the updated partner data
     $status = $_POST["status"] ?? "requested";
