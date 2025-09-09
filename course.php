@@ -27,14 +27,18 @@ $partners = json_decode($partnersJson, true);
 $platformsJson = file_get_contents('data/platforms.json');
 $platformsData = json_decode($platformsJson, true);
 
-// Find the partner slug for this course
+// Find the partner information for this course
+$partnerInfo = null;
 $partnerSlug = '';
+$partnerName = '';
 if (!empty($deets[36])) {
-    foreach ($partners as $partner) {
-        if ($partner['name'] === $deets[36]) {
-            $partnerSlug = $partner['slug'];
-            break;
-        }
+    $partnerInfo = getPartnerById($deets[36]);
+    if ($partnerInfo) {
+        $partnerSlug = $partnerInfo['slug'];
+        $partnerName = $partnerInfo['name'];
+    } else {
+        // Fallback if partner not found - just show the ID
+        $partnerName = $deets[36];
     }
 }
 
@@ -304,9 +308,11 @@ if (file_exists($categoriesFile)) {
 <div class="col-md-4">
 <div class=""><strong>Corp. Partner:</strong><br> 
 <?php if (!empty($partnerSlug)): ?>
-    <a href="/lsapp/partners/view.php?slug=<?= $partnerSlug ?>"><?= $deets[36] ?></a>
+    <a href="/lsapp/partners/view.php?slug=<?= $partnerSlug ?>"><?= sanitize($partnerName) ?></a>
+<?php elseif (!empty($partnerName)): ?>
+    <?= sanitize($partnerName) ?>
 <?php else: ?>
-    <?= $deets[36] ?>
+    <span class="text-muted">Not set</span>
 <?php endif ?>
 </div>
 </div>

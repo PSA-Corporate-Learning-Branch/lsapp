@@ -1,9 +1,37 @@
 <?php
 opcache_reset();
-
+define('SLASH', DIRECTORY_SEPARATOR);
+$docroot = 'E:\WebSites\Prod\BCPSA\Intranet\wwwroot\lsapp\\';
+define('BASE_DIR', $docroot);
 function build_path(...$segments) {
     return implode(SLASH, $segments);
 }
+
+// Load all courses into memory once
+function loadAllCourses() {
+    $path = build_path(BASE_DIR, 'data', 'courses.csv');
+    $f = fopen($path, 'r');
+    if (!$f) {
+        die("Failed to open courses CSV.");
+    }
+    
+    $header = fgetcsv($f); // Skip header row
+    $courses = [];
+    
+    while ($row = fgetcsv($f)) {
+        // Index by course ID for quick lookup
+        $courses[$row[0]] = $row;
+    }
+    
+    fclose($f);
+    return $courses;
+}
+
+// Get a specific course from the preloaded array
+function getCourse($cid, $coursesArray) {
+    return $coursesArray[$cid] ?? '';
+}
+
 function getCoursesClassesUpcoming($courseid) {
     $path = build_path(BASE_DIR, 'data', 'classes.csv');
     $f = fopen($path, 'r');
@@ -24,28 +52,18 @@ function getCoursesClassesUpcoming($courseid) {
     return $list;
 }
 
-$csvFile = fopen('../data/courses.csv', 'r');
-if (!$csvFile) {
-    die("Failed to open courses CSV.");
-}
-
-$header = fgetcsv($csvFile); // Skip header row
-$allCourseIds = []; // Track all course IDs for later cleanup
+// Load all courses once at the beginning
+$allCourses = loadAllCourses();
+$allCourseIds = array_keys($allCourses); // Track all course IDs for later cleanup
 
 $accessCodeJson = '../data/open-access-code.json';
 $accessCodeData = file_exists($accessCodeJson) ? json_decode(file_get_contents($accessCodeJson), true) : [];
 $expectedCode = $accessCodeData[0]['code'] ?? '';
 
-while (($course = fgetcsv($csvFile)) !== false) {
-    $allCourseIds[] = $course[0]; // Track all course IDs for later cleanup
-    if (isset($course[57]) && strtolower(trim($course[57])) === 'true' || strtolower(trim($course[57])) === 'on') {
-        $courseid = $course[0]; // Assuming course ID is in index 0
-
-        // Fetch course details
-        $course = getCourse($courseid);
-        if (!$course) {
-            die("Course not found.");
-        }
+// Process each course from the preloaded array
+foreach ($allCourses as $courseid => $course) {
+    if (isset($course[57]) && (strtolower(trim($course[57])) === 'true' || strtolower(trim($course[57])) === 'on')) {
+        // Course details are already in $course variable, no need to fetch again
 
         // Extract required course details
         $title = $course[2]; // CourseName
@@ -169,7 +187,7 @@ while (($course = fgetcsv($csvFile)) !== false) {
 //     $filename = basename($file, '.php');
 //     $match = false;
 //     foreach ($allCourseIds as $id) {
-//         $courseData = getCourse($id);
+//         $courseData = getCourse($id, $allCourses);
 //         if ($courseData && isset($courseData[3])) {
 //             $short = str_replace(' ', '-', strtolower($courseData[3]));
 //             if ($short === $filename) {
@@ -184,7 +202,5 @@ while (($course = fgetcsv($csvFile)) !== false) {
 //         unlink($file);
 //     }
 // }
-
-fclose($csvFile);
 // Redirect to the requested courses RSS feed generation
 header('Location: requested-courses-rss.php');

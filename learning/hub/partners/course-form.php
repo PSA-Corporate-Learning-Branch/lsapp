@@ -249,8 +249,10 @@ a:hover {
 <?php if ($courseid || isset($_GET['newcourse'])): ?>
 <?php
 if (isset($_GET['newcourse'])) {
+  // Use the partner ID instead of the slug/name
+  $partnerId = $matched_partner ? $matched_partner['id'] : '';
   $courseData = [
-    'LearningHubPartner' => $partnerslug,
+    'LearningHubPartner' => $partnerId,
     'CourseOwner' => LOGGED_IN_IDIR,
     'CourseID' => '',
     'CourseName' => '',
@@ -280,7 +282,15 @@ $formAction = isset($_GET['newcourse']) ? '../../../lsapp/course-create.php' : '
 <?php endif ?>
 
 <input type="hidden" name="user_idir" value="<?= LOGGED_IN_IDIR ?>">
-<input type="hidden" name="LearningHubPartner" value="<?= $courseData['LearningHubPartner'] ?>">
+<?php 
+// Ensure we're sending the partner ID, not the name
+$partnerValue = $courseData['LearningHubPartner'];
+// If it's not numeric, it might be a partner name - convert to ID
+if (!is_numeric($partnerValue) && $matched_partner) {
+    $partnerValue = $matched_partner['id'];
+}
+?>
+<input type="hidden" name="LearningHubPartner" value="<?= $partnerValue ?>">
 <input type="hidden" name="RequestedBy" value="<?= LOGGED_IN_IDIR ?>">
 <input type="hidden" name="Requested" value="<?= date('Y-m-d') ?>">
 <input type="hidden" name="EffectiveDate" value="<?= date('Y-m-d') ?>">

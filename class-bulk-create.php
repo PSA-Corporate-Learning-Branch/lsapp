@@ -17,10 +17,13 @@ foreach($dates as $date) {
 	$classid = date('YmdHis') . '-' . $count;
 	$combinedtimes = h($_POST['StartTime'][$count]) . ' - ' . h($_POST['EndTime'][$count]);	
 	$status = 'Requested';
-	$coursedays = $course[6];
-	if($coursedays < 1) $coursedays = 1;
-	$coursecorrect = $coursedays - 1;
-	$enddate = date("Y-m-d", strtotime($date . ' + ' . $coursecorrect . ' days'));
+	
+	// EndDate calculation
+		// Opted to default to same as StartDate while we determine future state incorporating sessions
+		// multi-day consecutive offerings are less common, so this change should result in less frequent changes needed to the end date
+		// while still letting the ClassDays field to be used as it has been
+	$coursedays = 1;
+	$enddate = $date;
 
 	$shipdate = '';
 	if($course[23] == 'Yes') {
@@ -46,8 +49,8 @@ foreach($dates as $date) {
 				$course[0],
 				$course[2],
 				'', // ITEM code
-				$date,
-				$enddate,
+				$date, // StartDate
+				$enddate, // EndDate
 				$combinedtimes,
 				$_POST['MinEnroll'][$count], //$course[28], //MinEnroll
 				$_POST['MaxEnroll'][$count], //$course[29], //MaxEnroll

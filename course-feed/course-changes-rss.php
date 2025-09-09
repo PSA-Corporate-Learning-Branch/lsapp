@@ -3,6 +3,25 @@ opcache_reset();
 
 // Set UTF-8 encoding for the script
 mb_internal_encoding('UTF-8');
+define('SLASH', DIRECTORY_SEPARATOR);
+$docroot = $_SERVER['DOCUMENT_ROOT'] . '/lsapp//';
+define('BASE_DIR', $docroot);
+function build_path(...$segments) {
+    return implode(SLASH, $segments);
+}
+
+function getCourse($cid) {
+	$path = build_path(BASE_DIR, 'data', 'courses.csv');
+	$f = fopen($path, 'r');
+	$course = '';
+	while ($row = fgetcsv($f)) {
+		if($row[0] == $cid) {
+			$course = $row;
+		}
+	}
+	fclose($f);
+	return $course;
+}
 
 // Directory containing the change request JSON files
 $directory = "../course-change/requests";

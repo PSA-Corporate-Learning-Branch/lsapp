@@ -18,6 +18,28 @@ if($_POST) {
         die("Invalid course ID");
     }
     
+    // Get current course data to check existing status
+    $currentCourse = getCourse($courseid);
+    $currentStatus = $currentCourse ? $currentCourse[1] : '';
+    
+    // Validate ItemCode for PSA Learning System courses being set to Active
+    if($_POST['Platform'] === 'PSA Learning System' && 
+       strcasecmp($_POST['Status'], 'Active') === 0 && 
+       strcasecmp($currentStatus, 'Active') !== 0) {
+        
+        $itemCode = trim($_POST['ItemCode']);
+        
+        // Check if ItemCode is empty
+        if(empty($itemCode)) {
+            die("Error: Cannot set course to Active. PSA Learning System courses require an ItemCode (e.g., ITEM-12345).");
+        }
+        
+        // Validate ItemCode format (must start with "ITEM-" and end with a number)
+        if(!preg_match('/^ITEM-\d+$/', $itemCode)) {
+            die("Error: Invalid ItemCode format. ItemCode must start with 'ITEM-' followed by a number (e.g., ITEM-12345).");
+        }
+    }
+    
     // Ensure HTTPS for pre/post work links
     $prework = sanitize($_POST['PreWork']);
     $postwork = sanitize($_POST['PostWork']);
@@ -278,7 +300,7 @@ $reportinglist = getReportingList();
                 <select name="LearningHubPartner" id="LearningHubPartner" class="form-select" required>
                     <option value="" disabled <?= empty($deets[36]) ? 'selected' : '' ?>>Select one</option>
                     <?php foreach($partners as $partner): ?>
-                        <option value="<?= sanitize($partner['name']) ?>" <?= ($partner['name'] == $deets[36]) ? 'selected' : '' ?>>
+                        <option value="<?= sanitize($partner['id']) ?>" <?= ($partner['id'] == $deets[36]) ? 'selected' : '' ?>>
                             <?= sanitize($partner['name']) ?>
                         </option>
                     <?php endforeach ?>
@@ -880,6 +902,30 @@ $(document).ready(function(){
             errors.push('Please select a delivery method');
         }
         
+        // Validate ItemCode for PSA Learning System courses being set to Active
+        var platform = $('#Platform').val();
+        var status = $('#Status').val();
+        var currentStatus = '<?= $deets[1] ?>'; // Get current status from PHP
+        var itemCode = $('#ItemCode').val().trim();
+        
+        if(platform === 'PSA Learning System' && 
+           status === 'Active' && 
+           currentStatus.toLowerCase() !== 'active') {
+            
+            // Check if ItemCode is empty
+            if(!itemCode) {
+                isValid = false;
+                $('#ItemCode').addClass('is-invalid');
+                errors.push('PSA Learning System courses require an ItemCode to be set to Active (e.g., ITEM-12345)');
+            }
+            // Validate ItemCode format
+            else if(!/^ITEM-\d+$/.test(itemCode)) {
+                isValid = false;
+                $('#ItemCode').addClass('is-invalid');
+                errors.push('ItemCode must start with "ITEM-" followed by a number (e.g., ITEM-12345)');
+            }
+        }
+        
         if(!isValid) {
             e.preventDefault();
             alert('Please correct the following errors:\n\n' + errors.join('\n'));
@@ -890,6 +936,50 @@ $(document).ready(function(){
     $('select[required], input[required], textarea[required]').on('change input', function() {
         $(this).removeClass('is-invalid');
     });
+    
+    // Real-time ItemCode validation for PSA Learning System
+    function validateItemCode() {
+        var platform = $('#Platform').val();
+        var status = $('#Status').val();
+        var currentStatus = '<?= $deets[1] ?>'; // Get current status from PHP
+        var itemCode = $('#ItemCode').val().trim();
+        var $itemCodeField = $('#ItemCode');
+        var $helpText = $('#itemCodeHelp');
+        
+        // Remove any existing help text
+        if($helpText.length === 0) {
+            $helpText = $('<div id="itemCodeHelp" class="form-text"></div>');
+            $itemCodeField.after($helpText);
+        }
+        
+        if(platform === 'PSA Learning System' && 
+           status === 'Active' && 
+           currentStatus.toLowerCase() !== 'active') {
+            
+            if(!itemCode) {
+                $itemCodeField.addClass('is-invalid');
+                $helpText.removeClass('text-success').addClass('text-danger')
+                    .html('<i class="bi bi-exclamation-circle"></i> Required for Active status (e.g., ITEM-12345)');
+            } else if(!/^ITEM-\d+$/.test(itemCode)) {
+                $itemCodeField.addClass('is-invalid');
+                $helpText.removeClass('text-success').addClass('text-danger')
+                    .html('<i class="bi bi-exclamation-circle"></i> Must start with "ITEM-" followed by numbers');
+            } else {
+                $itemCodeField.removeClass('is-invalid').addClass('is-valid');
+                $helpText.removeClass('text-danger').addClass('text-success')
+                    .html('<i class="bi bi-check-circle"></i> Valid ItemCode format');
+            }
+        } else {
+            $itemCodeField.removeClass('is-invalid is-valid');
+            $helpText.empty();
+        }
+    }
+    
+    // Trigger validation on relevant field changes
+    $('#Platform, #Status, #ItemCode').on('change input', validateItemCode);
+    
+    // Run validation on page load
+    validateItemCode();
     
     // Initialize character counters on page load
     $('#CourseName').trigger('input');

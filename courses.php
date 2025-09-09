@@ -182,7 +182,7 @@ function getFilterLink($filters, $key, $value = null) {
 
 ?>
 <?php getHeader() ?>
-<title>Learning Centre Course Catalog</title>
+<title>Corporate Learning Branch Course Catalog</title>
 <?php getScripts() ?>
 
 <body>
@@ -400,9 +400,12 @@ function getFilterLink($filters, $key, $value = null) {
                         Corp. Partner: 
                         <?php if (!empty($course[36])): ?>
                             <?php 
-                            $partnerSlug = strtolower(preg_replace('/[^a-z0-9\s-]/i', '', str_replace(' ', '-', $course[36])));
-                            ?>
-                            <a href="partners/view.php?slug=<?= $partnerSlug ?>"><?= sanitize($course[36]) ?></a>
+                            $partnerInfo = getPartnerById($course[36]);
+                            if ($partnerInfo): ?>
+                                <a href="partners/view.php?slug=<?= $partnerInfo['slug'] ?>"><?= sanitize($partnerInfo['name']) ?></a>
+                            <?php else: ?>
+                                <?= sanitize($course[36]) ?>
+                            <?php endif; ?>
                         <?php else: ?>
                             N/A
                         <?php endif; ?>

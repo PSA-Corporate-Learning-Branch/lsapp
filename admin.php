@@ -1,12 +1,30 @@
 <?php require('inc/lsapp.php') ?>
 <?php getHeader() ?>
-<title>The Learning Centre | PSA | Learning Support Application</title>
+<title>Admin Dashboard</title>
 <link href="/lsapp/css/summernote-bs4.css" rel="stylesheet">
 <?php getScripts() ?>
 <body>
 
 <?php getNavigation() ?>
 
+<?php 
+// Get all change request JSON files
+$files = glob("course-change/requests/*.json");
+
+// Initialize a counter to count open requests
+$changeRequests = 0;
+
+foreach ($files as $file) {
+    $changeData = json_decode(file_get_contents($file), true);
+
+	// count not closed requests
+    if ($changeData) {
+        if ($changeData['progress'] !== 'Closed') {
+			$changeRequests++;
+		}
+    }
+}
+?>
 
 <?php if(isAdmin()): ?>
 <div class="container-fluid">
@@ -63,8 +81,10 @@
 </div>
 <div class="col-md-3">
 
-<h3>Pending Course Changes</h3>
-<p>Temporarily disabled.</p>
+<h3>Pending Course Changes <span class="badge text-bg-dark"><?= $changeRequests > 0 ? $changeRequests : '' ?></span></h3>
+<?php if ($changeRequests > 0): ?>
+	<a href="course-change/index.php">View change requests</a>
+<?php endif; ?>
 
 </div>
 <div class="col-md-6">
