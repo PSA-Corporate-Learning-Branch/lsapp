@@ -73,7 +73,7 @@ $draftcourses = [];
 if (($handle = fopen("../../../lsapp/data/courses.csv", "r")) !== FALSE) {
     while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
         
-        if (isset($partnerid) && $data[36] == $partnerid) {
+        if (isset($partnerid) && isset($data[36]) && $data[36] == $partnerid) {
             if ($data[1] === 'Draft') {
                 $platform = $data[52] ?? 'Unknown';
                 if (!isset($draftcourses[$platform])) {
