@@ -40,10 +40,21 @@ function updateCourse($existingCourse, $newCourseData, &$logEntries) {
         $existingValue = sanitizeText(trim($existingCourse[$lsappIndex] ?? ''));
         $newValue = sanitizeText(trim($newCourseData[$elmIndex] ?? ''));
 
-        if ($existingValue !== $newValue) {
-            $updatedCourse[$lsappIndex] = $newValue;
-            $changes[] = "Updated field index $lsappIndex to '{$newValue}'";
-            $updatedCourse[51] = date('Y-m-d\TH:i:s'); // Update modified timestamp only if there's a change
+        // Special handling for LearningHubPartner field (index 36)
+        if ($lsappIndex === 36) {
+            // Convert partner name to ID
+            $partnerId = getPartnerIdByName($newValue);
+            if ($existingValue != $partnerId) {
+                $updatedCourse[$lsappIndex] = $partnerId;
+                $changes[] = "Updated LearningHubPartner to ID {$partnerId} (from name '{$newValue}')";
+                $updatedCourse[51] = date('Y-m-d\TH:i:s');
+            }
+        } else {
+            if ($existingValue !== $newValue) {
+                $updatedCourse[$lsappIndex] = $newValue;
+                $changes[] = "Updated field index $lsappIndex to '{$newValue}'";
+                $updatedCourse[51] = date('Y-m-d\TH:i:s'); // Update modified timestamp only if there's a change
+            }
         }
     }
 
@@ -134,7 +145,7 @@ foreach ($hubCourses as $hcCode => $hc) {
             '#F1F1F1',              // Color
             1,                      // Featured
             '', '',                 // Developer, EvaluationsLink
-            h($hc[10] ?? ''),       // LearningHubPartner
+            getPartnerIdByName($hc[10] ?? ''), // LearningHubPartner (convert name to ID)
             'No',                   // Alchemer
             h($hc[15] ?? ''),       // Topics
             h($hc[14] ?? ''),       // Audience
