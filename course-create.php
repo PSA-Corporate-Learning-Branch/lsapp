@@ -1,6 +1,6 @@
 <?php 
 require('inc/lsapp.php');
-require('inc/ches-client.php');
+require('inc/ches_client.php');
 opcache_reset();
 
 if(!canAccess()) {

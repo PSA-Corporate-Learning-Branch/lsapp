@@ -1,6 +1,5 @@
 <?php
 opcache_reset();
-
 define('SLASH', DIRECTORY_SEPARATOR);
 $docroot = 'E:\WebSites\Prod\BCPSA\Intranet\wwwroot\lsapp\\';
 define('BASE_DIR', $docroot);
