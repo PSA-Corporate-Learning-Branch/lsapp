@@ -329,10 +329,8 @@ a:hover {
         <ul class="list-group mb-4">
           <?php foreach($courses as $pc): ?>
             <li class="list-group-item d-flex justify-content-between align-items-center">
-              <a href="course-form.php?partnerid=<?= $pc[36] ?>&courseid=<?= htmlspecialchars($pc[0]) ?>">
-                <?= htmlspecialchars($pc[2]) ?>
-              </a>
-              <div>
+              <span><?= htmlspecialchars($pc[2]) ?></span>
+              <div class="d-flex align-items-center">
                 <?php 
                 $hubInclude = trim($pc[53] ?? '');
                 $hubIncludePersist = trim($pc[59] ?? '');
@@ -351,10 +349,12 @@ a:hover {
                 <?php endif; ?>
                 
                 <?php if (strtolower($hubInclude) === 'yes'): ?>
-                  <span class="badge bg-success" title="Included in LearningHUB catalog">Learning<b>HUB</b></span>
+                  <span class="badge bg-success me-2" title="Included in LearningHUB catalog">Learning<b>HUB</b></span>
                 <?php elseif (strtolower($hubInclude) === 'no'): ?>
-                  <span class="badge bg-secondary" title="Not included in LearningHUB catalog">No Learning<b>HUB</b></span>
+                  <span class="badge bg-secondary me-2" title="Not included in LearningHUB catalog">No Learning<b>HUB</b></span>
                 <?php endif; ?>
+                <a href="course-form.php?partnerid=<?= $pc[36] ?>&courseid=<?= htmlspecialchars($pc[0]) ?>" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+                <a href="https://corporatelearning.gww.gov.bc.ca/learninghub/course/<?= htmlspecialchars($pc[55]) ?>" class="btn btn-sm btn-outline-secondary" target="_blank">View</a>
               </div>
             </li>
           <?php endforeach ?>
