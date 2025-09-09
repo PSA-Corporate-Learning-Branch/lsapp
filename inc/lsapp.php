@@ -800,6 +800,39 @@ function getAllPartners() {
 }
 
 //
+// Get partner ID by name
+// Returns partner ID or 372 (Unknown partner) if not found
+//
+function getPartnerIdByName($partnerName) {
+	if(empty($partnerName)) {
+		return 372; // Return Unknown partner ID for empty names
+	}
+	
+	$partnerName = trim($partnerName);
+	
+	// Handle known variations
+	if($partnerName === 'Learning Centre') {
+		return 59; // Maps to PSA Corporate Learning Branch
+	}
+	if($partnerName === 'CIRMO') {
+		return 78; // Maps to Corporate Information and Records Management Office
+	}
+	if($partnerName === 'Procurement Strategy and Governance Branch') {
+		return 372; // Maps to Unknown partner
+	}
+	
+	$partners = getAllPartners();
+	foreach($partners as $partner) {
+		if($partner['name'] === $partnerName) {
+			return $partner['id'];
+		}
+	}
+	
+	// Return Unknown partner ID if not found
+	return 372;
+}
+
+//
 // Return all courses that have a given Learning Hub Partner by ID
 //
 function getCoursesByPartnerId($partnerId) {
