@@ -36,14 +36,7 @@ function syncForm($config) {
     
     $return_config['description'] = $form_data['description'];
     
-    if (!isset($return_config['responseFile'])) {
-        $return_config['responseFile'] = $form_data['snake'];
-    }
-    else if ($return_config['responseFile'] !== $form_data['snake']) {
-        // if we're using the snake for the responses filename (for now)
-        // we'll need do something to the old file if we create a new one
-        $return_config['responseFile'] = $form_data['snake'];
-    }
+    $return_config['slug'] = $form_data['snake'];
 
     // check for a change to the current version
     foreach ($form_data['versions'] as $version) {
@@ -153,11 +146,16 @@ function getResponses($config) {
     
     $form_id = $config['formId'];
     $secret = $config['formSecret'];
+    $responses_config = $config;
 
     $params = [
         'format' => 'json',
         'type' => 'submissions'
     ];
+    // preference={"minDate":"2020-12-17T08:00:00Z"}
+    // TODO: use the preference object to only request new responses
+    // via the lastResponsesUpdated field in the config (unix timestamp)
+
     $query_string = http_build_query($params);
 
     $submissions_export_endpoint = 'https://submit.digital.gov.bc.ca/app/api/v1/forms/' . $form_id . '/export' . '?' . $query_string;
@@ -173,10 +171,17 @@ function getResponses($config) {
 
     $context = stream_context_create($options);
 
-    
-
     $response = file_get_contents($submissions_export_endpoint, false, $context);
-    $response_data = json_decode($response, true);
+
+    $response_file = 'data/surveys/' . $form_id . '.json';
+
+    file_put_contents($response_file, $response);
+
+    // $response_data = json_decode($response, true);
+
+    $responses_config['lastResponsesUpdated'] = time();
+
+    return $responses_config;
 
 }
 
@@ -203,11 +208,16 @@ $updated_config = [];
 // sync the forms in the config file
 foreach ($config as $form_config) {
     
-    // sync the forms
-    $synced_config = syncForm($form_config);
-    $updated_config[] = $synced_config;
+    // sync the form and return an updated config
+    $synced_form_config = syncForm($form_config);
     
-    // get new responses
+    // pass the updated config and get new responses
+    $synced_response_config = getResponses($synced_form_config);
+
+    // take the fully updated config and add to our array
+    $updated_config[] = $synced_response_config;
+    
+   
 }
 
 $json_config = json_encode($updated_config, JSON_PRETTY_PRINT);
