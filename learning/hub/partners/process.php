@@ -87,8 +87,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    // Generate slug from name if not set
-    $slug = !empty($_POST["slug"]) ? $_POST["slug"] : strtolower(preg_replace('/[^a-z0-9\s-]/', '', str_replace(' ', '-', $_POST["name"])));
+    // Generate slug from name - always regenerate if name has changed
+    $nameChanged = false;
+    if ($partnerIndex !== -1 && $existingData[$partnerIndex]["name"] !== $_POST["name"]) {
+        $nameChanged = true;
+    }
+    
+    // Use existing slug if no name change, otherwise generate new slug from name
+    if ($partnerIndex !== -1 && !$nameChanged && !empty($existingData[$partnerIndex]["slug"])) {
+        $slug = $existingData[$partnerIndex]["slug"];
+    } else {
+        $slug = createSlug($_POST["name"]);
+    }
 
     // Construct the updated partner data
     $status = $_POST["status"] ?? "requested";

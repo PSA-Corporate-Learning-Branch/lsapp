@@ -4,10 +4,10 @@ require('../../../lsapp/inc/lsapp.php');
 $idir = LOGGED_IN_IDIR;
 // $idir = 'kefnk';
 
-$partnerslug = urldecode($_GET['partnerslug']) ?? '';
+$partnerid = $_GET['partnerid'] ?? '';
 /** #TODO make this graceful */
-if(empty($partnerslug)) {
-  echo 'Please provide a partner.';
+if(empty($partnerid)) {
+  echo 'Please provide a partner ID.';
   exit;
 }
 $partners_file = '../../../lsapp/data/partners.json';
@@ -32,7 +32,7 @@ if (file_exists($partners_file)) {
 // Check if the current partner matches any of the user's partner list
 $matched_partner = null;
 foreach ($user_partners as $partner) {
-  if ($partner['name'] === $partnerslug) {
+  if ($partner['id'] == $partnerid) {
     $matched_partner = $partner;
     break;
   }
@@ -42,7 +42,7 @@ $access_denied = false;
 if (is_null($matched_partner)) {
   // fallback to matching the full partners list just to get the display name
   foreach ($partners_data as $partner) {
-    if ($partner['name'] === $partnerslug) {
+    if ($partner['id'] == $partnerid) {
       $matched_partner = $partner;
       break;
     }
@@ -187,7 +187,7 @@ a:hover {
             <p class="mt-4">If you are looking to manage a course for a partner you are associated with, please select one of your partners below:</p>
             <ul>
               <?php foreach ($user_partners as $user_partner): ?>
-                <li><a href="dashboard.php?partnerslug=<?= urlencode($user_partner['name']) ?>"><?= htmlspecialchars($user_partner['name']) ?></a></li>
+                <li><a href="dashboard.php?partnerid=<?= $user_partner['id'] ?>"><?= htmlspecialchars($user_partner['name']) ?></a></li>
               <?php endforeach ?>
             </ul>
           <?php endif ?>
@@ -196,7 +196,7 @@ a:hover {
           <p>If you are looking to manage a course for a partner you are associated with, please select one of your partners below:</p>
           <ul>
             <?php foreach ($user_partners as $partner): ?>
-              <li><a href="dashboard.php?partnerslug=<?= urlencode($partner['name']) ?>"><?= htmlspecialchars($partner['name']) ?></a></li>
+              <li><a href="dashboard.php?partnerid=<?= $partner['id'] ?>"><?= htmlspecialchars($partner['name']) ?></a></li>
             <?php endforeach ?>
           </ul>
         <?php endif ?>
@@ -243,7 +243,7 @@ a:hover {
 <div class="col-md-12">
 
     <div class="mb-4">
-      <a href="dashboard.php?partnerslug=<?= urlencode($partnerslug) ?>" class="btn btn-secondary">← Back to Dashboard</a>
+      <a href="dashboard.php?partnerid=<?= $partnerid ?>" class="btn btn-secondary">← Back to Dashboard</a>
     </div>
 
 <?php if ($courseid || isset($_GET['newcourse'])): ?>

@@ -3,8 +3,8 @@ opcache_reset();
 require('../../../lsapp/inc/lsapp.php');
 $idir = LOGGED_IN_IDIR;
 
-$partnerslug = urldecode($_GET['partnerslug']) ?? '';
-if(empty($partnerslug)) {
+$partnerid = urldecode($_GET['partnerid']) ?? '';
+if(empty($partnerid)) {
   echo 'Please provide a partner.';
   exit;
 }
@@ -30,7 +30,7 @@ if (file_exists($partners_file)) {
 // Check if the current partner matches any of the user's partner list
 $matched_partner = null;
 foreach ($user_partners as $partner) {
-  if ($partner['name'] === $partnerslug) {
+  if ($partner['id'] == $partnerid) {
     $matched_partner = $partner;
     break;
   }
@@ -40,7 +40,7 @@ $access_denied = false;
 if (is_null($matched_partner)) {
   // fallback to matching the full partners list just to get the display name
   foreach ($partners_data as $partner) {
-    if ($partner['name'] === $partnerslug) {
+    if ($partner['id'] == $partnerid) {
       $matched_partner = $partner;
       break;
     }
@@ -73,7 +73,7 @@ $draftcourses = [];
 if (($handle = fopen("../../../lsapp/data/courses.csv", "r")) !== FALSE) {
     while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
         
-        if (isset($partnerslug) && $data[36] === $partnerslug) {
+        if (isset($partnerid) && $data[36] == $partnerid) {
             if ($data[1] === 'Draft') {
                 $platform = $data[52] ?? 'Unknown';
                 if (!isset($draftcourses[$platform])) {
@@ -136,7 +136,7 @@ a:hover {
             <p class="mt-4">If you are looking to manage a course for a partner you are associated with, please select one of your partners below:</p>
             <ul>
               <?php foreach ($user_partners as $user_partner): ?>
-                <li><a href="dashboard.php?partnerslug=<?= urlencode($user_partner['name']) ?>"><?= htmlspecialchars($user_partner['name']) ?></a></li>
+                <li><a href="dashboard.php?partnerid=<?= $user_partner['id'] ?>"><?= htmlspecialchars($user_partner['name']) ?></a></li>
               <?php endforeach ?>
             </ul>
           <?php endif ?>
@@ -145,7 +145,7 @@ a:hover {
           <p>If you are looking to manage a course for a partner you are associated with, please select one of your partners below:</p>
           <ul>
             <?php foreach ($user_partners as $partner): ?>
-              <li><a href="dashboard.php?partnerslug=<?= urlencode($partner['name']) ?>"><?= htmlspecialchars($partner['name']) ?></a></li>
+              <li><a href="dashboard.php?partnerid=<?= $partner['id'] ?>"><?= htmlspecialchars($partner['name']) ?></a></li>
             <?php endforeach ?>
           </ul>
         <?php endif ?>
@@ -154,6 +154,7 @@ a:hover {
           <div class="card-header fw-semibold">Request access to this partner</div>
           <div class="card-body">
             <form action="contact-request.php" method="POST">
+                <input type="hidden" name="partner_id" value="<?= htmlspecialchars($matched_partner['id']) ?>">
                 <input type="hidden" name="partner_slug" value="<?= htmlspecialchars($matched_partner['slug']) ?>">
                 <input type="hidden" name="partner_name" value="<?= htmlspecialchars($matched_partner['name']) ?>">
                 <div class="mb-3">
@@ -199,7 +200,7 @@ a:hover {
                 <?php foreach($user_partners as $partner): ?>
                   <?php if ($partner['name'] === $matched_partner['name']) continue; ?>
                   <li>
-                    <a class="dropdown-item" href="dashboard.php?partnerslug=<?= urlencode($partner['name']) ?>">
+                    <a class="dropdown-item" href="dashboard.php?partnerid=<?= $partner['id'] ?>">
                       <?= htmlspecialchars($partner['name']) ?>
                     </a>
                   </li>
@@ -241,7 +242,7 @@ a:hover {
                 <?php if (canAccess()): ?>
                   <form method="POST" action="retire-contact.php" style="display: inline;" 
                         onsubmit="return confirm('Are you sure you want to retire <?= htmlspecialchars($contact['name']) ?> as a contact for this partner?\n\nThis will move them to the contact history and they will no longer have access to manage courses.')">
-                    <input type="hidden" name="partner_slug" value="<?= htmlspecialchars($partnerslug) ?>">
+                    <input type="hidden" name="partner_id" value="<?= htmlspecialchars($partnerid) ?>">
                     <input type="hidden" name="contact_email" value="<?= htmlspecialchars($contact['email']) ?>">
                     <button type="submit" class="btn btn-outline-danger btn-sm" title="Retire this contact">
                       <i class="bi bi-person-x"></i>
@@ -261,7 +262,7 @@ a:hover {
       <p>As an administrator for <?= htmlspecialchars($matched_partner['name']) ?>, you can manage the courses here. Please use the list to the right to choose a course to manage.</p>
       <details>
         <summary>Read more</summary>
-          <p>You can <a href="course-form.php?partnerslug=<?= urlencode($partnerslug) ?>&newcourse=1">add a new course</a>. By default, new courses need to be reviewed before being published. You can create a course as a draft and update it until you have your details right. When you're ready, you can choose to request the course be reviewed. Our reviewers will strive to process new course requests into the system as soon as is possible.</p>
+          <p>You can <a href="course-form.php?partnerid=<?= $partnerid ?>&newcourse=1">add a new course</a>. By default, new courses need to be reviewed before being published. You can create a course as a draft and update it until you have your details right. When you're ready, you can choose to request the course be reviewed. Our reviewers will strive to process new course requests into the system as soon as is possible.</p>
           <p>Once your new course has been reviewed and made active, it will then be published to the LearningHUB during the next sync process. While new courses usually sync within a few hours, it may take 24-48 hours before the course will appear in the catalog.</p>
           <p>At this point, you can make subsequent updates to your course without needing a review.</p>
       </details>
@@ -280,7 +281,7 @@ a:hover {
     <?php endif ?>
 
     <div class="mb-4 float-end">
-      <a href="course-form.php?partnerslug=<?= urlencode($partnerslug) ?>&newcourse=1" class="btn btn-success">+ New Course</a>
+      <a href="course-form.php?partnerid=<?= $partnerid ?>&newcourse=1" class="btn btn-success">+ New Course</a>
     </div>
 
     <?php if (!empty($draftcourses)): ?>
@@ -292,7 +293,7 @@ a:hover {
           <li class="list-group-item d-flex justify-content-between align-items-center">
             <span><?= htmlspecialchars($pc[2]) ?></span>
             <div>
-              <a href="course-form.php?partnerslug=<?= urlencode($pc[36]) ?>&courseid=<?= htmlspecialchars($pc[0]) ?>" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+              <a href="course-form.php?partnerid=<?= $pc[36] ?>&courseid=<?= htmlspecialchars($pc[0]) ?>" class="btn btn-sm btn-outline-primary me-1">Edit</a>
               <a href="https://corporatelearning.gww.gov.bc.ca/learninghub/course/<?= htmlspecialchars($pc[55]) ?>" class="btn btn-sm btn-outline-secondary" target="_blank">View</a>
             </div>
           </li>
@@ -311,7 +312,7 @@ a:hover {
           <li class="list-group-item d-flex justify-content-between align-items-center">
             <span><?= htmlspecialchars($pc[2]) ?></span>
             <div>
-              <a href="course-form.php?partnerslug=<?= urlencode($pc[36]) ?>&courseid=<?= htmlspecialchars($pc[0]) ?>" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+              <a href="course-form.php?partnerid=<?= $pc[36] ?>&courseid=<?= htmlspecialchars($pc[0]) ?>" class="btn btn-sm btn-outline-primary me-1">Edit</a>
               <a href="https://corporatelearning.gww.gov.bc.ca/learninghub/course/<?= htmlspecialchars($pc[55]) ?>" class="btn btn-sm btn-outline-secondary" target="_blank">View</a>
             </div>
           </li>
@@ -328,9 +329,33 @@ a:hover {
         <ul class="list-group mb-4">
           <?php foreach($courses as $pc): ?>
             <li class="list-group-item d-flex justify-content-between align-items-center">
-              <a href="course-form.php?partnerslug=<?= urlencode($pc[36]) ?>&courseid=<?= htmlspecialchars($pc[0]) ?>">
+              <a href="course-form.php?partnerid=<?= $pc[36] ?>&courseid=<?= htmlspecialchars($pc[0]) ?>">
                 <?= htmlspecialchars($pc[2]) ?>
               </a>
+              <div>
+                <?php 
+                $hubInclude = trim($pc[53] ?? '');
+                $hubIncludePersist = trim($pc[59] ?? '');
+                $hubPersistMessage = trim($pc[60] ?? '');
+                $hubPersistState = trim($pc[61] ?? '');
+                
+                // Show persistent badge first if applicable
+                if (strtolower($hubIncludePersist) === 'yes'):
+                  $persistTitle = 'Persistent course';
+                  if (!empty($hubPersistMessage)) {
+                    $persistTitle .= ': ' . htmlspecialchars($hubPersistMessage);
+                  }
+                  $persistClass = (strtolower($hubPersistState) === 'inactive') ? 'bg-warning' : 'bg-info';
+                ?>
+                  <span class="badge <?= $persistClass ?> me-1" title="<?= $persistTitle ?>">Persistent</span>
+                <?php endif; ?>
+                
+                <?php if (strtolower($hubInclude) === 'yes'): ?>
+                  <span class="badge bg-success" title="Included in LearningHUB catalog">Learning<b>HUB</b></span>
+                <?php elseif (strtolower($hubInclude) === 'no'): ?>
+                  <span class="badge bg-secondary" title="Not included in LearningHUB catalog">No Learning<b>HUB</b></span>
+                <?php endif; ?>
+              </div>
             </li>
           <?php endforeach ?>
         </ul>
@@ -344,7 +369,29 @@ a:hover {
         <?php foreach($elmcourses as $pc): ?>
           <li class="list-group-item d-flex justify-content-between align-items-center">
             <span><?= htmlspecialchars($pc[2]) ?></span>
-            <div>
+            <div class="d-flex align-items-center">
+              <?php 
+              $hubInclude = trim($pc[53] ?? '');
+              $hubIncludePersist = trim($pc[59] ?? '');
+              $hubPersistMessage = trim($pc[60] ?? '');
+              $hubPersistState = trim($pc[61] ?? '');
+              
+              // Show persistent badge first if applicable
+              if (strtolower($hubIncludePersist) === 'yes'):
+                $persistTitle = 'Persistent course';
+                if (!empty($hubPersistMessage)) {
+                  $persistTitle .= ': ' . htmlspecialchars($hubPersistMessage);
+                }
+                $persistClass = (strtolower($hubPersistState) === 'inactive') ? 'bg-warning' : 'bg-info';
+              ?>
+                <span class="badge <?= $persistClass ?> me-1" title="<?= $persistTitle ?>">Persistent</span>
+              <?php endif; ?>
+              
+              <?php if (strtolower($hubInclude) === 'yes'): ?>
+                <span class="badge bg-success me-2" title="Included in LearningHUB catalog">Learning<b>HUB</b></span>
+              <?php elseif (strtolower($hubInclude) === 'no'): ?>
+                <span class="badge bg-secondary me-2" title="Not included in LearningHUB catalog">No Learning<b>HUB</b></span>
+              <?php endif; ?>
               <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_COURSESTRUCTURE.LM_CI_LA_CMP.GBL?LM_CI_ID=<?= htmlspecialchars($pc[50]) ?>" class="btn btn-sm btn-outline-primary me-1" target="_blank">Edit</a>
               <a href="https://corporatelearning.gww.gov.bc.ca/learninghub/course/<?= htmlspecialchars($pc[55]) ?>" class="btn btn-sm btn-outline-secondary" target="_blank">View</a>
             </div>
@@ -362,7 +409,7 @@ a:hover {
         <ul class="list-group mb-4">
           <?php foreach($courses as $pc): ?>
             <li class="list-group-item d-flex justify-content-between align-items-center">
-              <a href="course-form.php?partnerslug=<?= urlencode($pc[36]) ?>&courseid=<?= htmlspecialchars($pc[0]) ?>">
+              <a href="course-form.php?partnerid=<?= $pc[36] ?>&courseid=<?= htmlspecialchars($pc[0]) ?>">
                 <?= htmlspecialchars($pc[2]) ?>
               </a>
             </li>

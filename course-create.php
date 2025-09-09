@@ -178,16 +178,9 @@ if(!empty($_POST['CourseOwner']) || !empty($_POST['Developer'])) {
 
 // Check if this is from partner portal
 if (!empty($_POST['partner_redirect'])) {
-    // Redirect back to partner portal dashboard
-    // Need to get partner slug from ID
-    $partnerInfo = getPartnerById($_POST['LearningHubPartner']);
-    if ($partnerInfo) {
-        $partnerSlug = urlencode($partnerInfo['slug']);
-    } else {
-        // Fallback to using the ID if partner not found
-        $partnerSlug = urlencode($_POST['LearningHubPartner']);
-    }
-    header("Location: /learning/hub/partners/dashboard.php?partnerslug={$partnerSlug}&message=CourseCreated");
+    // Redirect back to partner portal dashboard using partner ID
+    $partnerId = $_POST['LearningHubPartner'];
+    header("Location: /learning/hub/partners/dashboard.php?partnerid={$partnerId}&message=CourseCreated");
 } else {
     // Redirect to the new course page
     header("Location: /lsapp/course.php?courseid={$courseid}");

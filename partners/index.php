@@ -135,7 +135,7 @@ usort($partners, function($a, $b) {
                                 <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="btn btn-sm btn-link" target="_blank">
                                     LearningHUB
                                 </a>
-                                <a href="https://gww.bcpublicservice.gov.bc.ca/learning/hub/partners/dashboard.php?partnerslug=<?php echo urlencode(htmlspecialchars($partner["name"])); ?>" class="btn btn-sm btn-link" target="_blank">
+                                <a href="https://gww.bcpublicservice.gov.bc.ca/learning/hub/partners/dashboard.php?partnerid=<?php echo htmlspecialchars($partner["id"]); ?>" class="btn btn-sm btn-link" target="_blank">
                                     Admin Panel
                                 </a>
                             </td>
