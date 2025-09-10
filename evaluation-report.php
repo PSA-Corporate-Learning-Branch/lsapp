@@ -3,7 +3,70 @@ opcache_reset();
 $path = './inc/lsapp.php';
 require($path); 
 
-$response_map = [
+$form_id = (isset($_GET['formid'])) ? $_GET['formid'] : 0;
+$alert = '';
+
+// testing link - http://localhost:8080/lsapp/evaluation-report.php?formid=7b6cd68b-85b9-41c3-b725-97339b06cc6e
+
+/**
+ * Take the form id, find the matching config
+ * and return the corresponding questions map array
+ */
+function getQuestionsConfig($form_id) {
+    global $alert;
+
+    if (!$form_id) {
+        $alert = 'Form ID not provided';
+        return;
+    }
+
+    // open config
+    $config_file = 'data/surveys/config.json';
+    $config_content = file_get_contents($config_file);
+    $config_array = json_decode($config_content, true);
+
+    // find config with matching form id
+    foreach ($config_array as $config) {
+        if ($config['formId'] == $form_id) {
+            if (array_key_exists('questions', $config)) {
+                return $config['questions'];
+            } else {
+                // if the questions key doesn't exist, we likely need to sync the form
+                $alert = 'Questions not found. Form may need sync.';
+            }
+            
+        } 
+    }
+
+    // if no forms match the provided id
+    $alert = 'Form not found.';
+    return;
+}
+
+// populate our response map from the url form id
+$response_map = getQuestionsConfig($form_id);
+
+/**
+ * Take the form id, and return the corresponding response
+ * file as an associative array
+ */
+function getResponses($form_id) {
+    
+    if (!$form_id) {
+        $alert = 'Form ID not provided';
+        return;
+    }
+    
+    $response_file = 'data/surveys/' . $form_id . '.json';
+
+    $response_contents = file_get_contents($response_file);
+    $response_data = json_decode($response_contents, true);
+
+    return $response_data;
+
+}
+
+$response_map_old = [
     // 'classCode' => '',
     // 'courseCode' => 'ITEM-2014',
     'whatWasTricky' => [
@@ -62,14 +125,14 @@ $response_map = [
 
 $chart_scripts = '';
 
-function compileResponsesByClass($file) {
+function compileResponsesByClass($response_data) {
     global $response_map;
     global $chart_scripts;
-
-    // open and decode file
-    $file_contents = file_get_contents($file);
-    $response_data = json_decode($file_contents, true);
     
+    if (!$response_map) {
+        return;
+    }
+
     // output array
     $responses = array();
     
@@ -107,7 +170,6 @@ function compileResponsesByClass($file) {
                     $responses[$response['classCode']][$question]['total']++;
                 }
             }
-
         }
     }
     return $responses;
@@ -116,6 +178,10 @@ function compileResponsesByClass($file) {
 function compileResponses($file) {
     global $response_map;
     global $chart_scripts;
+
+    if (!$response_map) {
+        return;
+    }
 
     // open and decode file
     $file_contents = file_get_contents($file);
@@ -160,9 +226,83 @@ function compileResponses($file) {
     }
     return $responses;
 }
+
 $compiled_responses = compileResponses('data/surveys/test-data.json');
 
+function createChartForRadioByClass($question, $responses) {
+    global $response_map;
+    global $chart_scripts;
 
+    // initialize chart values
+    $chart_labels = array();
+    $chart_values = array();
+
+    // get question options
+    $answer_options = array();
+    foreach ($response_map[$question]['values'] as $option_key => $option_name) {
+        // set the value if it exists or 0
+        $value = $responses[$question][$option_key] ?? 0;
+        
+        $answer_options[$option_key] = ['name' => $option_name, 'value' => $value];
+        
+        $chart_labels[] = $option_name;
+        $chart_values[] = $value;
+    }
+    
+    // create html content for chart / card
+    $html = '<div class="card my-3" >';
+    $html .=    '<h2 class="m-3">' . $response_map[$question]['label'] . '</h2>';
+    $html .=    '<div class="mt-3">';
+    $html .=        '<canvas id="' . $question . '"></canvas>';
+    $html .=    '</div>';
+
+    $html .=    '<div class="card-body">';
+                    
+    // iterate through answer options
+    foreach($answer_options as $option) {
+        $percent_total = round(($option['value'] / $responses[$question]['total']) * 100);
+        $html .=    '<div class="row align-items-center">';
+        $html .=        '<div class="col-4">';
+        $html .=            '<p style="font-size: smaller;" class="my-1">' . $option['name'] . '</p>';
+        $html .=        '</div>';
+        $html .=        '<div class="col-2">';
+        $html .=            '<p style="font-size: smaller;" class="my-1">' . $option['value'] . '</p>';
+        $html .=        '</div>';
+        $html .=        '<div class="col-6">';
+        $html .=            '<div class="progress" role="progressbar" aria-label="' . $option['name'] . '" aria-valuenow="' . $percent_total . '" aria-valuemin="0" aria-valuemax="100">';
+        $html .=                '<div class="progress-bar text-bg-success" style="width: ' . $percent_total . '%">' . $percent_total . '%</div>';
+        $html .=            '</div>';
+        $html .=        '</div>';
+        $html .=    '</div>';
+    }
+
+    $html .=    '</div>'; // /card-body
+    $html .= '</div>'; // /card
+
+    // add the chart details
+    $chart_scripts .= "const " . $question . "_chart" . " = document.getElementById('" . $question . "');
+
+    new Chart(" . $question . "_chart" . ", {
+        type: 'pie',
+        data: {
+            labels: " . json_encode($chart_labels) . ",   
+            datasets: [{
+                data: " . json_encode($chart_values) . ",
+                backgroundColor: [
+                '#971B2F',
+                '#5F2167',
+                '#e3a82b',
+                '#007864',
+                '#234075',
+                ],
+                hoverOffset: 4
+            }]
+        }
+    });";
+
+    return $html;
+    
+}
 
 function createChartForRadio($question, $responses) {
     global $response_map;
@@ -273,13 +413,16 @@ function createTextResponses($question, $responses) {
 <?php getNavigation() ?>
 
 <?php
-$test_responses = compileResponsesByClass('data/surveys/test-data.json')
+
+$test_responses = getResponses($form_id);
+$test_compiled_responses = compileResponsesByClass($test_responses);
 
 ?>
 
 
 <pre>
-    <?php print_r($test_responses) ?>
+    <?php //print_r($test_responses) ?>
+    <?php print_r($test_compiled_responses); ?>
 </pre>
 
 
@@ -287,10 +430,14 @@ $test_responses = compileResponsesByClass('data/surveys/test-data.json')
 <div class="container-lg p-lg-5 p-4 bg-light-subtle rounded">
     <h1 class="mb-5">Courses Evaluation Report</h1>
      
+    <!-- Alerts & Errors -->
+    <span style="background-color: yellow;"><strong><?= $alert ?></strong></span>
+    
+
     <div class="row justify-content-md-center">
         <div class="col-8 my-3 py-3 bg-secondary-subtle text-secondary-emphasis rounded shadow-sm">
             <p>Select class code to view responses</p>
-            <select class="form-select" aria-label="select data" multiple>
+            <select id="dataSelector" class="form-select" aria-label="select data" multiple>
                 <option selected>All</option>
                 <option value="1">One</option>
                 <option value="2">Two</option>
@@ -331,8 +478,35 @@ $test_responses = compileResponsesByClass('data/surveys/test-data.json')
 
     <?php echo $chart_scripts; ?>
 
+    const compiledResponses = <?php echo json_encode($test_compiled_responses) ?>
 
+    // console.log(compiledResponses);
 
+    function updateCharts(classCodes) {
+        let newData = {};
+        // if none provided, show all the data
+
+        // if one or more selection provided compile and update the data
+        classCodes.forEach(classCode => {
+            if (classCode in compiledResponses) {
+                for (const [key, value] of Object.entries(compiledResponses[classCode])) {
+
+                }
+                compiledResponses[classCode].forEach((response) => {
+                    if (response in newData) {
+                        newData[response] = response; // todo
+                    } else {
+
+                    }
+                })
+            }
+        })
+    }
+
+    // Listen for dropdown changes
+    // document.getElementById('dataSelector').addEventListener('change', function () {
+    //   updateCharts(this.value);
+    // });
 
 </script>
 
