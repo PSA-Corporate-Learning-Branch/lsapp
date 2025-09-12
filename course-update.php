@@ -132,7 +132,7 @@ if($_POST) {
         sanitize($_POST['PathStaging']),
         sanitize($_POST['PathLive']),
         sanitize($_POST['PathNIK']),
-        sanitize($_POST['PathTeams']),
+        sanitize($_POST['CHEFSFormID']), // CHEFSFormID
         $isMoodle,
         sanitize($_POST['TaxonomyProcessed'] ?? ''),
         sanitize($_POST['TaxonomyProcessedBy'] ?? ''),
@@ -737,8 +737,8 @@ $reportinglist = getReportingList();
             </div>
         </div>
         <div class="mb-3">
-            <label for="PathTeams" class="form-label">Teams Path</label>
-            <input type="text" name="PathTeams" id="PathTeams" class="form-control" value="<?= sanitize($deets[46]) ?>">
+            <label for="CHEFSFormID" class="form-label">CHEFS Form ID</label>
+            <input type="text" name="CHEFSFormID" id="CHEFSFormID" class="form-control" minlength="36" maxlength="36" value="<?= sanitize($deets[46]) ?>">
         </div>
     </div>
     
