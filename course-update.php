@@ -738,7 +738,7 @@ $reportinglist = getReportingList();
         </div>
         <div class="mb-3">
             <label for="CHEFSFormID" class="form-label">CHEFS Form ID</label>
-            <input type="text" name="CHEFSFormID" id="CHEFSFormID" class="form-control" minlength="36" maxlength="36" value="<?= sanitize($deets[46]) ?>">
+            <input type="text" name="CHEFSFormID" id="CHEFSFormID" class="form-control" minlength="34" maxlength="38" value="<?= sanitize($deets[46]) ?>">
         </div>
     </div>
     
@@ -926,6 +926,18 @@ $(document).ready(function(){
             }
         }
         
+        // Validate CHEFSFormID if entered
+        var formId = $('#CHEFSFormID').val();
+
+        if(formId !== '') {
+            // Validate Form ID format
+            if(!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(formId)) {
+                isValid = false;
+                $('#CHEFSFormID').addClass('is-invalid');
+                errors.push('Form ID format is invalid. Use the format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+            }
+        }
+
         if(!isValid) {
             e.preventDefault();
             alert('Please correct the following errors:\n\n' + errors.join('\n'));
