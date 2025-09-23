@@ -1,6 +1,6 @@
 .gitnogood
 /archive
-/fullcalendar
+/calendars
 /docs
 /exports
 /fullcalendar
@@ -49,3 +49,4 @@ nbproject/*
 .vscode
 # Sass preprocessor
 .sass-cache/
+.encryption_key

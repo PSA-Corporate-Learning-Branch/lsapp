@@ -13,10 +13,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$partnerSlug = $_POST['partner_slug'] ?? '';
+$partnerId = $_POST['partner_id'] ?? '';
 $contactEmail = $_POST['contact_email'] ?? '';
 
-if (empty($partnerSlug) || empty($contactEmail)) {
+if (empty($partnerId) || empty($contactEmail)) {
     http_response_code(400);
     echo 'Missing required parameters';
     exit;
@@ -37,10 +37,10 @@ if (!$partners) {
     exit;
 }
 
-// Find the partner (check both slug and name)
+// Find the partner by ID
 $partnerIndex = -1;
 foreach ($partners as $index => $partner) {
-    if ($partner['slug'] === $partnerSlug || $partner['name'] === $partnerSlug) {
+    if ($partner['id'] == $partnerId) {
         $partnerIndex = $index;
         break;
     }
@@ -82,7 +82,7 @@ if (!$contactFound) {
 // Save updated partners data
 if (file_put_contents($partnersFile, json_encode($partners, JSON_PRETTY_PRINT))) {
     // Redirect back to dashboard
-    header('Location: dashboard.php?partnerslug=' . urlencode($partnerSlug) . '&message=ContactRetired');
+    header('Location: dashboard.php?partnerid=' . $partnerId . '&message=ContactRetired');
 } else {
     http_response_code(500);
     echo 'Error saving changes';

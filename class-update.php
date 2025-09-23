@@ -1,5 +1,4 @@
 <?php require('inc/lsapp.php') ?>
-
 <?php if(isAdmin()): ?>
 <?php opcache_reset(); ?>
 <?php 

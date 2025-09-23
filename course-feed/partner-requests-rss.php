@@ -1,6 +1,5 @@
 <?php
 opcache_reset();
-require('../inc/lsapp.php');
 
 // Set UTF-8 encoding for the script
 mb_internal_encoding('UTF-8');

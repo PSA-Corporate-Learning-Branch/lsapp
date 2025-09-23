@@ -13,16 +13,6 @@
 
 010011001010010100000011100001110000 
 
-
- _        ______ _______             
-(_)      / _____(_______)            
- _      ( (____  _______ ____  ____  
-| |      \____ \|  ___  |  _ \|  _ \ 
-| |_____ _____) | |   | | |_| | |_| |
-|_______(______/|_|   |_|  __/|  __/ 
-                        |_|   |_|    
-
-
 "Meta-ELM" It's not an LMS/ELM. It doesn't manage registration, course content delivery, or any interface for
 the learner. It does contain all of the data associated with courses and class sessions that is necessary to 
 be able to input that information into the LMS (ELM).
@@ -155,4 +145,5 @@ CheckedBy,ShippingStatus,PickupIn
 
 
 -------------------changes-course.csv-------------------
+
 0-creqID,1-CourseID,2-CourseName,3-DateRequested,4-RequestedBy,5-Status,6-CompletedBy,7-CompletedDate,8-Request

@@ -53,6 +53,7 @@ foreach ($files as $file) {
                 <table class="table table-striped table-hover">
                     <thead>
                         <tr>
+                            <th><button class="btn btn-sm btn-secondary sort" data-sort="category">Category</button></th>
                             <th><button class="btn btn-sm btn-secondary sort" data-sort="course">Course</button></th>
                             <th><button class="btn btn-sm btn-secondary sort" data-sort="urgent">Urgent</button></th>
                             <th><button class="btn btn-sm btn-secondary sort" data-sort="assigned">Assigned To</button></th>
@@ -66,6 +67,7 @@ foreach ($files as $file) {
                         <?php foreach ($changeRequests as $request): ?>
                             <?php if($request['progress'] !== 'Closed'): ?>
                             <tr>
+                                <td class="category"><?php echo htmlspecialchars($request['category']); ?></td>
                                 <td class="course">
                                     <?php $deets = getCourse($request['courseid']); ?>
                                     <a href="/lsapp/course.php?courseid=<?php echo htmlspecialchars($request['courseid']); ?>">

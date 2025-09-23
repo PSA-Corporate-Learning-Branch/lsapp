@@ -1,5 +1,6 @@
 <?php 
 require('inc/lsapp.php');
+require('inc/ches_client.php');
 opcache_reset();
 
 if(!canAccess()) {
@@ -128,6 +129,30 @@ if(fputcsv($fp, $newcourse) === false) {
 }
 fclose($fp);
 
+// Send email notification for new course
+// try {
+//     $chesClient = new CHESClient();
+//     $courseNotificationData = [
+//         'id' => $courseid,
+//         'name' => $_POST['CourseName'],
+//         'description' => $_POST['CourseDescription'],
+//         'owner' => $_POST['CourseOwner'],
+//         'partner' => $_POST['LearningHubPartner'],
+//         'platform' => $_POST['Platform'],
+//         'method' => $_POST['Method'],
+//         'effectiveDate' => $_POST['EffectiveDate'],
+//         'created' => $now
+//     ];
+    
+//     $emailResult = $chesClient->sendCourseCreationNotification($courseNotificationData);
+    
+//     if (!$emailResult) {
+//         error_log("Warning: Failed to send course creation notification for course ID: {$courseid}");
+//     }
+// } catch (Exception $e) {
+//     error_log("CHES Email Exception: " . $e->getMessage());
+// }
+
 // Add course people relationships if specified
 if(!empty($_POST['CourseOwner']) || !empty($_POST['Developer'])) {
     $peoplefp = fopen('data/course-people.csv', 'a+');
@@ -153,9 +178,9 @@ if(!empty($_POST['CourseOwner']) || !empty($_POST['Developer'])) {
 
 // Check if this is from partner portal
 if (!empty($_POST['partner_redirect'])) {
-    // Redirect back to partner portal dashboard
-    $partnerSlug = urlencode($_POST['LearningHubPartner']);
-    header("Location: /learning/hub/partners/dashboard.php?partnerslug={$partnerSlug}&message=CourseCreated");
+    // Redirect back to partner portal dashboard using partner ID
+    $partnerId = $_POST['LearningHubPartner'];
+    header("Location: /learning/hub/partners/dashboard.php?partnerid={$partnerId}&message=CourseCreated");
 } else {
     // Redirect to the new course page
     header("Location: /lsapp/course.php?courseid={$courseid}");

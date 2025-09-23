@@ -140,6 +140,7 @@ function mapPartnerCode($code) {
         'CIRMO' => 'Corporate Information and Records Management Office',
         'DWCS' => 'Digital Workplace and Collaboration Services Branch',
         'Procurement Strategy Gov' => 'Procurement Strategy and Governance Branch',
+        'Service BC Web Services Branch' => 'Service BC - Web Services Branch',
         // Add other mappings as needed
     ];
     return $partners[$code] ?? $code;
@@ -192,3 +193,4 @@ function convertDeliveryMethod($method) {
     }
     return $method;
 }
+

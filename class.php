@@ -125,7 +125,26 @@ else:
 		</div>
 	<?php endif ?>
 
-	
+	<!-- CHEFS Eval Link -->
+	<?php $in_development = true; // To remove when it's time to launch ?>
+	<?php if(!empty($course[46]) && !empty($deets[7]) && !$in_development): ?>
+		<?php
+			// verify our CHEFS form id matches the pattern
+			$pattern = '/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/';
+			$match = preg_match($pattern, $course[46]); // returns 1 on match
+		?>
+		
+		<div class="my-3 p-2 bg-light-subtle border border-secondary-subtle rounded-3">
+			<!-- Invalid form id, then show an error --> 
+			<?php if ($match !== 1): ?>
+				<div class="alert alert-warning" role="alert">Course Survey Link Error: Invalid Form Id on course page</div>
+			<?php else: ?>
+				<?php $chefsurl = "https://submit.digital.gov.bc.ca/app/form/submit?f=" . h($course[46]) . "&classCode=" . h(trim($deets[7])); ?>
+				<a href="<?= $chefsurl ?>" target="_blank" class="">CHEFS Course Survey Link </a> 
+				<button class="copy btn btn-sm bg-secondary-subtle" data-clipboard-text="<?= $chefsurl ?>">Copy Course Survey URL</button>
+			<?php endif; ?>
+		</div>
+	<?php endif; ?>
 	
 	<?php if($course[47] == 'on' || $course[47] == 'Yes'): ?>
 		<div class="my-3"><a class="btn btn-light" href="https://learning.gww.gov.bc.ca/search/index.php?q=core_course-customfield=%22<?= h($deets[7]) ?>%22" target="_blank">Find on Moodle</a></div>

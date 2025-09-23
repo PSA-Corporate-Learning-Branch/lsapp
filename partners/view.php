@@ -98,7 +98,7 @@ usort($inactiveCourses, function($a, $b) {
                 <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="" target="_blank">
                     LearningHUB
                 </a> | 
-                <a href="https://gww.bcpublicservice.gov.bc.ca/learning/hub/partners/dashboard.php?partnerslug=<?php echo urlencode(htmlspecialchars($partner["name"])); ?>" class="" target="_blank">
+                <a href="https://gww.bcpublicservice.gov.bc.ca/learning/hub/partners/dashboard.php?partnerid=<?php echo htmlspecialchars($partner["id"]); ?>" class="" target="_blank">
                     Partner Admin Panel
                 </a>
             </div>

@@ -734,18 +734,145 @@ function getPartnerDetails($partnername) {
 	return '#todo Details unimplemted.';
 	
 }
+
 //
-// Return all courses that have a given Learning Hub Partner
+// Get partner information from partners.json by ID
+// Returns partner array or null if not found
 //
-function getCoursesByPartnerName($partnername) {
+function getPartnerById($partnerId) {
+	if(empty($partnerId)) {
+		return null;
+	}
+	
+	$path = build_path(BASE_DIR, 'data', 'partners.json');
+	if(!file_exists($path)) {
+		return null;
+	}
+	
+	$json = file_get_contents($path);
+	$partners = json_decode($json, true);
+	
+	if(!$partners) {
+		return null;
+	}
+	
+	foreach($partners as $partner) {
+		if($partner['id'] == $partnerId) {
+			return $partner;
+		}
+	}
+	
+	return null;
+}
+
+//
+// Get partner name by ID
+// Returns partner name string or the ID if partner not found
+//
+function getPartnerNameById($partnerId) {
+	if(empty($partnerId)) {
+		return '';
+	}
+	
+	$partner = getPartnerById($partnerId);
+	if($partner) {
+		return $partner['name'];
+	}
+	
+	// Return the ID as fallback if partner not found
+	return $partnerId;
+}
+
+//
+// Get all partners from partners.json
+// Returns array of partner objects
+//
+function getAllPartners() {
+	$path = build_path(BASE_DIR, 'data', 'partners.json');
+	if(!file_exists($path)) {
+		return [];
+	}
+	
+	$json = file_get_contents($path);
+	$partners = json_decode($json, true);
+	
+	return $partners ? $partners : [];
+}
+
+//
+// Get partner ID by name
+// Returns partner ID or 372 (Unknown partner) if not found
+//
+function getPartnerIdByName($partnerName) {
+	if(empty($partnerName)) {
+		return 372; // Return Unknown partner ID for empty names
+	}
+	
+	$partnerName = trim($partnerName);
+	
+	// Handle known variations
+	if($partnerName === 'Learning Centre') {
+		return 59; // Maps to PSA Corporate Learning Branch
+	}
+	if($partnerName === 'CIRMO') {
+		return 78; // Maps to Corporate Information and Records Management Office
+	}
+	if($partnerName === 'Procurement Strategy and Governance Branch') {
+		return 372; // Maps to Unknown partner
+	}
+	
+	$partners = getAllPartners();
+	foreach($partners as $partner) {
+		if($partner['name'] === $partnerName) {
+			return $partner['id'];
+		}
+	}
+	
+	// Return Unknown partner ID if not found
+	return 372;
+}
+
+//
+// Return all courses that have a given Learning Hub Partner by ID
+//
+function getCoursesByPartnerId($partnerId) {
 	
 	$path = build_path(BASE_DIR, 'data', 'courses.csv');
 	$f = fopen($path, 'r');
 	
 	$list = array();
 	while ($row = fgetcsv($f)) {
-		if($row[36] == $partnername) {
+		if($row[36] == $partnerId) {
 			array_push($list,$row);
+		}
+	}
+	fclose($f);
+	return $list;
+}
+
+//
+// Return all courses that have a given Learning Hub Partner
+// Now accepts either partner name (for backwards compatibility) or partner ID
+//
+function getCoursesByPartnerName($partnerIdentifier) {
+	
+	$path = build_path(BASE_DIR, 'data', 'courses.csv');
+	$f = fopen($path, 'r');
+	
+	$list = array();
+	while ($row = fgetcsv($f)) {
+		// Check if identifier matches directly (for IDs) or by name lookup
+		if($row[36] == $partnerIdentifier) {
+			array_push($list,$row);
+		} else if(is_numeric($partnerIdentifier)) {
+			// If numeric, already checked above
+			continue;
+		} else {
+			// If not numeric, it might be a name - check if this row's ID matches the name
+			$partnerInfo = getPartnerById($row[36]);
+			if($partnerInfo && $partnerInfo['name'] == $partnerIdentifier) {
+				array_push($list,$row);
+			}
 		}
 	}
 	fclose($f);

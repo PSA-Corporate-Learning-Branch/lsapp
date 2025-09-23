@@ -1,0 +1,52 @@
+<!-- Example of how to embed tracking pixel in your newsletter emails -->
+
+<!-- 
+IMPORTANT LIMITATIONS:
+- Only tracks when images are loaded
+- Most corporate email blocks images by default
+- Actual open rate will be 20-40% higher than tracked
+- Consider this a "minimum open rate"
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Newsletter</title>
+</head>
+<body>
+    <h1>Your Newsletter Content</h1>
+    <p>Regular newsletter content here...</p>
+    
+    <!-- Tracking pixel at the END of email (so it loads last) -->
+    <!-- Generate unique tracking_id for each recipient -->
+     <!-- https://learn.bcpublicservice.gov.bc.ca/newsletter-tracker/track.php?id=fffffffffffffffff&e=allan.haggett%40gov.bc.ca&n=2&c=5000 -->
+    <img src="https://your-public-server.com/track.php?id=<?php echo $unique_tracking_id; ?>&e=<?php echo urlencode($recipient_email); ?>&n=<?php echo $newsletter_id; ?>&c=<?php echo $campaign_id; ?>" 
+         width="1" 
+         height="1" 
+         border="0" 
+         alt=""
+         style="display:block;width:1px;height:1px;border:0;">
+    
+    <!-- Alternative: Hide it completely (some clients may not load display:none images) -->
+    <div style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;">
+        <img src="https://your-public-server.com/track.php?id=<?php echo $unique_tracking_id; ?>&e=<?php echo urlencode($recipient_email); ?>&n=<?php echo $newsletter_id; ?>&c=<?php echo $campaign_id; ?>" 
+             width="1" 
+             height="1" 
+             alt="">
+    </div>
+</body>
+</html>
+
+<!-- 
+TRACKING ID GENERATION:
+In your send_newsletter.php, generate unique tracking IDs like:
+$unique_tracking_id = md5($recipient_email . $campaign_id . time());
+or
+$unique_tracking_id = uniqid('track_', true);
+
+ALTERNATIVES TO CONSIDER:
+1. Track link clicks instead (more reliable, requires user action)
+2. Use "web version" links that open in browser (100% trackable)
+3. Combine both pixel tracking AND link tracking for better data
+4. Add "If you can't see images, click here" link to encourage image loading
+-->

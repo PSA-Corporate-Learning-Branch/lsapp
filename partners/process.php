@@ -32,7 +32,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // ADD or EDIT a Partner
     $partnerIndex = -1;
-    if (!empty($_POST["slug"])) {
+    
+    // First try to find by ID (for editing existing partners)
+    if (!empty($_POST["id"])) {
+        foreach ($existingData as $index => $partner) {
+            if ($partner["id"] == $_POST["id"]) {
+                $partnerIndex = $index;
+                break;
+            }
+        }
+    }
+    
+    // Fallback to finding by slug (for legacy compatibility)
+    if ($partnerIndex === -1 && !empty($_POST["slug"])) {
         foreach ($existingData as $index => $partner) {
             if ($partner["slug"] === $_POST["slug"]) {
                 $partnerIndex = $index;
@@ -112,8 +124,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    // Generate slug from name if not set
-    $slug = !empty($_POST["slug"]) ? $_POST["slug"] : strtolower(str_replace(' ', '-', preg_replace('/[^a-zA-Z0-9\s-]/', '', $_POST["name"])));
+    // Generate slug from name - always regenerate if name has changed
+    $nameChanged = false;
+    if ($partnerIndex !== -1 && isset($existingData[$partnerIndex]["name"]) && $existingData[$partnerIndex]["name"] !== $_POST["name"]) {
+        $nameChanged = true;
+    }
+    
+    // Always regenerate slug from name if name changed, or if it's a new partner
+    if ($partnerIndex === -1 || $nameChanged) {
+        $slug = strtolower(str_replace(' ', '-', preg_replace('/[^a-zA-Z0-9\s-]/', '', $_POST["name"])));
+    } else {
+        // Keep existing slug if name hasn't changed
+        $slug = $existingData[$partnerIndex]["slug"] ?? strtolower(str_replace(' ', '-', preg_replace('/[^a-zA-Z0-9\s-]/', '', $_POST["name"])));
+    }
 
     // Handle employee-facing contact based on type selection (required field)
     $employeeFacingContact = "";
