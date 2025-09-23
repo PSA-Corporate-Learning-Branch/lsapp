@@ -4,6 +4,7 @@ $path = './inc/lsapp.php';
 require($path); 
 
 $form_id = (isset($_GET['formid'])) ? $_GET['formid'] : 0;
+$class_code = (isset($_GET['classCode'])) ? $_GET['classCode'] : 0;
 $alert = '';
 
 // testing link - http://localhost:8080/lsapp/evaluation-report.php?formid=7b6cd68b-85b9-41c3-b725-97339b06cc6e
@@ -47,11 +48,12 @@ function getQuestionsConfig($form_id) {
 $response_map = getQuestionsConfig($form_id);
 
 /**
- * Take the form id, and return the corresponding response
- * file as an associative array
+ * Take the form id and class code, and return the 
+ * corresponding responses as an associative array
  */
-function getResponses($form_id) {
-    
+function getResponses($form_id, $class_code = 0) {
+    global $alert;
+
     if (!$form_id) {
         $alert = 'Form ID not provided';
         return;
@@ -61,6 +63,16 @@ function getResponses($form_id) {
 
     $response_contents = file_get_contents($response_file);
     $response_data = json_decode($response_contents, true);
+
+    if ($class_code !== 0) {
+        $response_data_by_class = array();
+        foreach ($response_data as $response) {
+            if ($response['classCode'] == $class_code) {
+                array_push($response_data_by_class, $response);
+            }
+        }
+        $response_data = $response_data_by_class;
+    }
 
     return $response_data;
 
