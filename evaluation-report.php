@@ -6,15 +6,17 @@ require($path);
 $form_id = (isset($_GET['formid'])) ? $_GET['formid'] : 0;
 $class_code = (isset($_GET['classCode'])) ? $_GET['classCode'] : 0;
 $alert = '';
+$title = 'Course Survey Report';
 
 // testing link - http://localhost:8080/lsapp/evaluation-report.php?formid=7b6cd68b-85b9-41c3-b725-97339b06cc6e
+// testing link with class - http://localhost:8080/lsapp/evaluation-report.php?formid=7b6cd68b-85b9-41c3-b725-97339b06cc6e&classCode=ITEM-2014-55
 
 /**
  * Take the form id, find the matching config
  * and return the corresponding questions map array
  */
 function getQuestionsConfig($form_id) {
-    global $alert;
+    global $alert, $title;
 
     if (!$form_id) {
         $alert = 'Form ID not provided';
@@ -29,6 +31,9 @@ function getQuestionsConfig($form_id) {
     // find config with matching form id
     foreach ($config_array as $config) {
         if ($config['formId'] == $form_id) {
+            if (array_key_exists('name', $config)) {
+                $title = $config['name'];
+            }
             if (array_key_exists('questions', $config)) {
                 return $config['questions'];
             } else {
@@ -78,7 +83,7 @@ function getResponses($form_id) {
 $response_data = getResponses($form_id, $class_code);
 
 /**
- * Get the class codes we have responses for
+ * Return an array of unique class codes across responses
  */
 function getResponseClasses($response_data) {
     global $alert;
@@ -95,8 +100,10 @@ function getResponseClasses($response_data) {
 }
 $classes = getResponseClasses($response_data);
 
-function getResponsesByClass($response_data) {
-    global $class_code;
+/**
+ * Returns a filtered array of responses
+ */
+function filterResponsesByClass($response_data, $class_code = 0) {
     $response_data_by_class = array();
 
      // if we've been provided a class code in the url, get those responses
@@ -469,15 +476,14 @@ $test_compiled_responses = compileResponsesByClass($test_responses);
 </pre>
 
 
-
 <div class="container-lg p-lg-5 p-4 bg-light-subtle rounded">
-    <h1 class="mb-5">Courses Evaluation Report</h1>
+    <h1 class="mb-5"><?= $title . ' Report' ?></h1>
      
     <!-- Alerts & Errors -->
     <span style="background-color: yellow;"><strong><?= $alert ?></strong></span>
     
 
-    <div class="row justify-content-md-center">
+    <!-- <div class="row justify-content-md-center">
         <div class="col-8 my-3 py-3 bg-secondary-subtle text-secondary-emphasis rounded shadow-sm">
             <p>Select class code to view responses</p>
             <select id="dataSelector" class="form-select" aria-label="select data" multiple>
@@ -488,10 +494,8 @@ $test_compiled_responses = compileResponsesByClass($test_responses);
                 <option value="4">Four</option>
                 <option value="5">Five</option>
             </select>
-
-
         </div>
-    </div>
+    </div> -->
 
     <?php
     foreach($compiled_responses as $question => $response) {
