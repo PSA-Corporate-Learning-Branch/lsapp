@@ -106,19 +106,24 @@ $classes = getResponseClasses($response_data);
 function filterResponsesByClass($response_data, $class_code = 0) {
     $response_data_by_class = array();
 
-     // if we've been provided a class code in the url, get those responses
+    // if we've been provided a class code in the url, get those responses
     if ($class_code !== 0) {
-        $response_data_by_class = array();
         foreach ($response_data as $response) {
             if ($response['classCode'] == $class_code) {
                 array_push($response_data_by_class, $response);
             }
         }
-        $response_data = $response_data_by_class;
     }
+
+    return $response_data_by_class;
 
 }
 
+if ($class_code && in_array($class_code, $classes)) {
+    $response_data_processed = filterResponsesByClass($response_data, $class_code);
+} else {
+    $response_data_processed = $response_data;
+}
 
 $response_map_old = [
     // 'classCode' => '',
@@ -179,55 +184,6 @@ $response_map_old = [
 
 $chart_scripts = '';
 
-function compileResponsesByClass($response_data) {
-    global $response_map;
-    global $chart_scripts;
-    
-    if (!$response_map) {
-        return;
-    }
-
-    // output array
-    $responses = array();
-    
-    foreach ($response_data as $response) {
-        if (!array_key_exists($response['classCode'], $responses)) {
-                $responses[$response['classCode']] = array();
-            }
-        foreach ($response as $question => $answer) {
-            // ignore fields we don't need
-            if ($question == 'form' || $question == 'lateEntry' || $question == 'classCode' || $question == 'courseCode') {
-                continue;
-            } 
-            // don't capture the information from empty question responses
-            elseif (empty($answer)) {
-                continue;
-            }
-            // for text type responses store as an array of answers
-            elseif ($response_map[$question]['inputType'] == 'text') {
-                if (!array_key_exists($question, $responses[$response['classCode']])) {
-                    $responses[$response['classCode']][$question] = array();
-                } else {
-                    $responses[$response['classCode']][$question][] = $answer;
-                }
-            } 
-            // for radio type responses add a count of the response option
-            elseif ($response_map[$question]['inputType'] == 'radio') {
-                if (!array_key_exists($question, $responses[$response['classCode']])) {
-                    $responses[$response['classCode']][$question] = array();
-                    $responses[$response['classCode']][$question]['total'] = 0;
-                } elseif (!array_key_exists($answer, $responses[$response['classCode']][$question])) {
-                    $responses[$response['classCode']][$question][$answer] = 1;
-                    $responses[$response['classCode']][$question]['total']++;
-                } else {
-                    $responses[$response['classCode']][$question][$answer]++;
-                    $responses[$response['classCode']][$question]['total']++;
-                }
-            }
-        }
-    }
-    return $responses;
-}
 
 function compileResponses($response_data) {
     global $response_map;
@@ -277,82 +233,7 @@ function compileResponses($response_data) {
     return $responses;
 }
 
-$compiled_responses = compileResponses($response_data);
-
-function createChartForRadioByClass($question, $responses) {
-    global $response_map;
-    global $chart_scripts;
-
-    // initialize chart values
-    $chart_labels = array();
-    $chart_values = array();
-
-    // get question options
-    $answer_options = array();
-    foreach ($response_map[$question]['values'] as $option_key => $option_name) {
-        // set the value if it exists or 0
-        $value = $responses[$question][$option_key] ?? 0;
-        
-        $answer_options[$option_key] = ['name' => $option_name, 'value' => $value];
-        
-        $chart_labels[] = $option_name;
-        $chart_values[] = $value;
-    }
-    
-    // create html content for chart / card
-    $html = '<div class="card my-3" >';
-    $html .=    '<h2 class="m-3">' . $response_map[$question]['label'] . '</h2>';
-    $html .=    '<div class="mt-3">';
-    $html .=        '<canvas id="' . $question . '"></canvas>';
-    $html .=    '</div>';
-
-    $html .=    '<div class="card-body">';
-                    
-    // iterate through answer options
-    foreach($answer_options as $option) {
-        $percent_total = round(($option['value'] / $responses[$question]['total']) * 100);
-        $html .=    '<div class="row align-items-center">';
-        $html .=        '<div class="col-4">';
-        $html .=            '<p style="font-size: smaller;" class="my-1">' . $option['name'] . '</p>';
-        $html .=        '</div>';
-        $html .=        '<div class="col-2">';
-        $html .=            '<p style="font-size: smaller;" class="my-1">' . $option['value'] . '</p>';
-        $html .=        '</div>';
-        $html .=        '<div class="col-6">';
-        $html .=            '<div class="progress" role="progressbar" aria-label="' . $option['name'] . '" aria-valuenow="' . $percent_total . '" aria-valuemin="0" aria-valuemax="100">';
-        $html .=                '<div class="progress-bar text-bg-success" style="width: ' . $percent_total . '%">' . $percent_total . '%</div>';
-        $html .=            '</div>';
-        $html .=        '</div>';
-        $html .=    '</div>';
-    }
-
-    $html .=    '</div>'; // /card-body
-    $html .= '</div>'; // /card
-
-    // add the chart details
-    $chart_scripts .= "const " . $question . "_chart" . " = document.getElementById('" . $question . "');
-
-    new Chart(" . $question . "_chart" . ", {
-        type: 'pie',
-        data: {
-            labels: " . json_encode($chart_labels) . ",   
-            datasets: [{
-                data: " . json_encode($chart_values) . ",
-                backgroundColor: [
-                '#971B2F',
-                '#5F2167',
-                '#e3a82b',
-                '#007864',
-                '#234075',
-                ],
-                hoverOffset: 4
-            }]
-        }
-    });";
-
-    return $html;
-    
-}
+$compiled_responses = compileResponses($response_data_processed);
 
 function createChartForRadio($question, $responses) {
     global $response_map;
@@ -465,7 +346,7 @@ function createTextResponses($question, $responses) {
 <?php
 
 $test_responses = getResponses($form_id);
-$test_compiled_responses = compileResponsesByClass($test_responses);
+
 
 ?>
 
@@ -475,28 +356,42 @@ $test_compiled_responses = compileResponsesByClass($test_responses);
     <?php //print_r($classes); ?>
 </pre>
 
+<div class="container-fluid">
+<div class="row justify-content-md-center mb-3">
 
+    <div class="col-12">
+        <h1 class="mb-5"><?= $title . ' Report' ?></h1>
+    </div>
+
+
+<div class="col-lg-2" name="side-nav">
+    <div class="card sticky-top m-auto z-0 overflow-hidden" style="top: 65px; max-width: 310px;">
+        <h5 class="card-header">Classes</h4>
+        <ul class="list-group list-group-flush">
+        <?php foreach($classes as $class): ?>
+            <li class="list-group-item">
+                <div class="form-check">
+                    <input class="form-check-input" type=checkbox value="" id="<?= $class ?>-checkbox" autocomplete="off" <?= $class === $class_code ? 'checked=""' : '' ?>>
+                    <label class="form-check-label" for="<?= $class ?>-checkbox"><?= $class ?></label>
+                </div>
+            </li>
+        <?php endforeach ?>
+        </ul>
+        <div class="card-footer">
+            <a href="#" id="apply" class="card-link">Apply</a>	
+        </div>
+    </div>
+</div>
+
+
+<div class="col-9">
 <div class="container-lg p-lg-5 p-4 bg-light-subtle rounded">
-    <h1 class="mb-5"><?= $title . ' Report' ?></h1>
      
     <!-- Alerts & Errors -->
     <span style="background-color: yellow;"><strong><?= $alert ?></strong></span>
     
 
-    <!-- <div class="row justify-content-md-center">
-        <div class="col-8 my-3 py-3 bg-secondary-subtle text-secondary-emphasis rounded shadow-sm">
-            <p>Select class code to view responses</p>
-            <select id="dataSelector" class="form-select" aria-label="select data" multiple>
-                <option selected>All</option>
-                <option value="1">One</option>
-                <option value="2">Two</option>
-                <option value="3">Three</option>
-                <option value="4">Four</option>
-                <option value="5">Five</option>
-            </select>
-        </div>
-    </div> -->
-
+   
     <?php
     foreach($compiled_responses as $question => $response) {
         if ($response_map[$question]['inputType'] == 'radio') {
@@ -517,7 +412,12 @@ $test_compiled_responses = compileResponsesByClass($test_responses);
     ?>
     
 
-</div>
+</div> <!-- /container -->
+</div> <!-- /col -->
+
+
+</div> <!-- /row -->
+</div> <!-- /container -->
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
