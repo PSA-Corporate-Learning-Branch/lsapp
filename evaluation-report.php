@@ -48,10 +48,10 @@ function getQuestionsConfig($form_id) {
 $response_map = getQuestionsConfig($form_id);
 
 /**
- * Take the form id and class code, and return the 
- * corresponding responses as an associative array
+ * Take the form id, and return all
+ * responses as an associative array
  */
-function getResponses($form_id, $class_code = 0) {
+function getResponses($form_id) {
     global $alert;
 
     if (!$form_id) {
@@ -61,9 +61,45 @@ function getResponses($form_id, $class_code = 0) {
     
     $response_file = 'data/surveys/' . $form_id . '.json';
 
+    // get the file contents or false on failure
     $response_contents = file_get_contents($response_file);
+    
+    if (!$response_contents) {
+        $alert = 'Error opening file.';
+        return;
+    }
+
+    // decode our json data into an associative array
     $response_data = json_decode($response_contents, true);
 
+    return $response_data;
+
+}
+$response_data = getResponses($form_id, $class_code);
+
+/**
+ * Get the class codes we have responses for
+ */
+function getResponseClasses($response_data) {
+    global $alert;
+    $classes = array();
+
+    foreach ($response_data as $response) {
+        if (array_key_exists('classCode', $response) && !in_array($response['classCode'], $classes)) {
+            array_push($classes, $response['classCode']);
+        }
+    }
+
+    return $classes;
+
+}
+$classes = getResponseClasses($response_data);
+
+function getResponsesByClass($response_data) {
+    global $class_code;
+    $response_data_by_class = array();
+
+     // if we've been provided a class code in the url, get those responses
     if ($class_code !== 0) {
         $response_data_by_class = array();
         foreach ($response_data as $response) {
@@ -74,9 +110,8 @@ function getResponses($form_id, $class_code = 0) {
         $response_data = $response_data_by_class;
     }
 
-    return $response_data;
-
 }
+
 
 $response_map_old = [
     // 'classCode' => '',
@@ -187,17 +222,13 @@ function compileResponsesByClass($response_data) {
     return $responses;
 }
 
-function compileResponses($file) {
+function compileResponses($response_data) {
     global $response_map;
     global $chart_scripts;
 
     if (!$response_map) {
         return;
     }
-
-    // open and decode file
-    $file_contents = file_get_contents($file);
-    $response_data = json_decode($file_contents);
     
     // output array
     $responses = array();
@@ -239,7 +270,7 @@ function compileResponses($file) {
     return $responses;
 }
 
-$compiled_responses = compileResponses('data/surveys/test-data.json');
+$compiled_responses = compileResponses($response_data);
 
 function createChartForRadioByClass($question, $responses) {
     global $response_map;
@@ -433,8 +464,8 @@ $test_compiled_responses = compileResponsesByClass($test_responses);
 
 
 <pre>
-    <?php //print_r($test_responses) ?>
-    <?php print_r($test_compiled_responses); ?>
+    <?php //print_r(gettype($response_data)) ?>
+    <?php //print_r($classes); ?>
 </pre>
 
 
@@ -490,30 +521,30 @@ $test_compiled_responses = compileResponsesByClass($test_responses);
 
     <?php echo $chart_scripts; ?>
 
-    const compiledResponses = <?php echo json_encode($test_compiled_responses) ?>
+    // const compiledResponses = <?php //echo json_encode($test_compiled_responses) ?>
 
     // console.log(compiledResponses);
 
-    function updateCharts(classCodes) {
-        let newData = {};
-        // if none provided, show all the data
+    // function updateCharts(classCodes) {
+    //     let newData = {};
+    //     // if none provided, show all the data
 
-        // if one or more selection provided compile and update the data
-        classCodes.forEach(classCode => {
-            if (classCode in compiledResponses) {
-                for (const [key, value] of Object.entries(compiledResponses[classCode])) {
+    //     // if one or more selection provided compile and update the data
+    //     classCodes.forEach(classCode => {
+    //         if (classCode in compiledResponses) {
+    //             for (const [key, value] of Object.entries(compiledResponses[classCode])) {
 
-                }
-                compiledResponses[classCode].forEach((response) => {
-                    if (response in newData) {
-                        newData[response] = response; // todo
-                    } else {
+    //             }
+    //             compiledResponses[classCode].forEach((response) => {
+    //                 if (response in newData) {
+    //                     newData[response] = response; // todo
+    //                 } else {
 
-                    }
-                })
-            }
-        })
-    }
+    //                 }
+    //             })
+    //         }
+    //     })
+    // }
 
     // Listen for dropdown changes
     // document.getElementById('dataSelector').addEventListener('change', function () {
