@@ -366,20 +366,23 @@ $test_responses = getResponses($form_id);
 
 <div class="col-lg-2" name="side-nav">
     <div class="card sticky-top m-auto z-0 overflow-hidden" style="top: 65px; max-width: 310px;">
-        <h5 class="card-header">Classes</h4>
+        <form action="evaluation-report.php" method="get">
+        <h5 class="card-header">Classes</h5>
         <ul class="list-group list-group-flush">
         <?php foreach($classes as $class): ?>
             <li class="list-group-item">
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="classCode" id="<?= $class ?>-radio" autocomplete="off" <?= $class === $class_code ? 'checked=""' : '' ?>>
+                    <input class="form-check-input" type="radio" name="classCode" id="<?= $class ?>-radio" value="<?= $class ?>" autocomplete="off" <?= $class === $class_code ? 'checked=""' : '' ?>>
                     <label class="form-check-label" for="<?= $class ?>-radio"><?= $class ?></label>
                 </div>
             </li>
         <?php endforeach ?>
         </ul>
+        <input type="hidden" id="form-id" name="formid" value="<?= $form_id ?>">
         <div class="card-footer">
-            <a href="#" id="apply" class="card-link">Apply</a>	
+            <button type="submit" class="btn btn-primary">Apply</button>	
         </div>
+        </form>
     </div>
 </div>
 
