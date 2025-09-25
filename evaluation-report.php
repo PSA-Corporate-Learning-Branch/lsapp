@@ -360,7 +360,7 @@ $test_responses = getResponses($form_id);
 <div class="row justify-content-md-center mb-3">
 
     <div class="col-12">
-        <h1 class="mb-5"><?= $title . ' Report' ?></h1>
+        <h1 class="mb-5 text-center"><?= $title . ' Report' ?></h1>
     </div>
 
 
@@ -371,8 +371,8 @@ $test_responses = getResponses($form_id);
         <?php foreach($classes as $class): ?>
             <li class="list-group-item">
                 <div class="form-check">
-                    <input class="form-check-input" type=checkbox value="" id="<?= $class ?>-checkbox" autocomplete="off" <?= $class === $class_code ? 'checked=""' : '' ?>>
-                    <label class="form-check-label" for="<?= $class ?>-checkbox"><?= $class ?></label>
+                    <input class="form-check-input" type="radio" name="classCode" id="<?= $class ?>-radio" autocomplete="off" <?= $class === $class_code ? 'checked=""' : '' ?>>
+                    <label class="form-check-label" for="<?= $class ?>-radio"><?= $class ?></label>
                 </div>
             </li>
         <?php endforeach ?>
