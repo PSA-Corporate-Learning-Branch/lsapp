@@ -345,7 +345,6 @@ function createTextResponses($question, $responses) {
 
 <?php
 
-$test_responses = getResponses($form_id);
 
 
 ?>

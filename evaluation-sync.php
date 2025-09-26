@@ -129,7 +129,7 @@ function processVersionQuestions(array $array, array &$return_array = []) {
                     ];
                     continue;
                 }
-                // TODO: add checkbox type, possibly others
+                // TODO: add select, checkbox types, possibly others
             }
             // if we determine it's not a question, process the array looking for
             // questions within as they can be nested in a layout component
