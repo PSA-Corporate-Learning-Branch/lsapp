@@ -19,6 +19,7 @@ foreach ($files as $file) {
         $changeRequests[] = [
             'changeid' => $changeData['changeid'],
             'courseid' => $changeData['courseid'],
+            'category' => $changeData['category'] ?? '',
             'assign_to' => $changeData['assign_to'],
             'progress' => $changeData['progress'],
             'urgent' => $changeData['urgent'] ? 'Yes' : 'No',
@@ -67,7 +68,7 @@ foreach ($files as $file) {
                         <?php foreach ($changeRequests as $request): ?>
                             <?php if($request['progress'] !== 'Closed'): ?>
                             <tr>
-                                <td class="category"><?php echo htmlspecialchars($request['category']); ?></td>
+                                <td class="category"><?php echo htmlspecialchars($request['category'] ?? ''); ?></td>
                                 <td class="course">
                                     <?php $deets = getCourse($request['courseid']); ?>
                                     <a href="/lsapp/course.php?courseid=<?php echo htmlspecialchars($request['courseid']); ?>">
@@ -95,7 +96,7 @@ foreach ($files as $file) {
 
     <script>
     var options = {
-        valueNames: ['course', 'assigned', 'progressstat', 'urgent', 'date-created', 'date-modified']
+        valueNames: ['category', 'course', 'assigned', 'progressstat', 'urgent', 'date-created', 'date-modified']
     };
 
     var changeRequestsList = new List('change-requests-list', options);

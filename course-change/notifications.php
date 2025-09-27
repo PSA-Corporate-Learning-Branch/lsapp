@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if($formData['urgent']) {
             $subject .= '[URGENT] ';
         }
-        $subject .= $course_deets[2] . ' - ' . htmlspecialchars($formData['category'] ?? 'N/A') . ' request';
+        $subject .= '[Course Change] ' . $course_deets[2] . ' - ' . htmlspecialchars($formData['category'] ?? 'N/A') . ' request';
 
         $body = "This is just a notification. Please reply via the request page on LSApp.\n";
         // Add a link back to the request
@@ -144,7 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $subject,
                 $body,
                 null, // No HTML body
-                "LearningHUB.Notification@gov.bc.ca",
+                "donotreply_lsapp@gov.bc.ca",
                 empty($ccRecipients) ? null : $ccRecipients, // CC recipients
                 null  // No BCC
             );
@@ -192,15 +192,13 @@ $allPeople = getAllPeople();
 .person-item {
     padding: 8px;
     margin-bottom: 4px;
-    border: 1px solid #dee2e6;
+
     border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
-.person-item:hover {
-    background-color: #f8f9fa;
-}
+
 .person-item input[type="checkbox"] {
     margin-right: 10px;
 }
@@ -278,7 +276,7 @@ $allPeople = getAllPeople();
                             <h5>Primary Recipients (To:)</h5>
 
                             <?php if ($course_steward && !empty($course_steward[3])): ?>
-                            <div class="person-item">
+                            <div class="person-item bg-dark-subtle">
                                 <label class="d-flex align-items-center">
                                     <input type="checkbox" name="recipients[]" value="<?= htmlspecialchars($course_steward[3]) ?>" checked>
                                     <div class="person-info">
@@ -291,7 +289,7 @@ $allPeople = getAllPeople();
 
                             <?php if ($course_developer && !empty($course_developer[3]) &&
                                       (!$course_steward || $course_developer[0] !== $course_steward[0])): ?>
-                            <div class="person-item">
+                            <div class="person-item bg-dark-subtle">
                                 <label class="d-flex align-items-center">
                                     <input type="checkbox" name="recipients[]" value="<?= htmlspecialchars($course_developer[3]) ?>" checked>
                                     <div class="person-info">
@@ -305,7 +303,7 @@ $allPeople = getAllPeople();
                             <?php if ($assigned_person && !empty($assigned_person[3]) &&
                                       (!$course_steward || $assigned_person[0] !== $course_steward[0]) &&
                                       (!$course_developer || $assigned_person[0] !== $course_developer[0])): ?>
-                            <div class="person-item">
+                            <div class="person-item bg-dark-subtle">
                                 <label class="d-flex align-items-center">
                                     <input type="checkbox" name="recipients[]" value="<?= htmlspecialchars($assigned_person[3]) ?>" checked>
                                     <div class="person-info">
