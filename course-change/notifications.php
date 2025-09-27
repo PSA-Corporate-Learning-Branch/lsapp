@@ -213,8 +213,6 @@ $allPeople = getAllPeople();
     top: 100%;
     left: 0;
     right: 0;
-    background: white;
-    border: 1px solid #dee2e6;
     border-top: none;
     max-height: 300px;
     overflow-y: auto;
@@ -227,10 +225,10 @@ $allPeople = getAllPeople();
 .search-result-item {
     padding: 10px;
     cursor: pointer;
-    border-bottom: 1px solid #f0f0f0;
+
 }
 .search-result-item:hover {
-    background-color: #f8f9fa;
+
 }
 .selected-additional {
     margin-top: 10px;
@@ -239,7 +237,7 @@ $allPeople = getAllPeople();
     display: inline-block;
     padding: 5px 10px;
     margin: 5px;
-    background-color: #e9ecef;
+
     border-radius: 20px;
 }
 .remove-person {
@@ -381,7 +379,7 @@ searchInput.addEventListener('input', function() {
         matches.forEach(person => {
             if (!selectedAdditionalPeople.has(person.email)) {
                 const div = document.createElement('div');
-                div.className = 'search-result-item';
+                div.className = 'search-result-item bg-dark-subtle';
                 div.innerHTML = `
                     <strong>${person.name}</strong><br>
                     <small>${person.email}</small>
@@ -397,7 +395,7 @@ searchInput.addEventListener('input', function() {
         });
         searchResults.classList.add('show');
     } else {
-        searchResults.innerHTML = '<div class="search-result-item">No matches found</div>';
+        searchResults.innerHTML = '<div class="search-result-item bg-dark-subtle">No matches found</div>';
         searchResults.classList.add('show');
     }
 });
