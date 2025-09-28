@@ -34,7 +34,7 @@ foreach ($files as $file) {
 
 <?php getHeader() ?>
 
-<title>Change Request Dashboard</title>
+<title>Course Change Request Dashboard</title>
 
 <?php getScripts() ?>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
@@ -44,8 +44,8 @@ foreach ($files as $file) {
 <div class="container">
     <div class="row justify-content-md-center">
         <div class="col">
-        <h1>Change Requests Dashboard</h1>
-        <div class="mb-4">Incomplete change requests</div>
+        <h1>Course Change Requests Dashboard</h1>
+        <div class="mb-4">Incomplete course change requests</div>
         <?php if (!empty($changeRequests)): ?>
             <!-- Search and sort controls -->
             <div id="change-requests-list">
@@ -54,7 +54,7 @@ foreach ($files as $file) {
                 <table class="table table-striped table-hover">
                     <thead>
                         <tr>
-                            <th><button class="btn btn-sm btn-secondary sort" data-sort="category">Category</button></th>
+                            <th width="140"><button class="btn btn-sm btn-secondary sort" data-sort="category">Category</button></th>
                             <th><button class="btn btn-sm btn-secondary sort" data-sort="course">Course</button></th>
                             <th><button class="btn btn-sm btn-secondary sort" data-sort="urgent">Urgent</button></th>
                             <th><button class="btn btn-sm btn-secondary sort" data-sort="assigned">Assigned To</button></th>
