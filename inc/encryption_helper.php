@@ -14,7 +14,7 @@ class EncryptionHelper {
      */
     private static function getEncryptionKey() {
         // Try to get from environment variable first
-        $key = getenv('APP_ENCRYPTION_KEY');
+        $key = getenv('CHEFS_ENCRYPTION_KEY');
         
         if (!$key) {
             // Fall back to a file-based key (should be outside web root)
