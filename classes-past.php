@@ -160,8 +160,8 @@ foreach($c as $row) {
 		<!-- City -->
 		<td class="city">
             <a href="city.php?name=<?= h($row[25]) ?>"><?= h($row[25]) ?></a>
-            <?php if(!$row[25]): ?>
-			<span class="badge bg-light-subtle text-primary-emphasis"><?= h($row[45]) ?></span>
+            <?php if(!$row[25] && $row[1] != 'Inactive'): ?>
+				<span class="badge bg-light-subtle text-primary-emphasis"><?= h($row[45]) ?></span>
 			<?php endif ?>
         </td>
 		<!-- Facilitator -->
