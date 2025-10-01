@@ -177,6 +177,7 @@ foreach($c as $row) {
 		<td class="enrolled">
 			<?php if($row['18'] < $row[11] && $row[1] != 'Inactive'): ?>
 				<span class="badge bg-danger text-white" title="Enrollment is currently below the set minimum"><?= h($row[18]) ?></span>
+			<?php elseif($row[1] == 'Inactive'): ?>
 			<?php else: ?>
 				<span class="badge bg-light-subtle text-primary-emphasis"><?= h($row[18]) ?></span>
 			<?php endif ?>
@@ -222,7 +223,7 @@ $(document).ready(function(){
 	$('.search').focus();
 
 	var upcomingoptions = {
-		valueNames: [ 'status', 'shippingstatus', 'startdate', 'course', 'facilitator', 'region', 'venue', 'city', 'itemcode', 'enrolled', 'attendance', 'survey ' ]
+		valueNames: [ 'status', 'shippingstatus', 'startdate', 'course', 'facilitator', 'region', 'venue', 'city', 'itemcode', 'enrolled', 'attendance', 'survey' ]
 	};
 	var upcomingClasses = new List('upcoming-classes', upcomingoptions);
 	upcomingClasses.on('searchComplete', function(){
