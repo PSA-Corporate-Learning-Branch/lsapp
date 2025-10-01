@@ -98,7 +98,7 @@ foreach($c as $row) {
 	<?php
 	$statrow = '';
 	$issueflag = '';
-	if(!$row[7] && $row[4] != 'Dedicated' && $row[1] != 'Requested') {
+	if(!$row[7] && $row[4] != 'Dedicated' && $row[1] != 'Requested' && $row[1] != 'Inactive') {
 		$issueflag = '<span class="badge bg-danger text-white">???</span>';
 	}
 	//if($row[1] == 'Pending') {
@@ -134,7 +134,7 @@ foreach($c as $row) {
 			<?= $issueflag ?>
 			<small><?= h($row[7]) ?></small>
 			<?php if($row[4] == 'Dedicated'): ?>
-			<span class="badge bg-light-subtle ">Dedicated</span>
+				<span class="badge bg-light-subtle text-primary-emphasis">Dedicated</span>
 			<?php endif ?>
 		</td>
 		<!-- Class Date -->
