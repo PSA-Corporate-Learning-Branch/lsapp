@@ -424,7 +424,7 @@ function updateSelectedDisplay() {
 
     selectedAdditionalPeople.forEach((person, email) => {
         const span = document.createElement('span');
-        span.className = 'selected-person';
+        span.className = 'selected-person bg-dark-subtle';
         span.innerHTML = `
             ${person.name}
             <span class="remove-person" onclick="removePerson('${email}')">×</span>
