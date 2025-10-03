@@ -89,7 +89,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
         $firstRow = fgetcsv($handle);
         if ($firstRow) {
             // Check if first row looks like a header
+            // Strip UTF-8 BOM if present
             $firstCell = strtolower(trim($firstRow[0]));
+            $firstCell = str_replace("\xEF\xBB\xBF", '', $firstCell); // Remove UTF-8 BOM
             if (in_array($firstCell, ['email', 'email address', 'e-mail'])) {
                 // This is a header row, skip it
             } else {
