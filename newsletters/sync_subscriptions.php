@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         
         try {
             // Run the sync script as a separate process to avoid database locks
-            $command = "cd " . escapeshellarg(__DIR__) . " && php manage_subscriptions.php " . escapeshellarg($newsletterId) . " 2>&1";
+            $command = "cd " . escapeshellarg(__DIR__) . " && E:\php-8.3.16\php.exe manage_subscriptions.php " . escapeshellarg($newsletterId) . " 2>&1";
             $syncOutput = shell_exec($command);
             
             if ($syncOutput === null) {
