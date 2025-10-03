@@ -28,6 +28,64 @@ if (!$newsletter) {
     exit();
 }
 
+// Handle CSV export
+if (isset($_GET['export']) && $_GET['export'] === 'csv') {
+    $exportStatusFilter = $_GET['status'] ?? 'active';
+    $exportSearchQuery = $_GET['search'] ?? '';
+
+    // Build export query
+    $exportQuery = "SELECT email, status, created_at, updated_at FROM subscriptions";
+    $exportParams = [];
+    $exportConditions = [];
+
+    $exportConditions[] = "newsletter_id = :newsletter_id";
+    $exportParams[':newsletter_id'] = $newsletterId;
+
+    if ($exportStatusFilter !== 'all') {
+        $exportConditions[] = "status = :status";
+        $exportParams[':status'] = $exportStatusFilter;
+    }
+
+    if (!empty($exportSearchQuery)) {
+        $exportConditions[] = "email LIKE :search";
+        $exportParams[':search'] = "%$exportSearchQuery%";
+    }
+
+    $exportQuery .= " WHERE " . implode(" AND ", $exportConditions);
+    $exportQuery .= " ORDER BY created_at DESC";
+
+    $exportStmt = $db->prepare($exportQuery);
+    $exportStmt->execute($exportParams);
+    $exportData = $exportStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Set headers for CSV download
+    $filename = preg_replace('/[^a-z0-9]/i', '_', $newsletter['name']) . '_subscribers_' . date('Y-m-d') . '.csv';
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+    // Output CSV
+    $output = fopen('php://output', 'w');
+
+    // Add BOM for Excel UTF-8 compatibility
+    fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+    // Add header row
+    fputcsv($output, ['Email', 'Status', 'Subscribed Date', 'Last Updated']);
+
+    // Add data rows
+    foreach ($exportData as $row) {
+        fputcsv($output, [
+            $row['email'],
+            $row['status'],
+            $row['created_at'],
+            $row['updated_at']
+        ]);
+    }
+
+    fclose($output);
+    exit();
+}
+
 // Handle form submissions
 $message = '';
 $messageType = '';
@@ -242,22 +300,26 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
             $lastSyncStmt->execute([$newsletterId]);
             $lastSyncInfo = $lastSyncStmt->fetch(PDO::FETCH_ASSOC);
             ?>
-            <?php if ($lastSyncInfo): ?>
-                <p class="text-secondary">Last sync: <?php echo date('Y-m-d H:i:s', strtotime($lastSyncInfo['created_at'])); ?> (<?php echo $lastSyncInfo['records_processed']; ?> records processed)</p>
+            <?php if (!empty($newsletter['form_id']) && !empty($newsletter['api_username'])): ?>
+                <?php if ($lastSyncInfo): ?>
+                    <p class="text-secondary">Last sync: <?php echo date('Y-m-d H:i:s', strtotime($lastSyncInfo['created_at'])); ?> (<?php echo $lastSyncInfo['records_processed']; ?> records processed)</p>
+                <?php else: ?>
+                    <p class="text-secondary">No sync history available - <a href="sync_subscriptions.php?newsletter_id=<?php echo $newsletterId; ?>">run your first sync</a></p>
+                <?php endif; ?>
             <?php else: ?>
-                <p class="text-secondary">No sync history available - <a href="sync_subscriptions.php?newsletter_id=<?php echo $newsletterId; ?>">run your first sync</a></p>
+                <p class="text-secondary">Form API not configured - use CSV import to add subscribers</p>
             <?php endif; ?>
             <div class="mb-3">
                 <a href="index.php" class="btn btn-sm btn-outline-secondary me-2">← All Newsletters</a>
                 <a href="newsletter_dashboard.php?newsletter_id=<?php echo $newsletterId; ?>" class="btn btn-sm btn-outline-primary me-2">Dashboard</a>
-                <a href="sync_subscriptions.php?newsletter_id=<?php echo $newsletterId; ?>" class="btn btn-sm btn-outline-primary me-2">🔄 Sync Subscriptions</a>
-                <a href="send_newsletter.php?newsletter_id=<?php echo $newsletterId; ?>" class="btn btn-sm btn-primary me-2">✉️ Send Newsletter</a>
-                <?php if (!empty($newsletter['form_id'])): ?>
-                    <a href="https://submit.digital.gov.bc.ca/app/form/submit?f=<?php echo htmlspecialchars($newsletter['form_id']); ?>" 
-                       class="btn btn-sm btn-success" 
-                       target="_blank" 
+                <?php if (!empty($newsletter['form_id']) && !empty($newsletter['api_username'])): ?>
+                    <a href="sync_subscriptions.php?newsletter_id=<?php echo $newsletterId; ?>" class="btn btn-sm btn-outline-primary me-2">🔄 Sync Subscriptions</a>
+                    <a href="https://submit.digital.gov.bc.ca/app/form/submit?f=<?php echo htmlspecialchars($newsletter['form_id']); ?>"
+                       class="btn btn-sm btn-success me-2"
+                       target="_blank"
                        rel="noopener noreferrer">📝 Subscription Form</a>
                 <?php endif; ?>
+                <a href="send_newsletter.php?newsletter_id=<?php echo $newsletterId; ?>" class="btn btn-sm btn-primary me-2">✉️ Send Newsletter</a>
             </div>
         </div>
     </div>
@@ -333,6 +395,20 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
                         <?php endif; ?>
                     </div>
                 </form>
+                <div class="mt-3">
+                    <?php
+                    $exportUrl = '?newsletter_id=' . $newsletterId . '&export=csv';
+                    if ($statusFilter !== 'active') {
+                        $exportUrl .= '&status=' . urlencode($statusFilter);
+                    }
+                    if (!empty($searchQuery)) {
+                        $exportUrl .= '&search=' . urlencode($searchQuery);
+                    }
+                    ?>
+                    <a href="<?php echo htmlspecialchars($exportUrl); ?>" class="btn btn-success">
+                        📥 Export to CSV (<?php echo count($subscriptions); ?> records)
+                    </a>
+                </div>
             </div>
         </section>
 
@@ -405,7 +481,7 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="card-body">
                 <h2 class="card-title">Manual Subscription Management</h2>
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <h3 class="h5">Add New Subscriber</h3>
                         <form method="post" action="">
                             <input type="hidden" name="action" value="add_subscriber">
@@ -413,13 +489,13 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
                                 <label for="add-email" class="form-label">Email Address</label>
                                 <div class="input-group">
                                     <input type="email" id="add-email" name="email" class="form-control" placeholder="subscriber@example.com" required>
-                                    <button type="submit" class="btn btn-primary">Add Subscriber</button>
+                                    <button type="submit" class="btn btn-primary">Add</button>
                                 </div>
                             </div>
                         </form>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <h3 class="h5">Unsubscribe Email</h3>
                         <form method="post" action="" onsubmit="return confirm('Are you sure you want to unsubscribe this email address?')">
                             <input type="hidden" name="action" value="unsubscribe">
@@ -432,8 +508,16 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
                             </div>
                         </form>
                     </div>
+
+                    <div class="col-md-4">
+                        <h3 class="h5">Bulk Import</h3>
+                        <p class="small text-secondary">Import multiple subscribers from a CSV file</p>
+                        <a href="import_csv.php?newsletter_id=<?php echo $newsletterId; ?>" class="btn btn-success">
+                            📁 Import from CSV
+                        </a>
+                    </div>
                 </div>
-                
+
 
             </div>
         </section>
