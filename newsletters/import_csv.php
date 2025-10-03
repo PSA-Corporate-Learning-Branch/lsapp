@@ -420,7 +420,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </ul>
 
                     <p class="small mb-2"><strong>Example:</strong></p>
-                    <pre class="small bg-white p-2 rounded">email
+                    <pre class="small bg-light-subtle p-2 rounded">email
 user1@example.com
 user2@example.com
 user3@example.com</pre>
