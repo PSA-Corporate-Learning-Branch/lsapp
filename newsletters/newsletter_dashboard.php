@@ -28,6 +28,64 @@ if (!$newsletter) {
     exit();
 }
 
+// Handle CSV export
+if (isset($_GET['export']) && $_GET['export'] === 'csv') {
+    $exportStatusFilter = $_GET['status'] ?? 'active';
+    $exportSearchQuery = $_GET['search'] ?? '';
+
+    // Build export query
+    $exportQuery = "SELECT email, status, created_at, updated_at FROM subscriptions";
+    $exportParams = [];
+    $exportConditions = [];
+
+    $exportConditions[] = "newsletter_id = :newsletter_id";
+    $exportParams[':newsletter_id'] = $newsletterId;
+
+    if ($exportStatusFilter !== 'all') {
+        $exportConditions[] = "status = :status";
+        $exportParams[':status'] = $exportStatusFilter;
+    }
+
+    if (!empty($exportSearchQuery)) {
+        $exportConditions[] = "email LIKE :search";
+        $exportParams[':search'] = "%$exportSearchQuery%";
+    }
+
+    $exportQuery .= " WHERE " . implode(" AND ", $exportConditions);
+    $exportQuery .= " ORDER BY created_at DESC";
+
+    $exportStmt = $db->prepare($exportQuery);
+    $exportStmt->execute($exportParams);
+    $exportData = $exportStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Set headers for CSV download
+    $filename = preg_replace('/[^a-z0-9]/i', '_', $newsletter['name']) . '_subscribers_' . date('Y-m-d') . '.csv';
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+    // Output CSV
+    $output = fopen('php://output', 'w');
+
+    // Add BOM for Excel UTF-8 compatibility
+    fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+    // Add header row
+    fputcsv($output, ['Email', 'Status', 'Subscribed Date', 'Last Updated']);
+
+    // Add data rows
+    foreach ($exportData as $row) {
+        fputcsv($output, [
+            $row['email'],
+            $row['status'],
+            $row['created_at'],
+            $row['updated_at']
+        ]);
+    }
+
+    fclose($output);
+    exit();
+}
+
 // Handle form submissions
 $message = '';
 $messageType = '';
@@ -337,6 +395,20 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
                         <?php endif; ?>
                     </div>
                 </form>
+                <div class="mt-3">
+                    <?php
+                    $exportUrl = '?newsletter_id=' . $newsletterId . '&export=csv';
+                    if ($statusFilter !== 'active') {
+                        $exportUrl .= '&status=' . urlencode($statusFilter);
+                    }
+                    if (!empty($searchQuery)) {
+                        $exportUrl .= '&search=' . urlencode($searchQuery);
+                    }
+                    ?>
+                    <a href="<?php echo htmlspecialchars($exportUrl); ?>" class="btn btn-success">
+                        📥 Export to CSV (<?php echo count($subscriptions); ?> records)
+                    </a>
+                </div>
             </div>
         </section>
 
