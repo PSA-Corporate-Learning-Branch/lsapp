@@ -15,7 +15,7 @@ try {
     $db = new PDO("sqlite:../data/subscriptions.db");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+    handleDatabaseError($e);
 }
 
 // Get newsletter details
@@ -92,13 +92,13 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     // Add header row
     fputcsv($output, ['Email', 'Status', 'Subscribed Date', 'Last Updated']);
 
-    // Add data rows
+    // Add data rows with CSV injection protection
     foreach ($exportData as $row) {
         fputcsv($output, [
-            $row['email'],
-            $row['status'],
-            $row['created_at'],
-            $row['updated_at']
+            sanitizeCSVValue($row['email']),
+            sanitizeCSVValue($row['status']),
+            sanitizeCSVValue($row['created_at']),
+            sanitizeCSVValue($row['updated_at'])
         ]);
     }
 
@@ -125,8 +125,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (empty($email)) {
                     throw new Exception("Email address is required");
                 }
-                
-                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+
+                if (!validateEmail($email)) {
                     throw new Exception("Invalid email address format");
                 }
                 
@@ -247,7 +247,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
         } catch (Exception $e) {
-            $message = "Error: " . $e->getMessage();
+            $message = getUserFriendlyError($e);
             $messageType = 'error';
         }
     }

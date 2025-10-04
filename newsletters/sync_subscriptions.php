@@ -23,7 +23,7 @@ try {
         exit();
     }
 } catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+    handleDatabaseError($e);
 }
 
 // Check if sync was requested

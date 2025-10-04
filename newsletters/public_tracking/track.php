@@ -25,11 +25,85 @@ if (!$trackingId) {
     exit;
 }
 
+// Validate tracking ID format (should be alphanumeric hash)
+if (!preg_match('/^[a-f0-9]{32}$/', $trackingId)) {
+    echo $pixel;
+    exit;
+}
+
+// Validate newsletter ID if provided
+if ($newsletterId !== null && (!is_numeric($newsletterId) || $newsletterId < 1)) {
+    $newsletterId = null;
+}
+
+// Sanitize and validate email if provided
+if ($email !== null) {
+    // Check for dangerous characters BEFORE trimming
+    if (strpos($email, "\0") !== false ||                 // No null bytes
+        preg_match('/[\x00-\x1F\x7F]/', $email)) {       // No control chars
+        $email = null;
+    } else {
+        $email = trim($email);
+
+        // Comprehensive email validation
+        if (strlen($email) > 254 ||                       // RFC max length
+            $email === '' ||                              // Not empty
+            !filter_var($email, FILTER_VALIDATE_EMAIL) || // Basic format
+            substr_count($email, '@') !== 1) {            // Exactly one @
+            $email = null;
+        } else {
+            // Additional checks for valid emails
+            list($local, $domain) = explode('@', $email);
+            if (strlen($local) > 64 || strlen($local) < 1 ||  // Local part length
+                strlen($domain) > 255 || strlen($domain) < 1 || // Domain part length
+                strpos($local, '..') !== false ||              // No consecutive dots
+                strpos($domain, '..') !== false ||
+                $local[0] === '.' ||                           // No leading dot
+                $local[strlen($local) - 1] === '.' ||          // No trailing dot
+                strpos($domain, '.') === false) {              // Domain must have dot
+                $email = null;
+            }
+        }
+    }
+}
+
 // Get additional tracking data
 $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
 $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 $referer = $_SERVER['HTTP_REFERER'] ?? null;
 $timestamp = date('Y-m-d H:i:s');
+
+// Rate limiting: max 10 requests per IP per second
+$rateLimitDir = __DIR__ . '/data/rate_limit';
+if (!is_dir($rateLimitDir)) {
+    mkdir($rateLimitDir, 0755, true);
+}
+
+$rateLimitKey = md5($ipAddress);
+$rateLimitFile = $rateLimitDir . '/' . $rateLimitKey;
+
+if (file_exists($rateLimitFile)) {
+    $lastRequest = (int)file_get_contents($rateLimitFile);
+    if (time() - $lastRequest < 1) {
+        // More than 1 request per second from same IP - likely bot/abuse
+        http_response_code(429); // Too Many Requests
+        echo $pixel;
+        exit;
+    }
+}
+
+file_put_contents($rateLimitFile, time());
+
+// Clean up old rate limit files (older than 1 hour)
+if (rand(1, 100) === 1) { // 1% chance on each request
+    $files = glob($rateLimitDir . '/*');
+    $oneHourAgo = time() - 3600;
+    foreach ($files as $file) {
+        if (filemtime($file) < $oneHourAgo) {
+            @unlink($file);
+        }
+    }
+}
 
 // Initialize database connection
 try {
@@ -77,39 +151,56 @@ try {
     
     // Only log if not a recent duplicate
     if ($recentCount == 0) {
-        // Insert tracking record
-        $stmt = $db->prepare("
-            INSERT INTO email_opens (
-                tracking_id, 
-                email, 
-                newsletter_id, 
-                campaign_id, 
-                opened_at, 
-                ip_address, 
-                user_agent, 
-                referer
-            ) VALUES (
-                :tracking_id,
-                :email,
-                :newsletter_id,
-                :campaign_id,
-                :opened_at,
-                :ip_address,
-                :user_agent,
-                :referer
-            )
-        ");
-        
-        $stmt->execute([
-            ':tracking_id' => $trackingId,
-            ':email' => $email,
-            ':newsletter_id' => $newsletterId,
-            ':campaign_id' => $campaignId,
-            ':opened_at' => $timestamp,
-            ':ip_address' => $ipAddress,
-            ':user_agent' => $userAgent,
-            ':referer' => $referer
-        ]);
+        // Check database size - prevent DoS via storage exhaustion
+        $dbSize = filesize("$dbDir/email_tracking.db");
+        $maxDbSize = 100 * 1024 * 1024; // 100MB limit
+
+        if ($dbSize < $maxDbSize) {
+            // Sanitize user agent and referer to prevent injection
+            $userAgent = substr($userAgent, 0, 500); // Limit length
+            $referer = $referer ? substr($referer, 0, 500) : null;
+
+            // Insert tracking record
+            $stmt = $db->prepare("
+                INSERT INTO email_opens (
+                    tracking_id,
+                    email,
+                    newsletter_id,
+                    campaign_id,
+                    opened_at,
+                    ip_address,
+                    user_agent,
+                    referer
+                ) VALUES (
+                    :tracking_id,
+                    :email,
+                    :newsletter_id,
+                    :campaign_id,
+                    :opened_at,
+                    :ip_address,
+                    :user_agent,
+                    :referer
+                )
+            ");
+
+            $stmt->execute([
+                ':tracking_id' => $trackingId,
+                ':email' => $email,
+                ':newsletter_id' => $newsletterId,
+                ':campaign_id' => $campaignId,
+                ':opened_at' => $timestamp,
+                ':ip_address' => $ipAddress,
+                ':user_agent' => $userAgent,
+                ':referer' => $referer
+            ]);
+
+            // Periodic cleanup: delete records older than 90 days (1% chance)
+            if (rand(1, 100) === 1) {
+                $db->exec("DELETE FROM email_opens WHERE opened_at < datetime('now', '-90 days')");
+            }
+        } else {
+            error_log("Email tracking database size limit reached: " . ($dbSize / 1024 / 1024) . "MB");
+        }
     }
     
 } catch (Exception $e) {

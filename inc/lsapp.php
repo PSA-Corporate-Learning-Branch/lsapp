@@ -2437,3 +2437,57 @@ function requireCsrfToken() {
         die('CSRF token validation failed. Please refresh the page and try again.');
     }
 }
+
+/**
+ * Handle database connection errors securely
+ * Logs detailed error, shows generic message to user
+ *
+ * @param Exception $e The exception to handle
+ */
+function handleDatabaseError($e) {
+    // Log detailed error for administrators
+    error_log("Database error: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
+
+    // Show generic error to user
+    http_response_code(500);
+    die("A database error occurred. Please try again later or contact support if the problem persists.");
+}
+
+/**
+ * Get user-friendly error message
+ * Logs detailed error, returns generic message
+ *
+ * @param Exception $e The exception
+ * @return string Generic error message for display
+ */
+function getUserFriendlyError($e) {
+    // Log detailed error for administrators
+    error_log("Application error: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
+
+    // Return generic message
+    return "An error occurred while processing your request. Please try again.";
+}
+
+/**
+ * Sanitize CSV value to prevent formula injection
+ * Prevents CSV injection attacks when opening in Excel/LibreOffice
+ *
+ * @param mixed $value The value to sanitize
+ * @return string Sanitized value safe for CSV export
+ */
+function sanitizeCSVValue($value) {
+    if ($value === null) {
+        return '';
+    }
+
+    $value = (string)$value;
+
+    // If value starts with dangerous characters, prepend single quote
+    // Excel/LibreOffice/Google Sheets treat leading single quote as text indicator
+    // Dangerous characters: = + - @ \t \r (formula injection characters)
+    if (preg_match('/^[=+\-@\t\r]/', $value)) {
+        return "'" . $value;
+    }
+
+    return $value;
+}

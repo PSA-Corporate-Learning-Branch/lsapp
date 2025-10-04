@@ -24,7 +24,7 @@ try {
         exit();
     }
 } catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+    handleDatabaseError($e);
 }
 
 // Initialize email history table
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception("Message content is required");
         }
         
-        if (!filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
+        if (!validateEmail($fromEmail)) {
             throw new Exception("Invalid sender email address");
         }
         
@@ -194,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
     } catch (Exception $e) {
-        $message = "Error: " . $e->getMessage();
+        $message = getUserFriendlyError($e);
         $messageType = 'error';
     }
 }
