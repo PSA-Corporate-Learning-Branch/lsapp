@@ -281,68 +281,122 @@ if (rand(1, 100) === 1) {
 
 ## HIGH Severity Issues
 
-### 5. Information Disclosure via Detailed Error Messages
+### 5. Information Disclosure via Detailed Error Messages - FIXED ✅
 **Files:** Multiple files
 **Severity:** HIGH
+**Status:** ✅ **RESOLVED**
 
-**Examples:**
+**What Was Fixed:**
+
+Detailed database error messages were being displayed to users, revealing sensitive information about the system.
+
+**Examples of Vulnerable Code (Before):**
 ```php
 // campaign_monitor.php:43
 die("Database connection failed: " . $e->getMessage());
+// Output: "SQLITE_CANTOPEN: unable to open database file /var/www/html/lsapp/data/subscriptions.db"
 
 // newsletter_edit.php:150
 $message = "Error: " . $e->getMessage();
-
-// manage_subscriptions.php:86
-die("Database initialization failed: " . $e->getMessage() . "\n");
-
-// sync_subscriptions.php:26
-die("Database connection failed: " . $e->getMessage());
+// Output: "Error: Invalid API credentials for form abc123 at line 245"
 ```
 
-**Information Exposed:**
+**Information That Was Being Exposed:**
 - Database file paths and structure
 - SQL query syntax and table names
 - PHP version and configuration
 - Internal application logic
 - File system structure
+- API credentials and endpoints
 
 **Impact:**
-- Aids attackers in reconnaissance
-- Reveals vulnerable components
-- Exposes security mechanisms
-- Facilitates targeted attacks
+- Aided attackers in reconnaissance
+- Revealed vulnerable components
+- Exposed security mechanisms
+- Facilitated targeted attacks
 
-**Recommended Fix:**
+**Solution Implemented:**
+
+Created centralized error handling functions in `inc/lsapp.php`:
+
 ```php
-// Development/Debug mode check
-$isDebugMode = (getenv('APP_ENV') === 'development');
+/**
+ * Handle database connection errors securely
+ * Logs detailed error, shows generic message to user
+ */
+function handleDatabaseError($e) {
+    // Log detailed error for administrators
+    error_log("Database error: " . $e->getMessage() .
+              " in " . $e->getFile() .
+              " on line " . $e->getLine());
 
-try {
-    $db = new PDO("sqlite:../data/subscriptions.db");
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    // Log full error details
-    error_log("Database error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
-
-    // Show different messages based on environment
-    if ($isDebugMode) {
-        die("Database error: " . $e->getMessage());
-    } else {
-        http_response_code(500);
-        die("A database error occurred. Please contact support or try again later.");
-    }
+    // Show generic error to user
+    http_response_code(500);
+    die("A database error occurred. Please try again later or contact support if the problem persists.");
 }
 
-// For user-facing errors
-try {
-    // ... operation
-} catch (Exception $e) {
-    error_log("Operation failed: " . $e->getMessage());
-    $message = "An error occurred. Please try again.";
-    $messageType = 'error';
+/**
+ * Get user-friendly error message
+ * Logs detailed error, returns generic message
+ */
+function getUserFriendlyError($e) {
+    // Log detailed error for administrators
+    error_log("Application error: " . $e->getMessage() .
+              " in " . $e->getFile() .
+              " on line " . $e->getLine());
+
+    // Return generic message
+    return "An error occurred while processing your request. Please try again.";
 }
 ```
+
+**Fixed in All Web-Facing Files:**
+
+Database Connection Errors:
+- ✅ `index.php` - Uses `handleDatabaseError()`
+- ✅ `newsletter_dashboard.php` - Uses `handleDatabaseError()`
+- ✅ `newsletter_edit.php` - Uses `handleDatabaseError()`
+- ✅ `send_newsletter.php` - Uses `handleDatabaseError()`
+- ✅ `import_csv.php` - Uses `handleDatabaseError()`
+- ✅ `sync_subscriptions.php` - Uses `handleDatabaseError()`
+- ✅ `campaign_monitor.php` - Uses `handleDatabaseError()`
+
+Application Errors:
+- ✅ All exception handlers use `getUserFriendlyError()`
+- ✅ Detailed errors logged server-side only
+- ✅ Generic messages displayed to users
+
+**After Fix:**
+```php
+// Database errors
+} catch (PDOException $e) {
+    handleDatabaseError($e);
+    // Logs: "Database error: SQLITE_CANTOPEN: unable to open database file..."
+    // Shows: "A database error occurred. Please try again later..."
+}
+
+// Application errors
+} catch (Exception $e) {
+    $message = getUserFriendlyError($e);
+    // Logs: "Application error: Invalid email format in /path/to/file.php on line 123"
+    // Shows: "An error occurred while processing your request. Please try again."
+}
+```
+
+**Security Improvements:**
+- ❌ Database paths - Hidden from users
+- ❌ SQL errors - Not disclosed
+- ❌ File paths - Not revealed
+- ❌ Stack traces - Only in logs
+- ✅ Detailed errors - Logged for admins
+- ✅ Generic messages - Shown to users
+- ✅ Professional UX - Clear next steps
+
+**Attack Prevention:**
+- Attackers can no longer enumerate database structure
+- File system layout not revealed via errors
+- PHP version not disclosed
+- API endpoints not exposed through error messages
 
 ---
 
@@ -1115,67 +1169,82 @@ if (!isAdmin()) {
 
 | Severity | Count | Priority | Status |
 |----------|-------|----------|--------|
-| **CRITICAL** | 3 | Immediate | ✅ All Fixed |
-| **HIGH** | 5 | Urgent | 🔄 In Progress |
+| **CRITICAL** | 3 | Immediate | ✅ **All Fixed** |
+| **HIGH** | 5 | Urgent | ✅ **1 Fixed**, 4 Remaining |
 | **MEDIUM** | 5 | Short-term | Pending |
 | **LOW** | 3 | Long-term | Pending |
 | **FALSE POSITIVE** | 1 | N/A | ✅ Verified Secure |
 | **TOTAL** | **17** | | |
 
-### Fixed Issues:
-- ✅ **Critical #1:** Command Injection (sync_subscriptions.php) - Fixed with `proc_open()`
-- ✅ **Critical #2:** Missing CSRF Protection - Implemented across all forms
-- ✅ **Critical #3:** SQL Injection via filters - Input validation & whitelist added
-- ✅ **False Positive #4:** Email tracking endpoint - Verified as secure by design
+### Issues Fixed (4 Critical + 1 High = 5 Total):
+
+**CRITICAL Issues - All Fixed:**
+- ✅ **#1 Command Injection** (sync_subscriptions.php) - Fixed with `proc_open()` array arguments
+- ✅ **#2 Missing CSRF Protection** - Implemented token generation, validation across all 6 POST handlers
+- ✅ **#3 SQL Injection** (newsletter_dashboard.php) - Added whitelist validation & input sanitization
+
+**HIGH Issues:**
+- ✅ **#5 Information Disclosure** - Centralized error handling with logging, generic user messages
+- ⏭️ **#6 CSV Injection** - Pending
+- ⏭️ **#7 Insecure File Upload** - Pending
+- ⏭️ **#8 Weak Encryption** - Pending
+- ⏭️ **#9 Insufficient Email Validation** - Pending
+
+**FALSE POSITIVES:**
+- ✅ **#4 Email Tracking Endpoint** - Verified as secure by design (unauthenticated by necessity)
 
 ---
 
 ## Priority Remediation Plan
 
-### Immediate Actions (Critical - Within 24 hours):
+### ✅ Completed - Immediate Actions (Critical):
 
-1. **Add CSRF protection** to all POST forms
-   - Generate tokens in session
-   - Validate on all state-changing operations
-   - Impact: Prevents unauthorized actions
+1. ✅ **CSRF protection added** to all POST forms
+   - ✓ Generated tokens in session
+   - ✓ Validated on all state-changing operations
+   - ✓ Impact: Prevents unauthorized actions
+   - **Status:** Implemented in 6 files
 
-2. **Fix command injection** in sync_subscriptions.php
-   - Replace `shell_exec()` with `proc_open()`
-   - Remove hardcoded paths
-   - Impact: Prevents server compromise
+2. ✅ **Command injection fixed** in sync_subscriptions.php
+   - ✓ Replaced `shell_exec()` with `proc_open()`
+   - ✓ Removed hardcoded paths
+   - ✓ Impact: Prevents server compromise
+   - **Status:** Fixed with array arguments
 
-3. **Sanitize CSV exports** against formula injection
+3. ✅ **SQL Injection fixed** in newsletter_dashboard.php
+   - ✓ Added whitelist validation for status filter
+   - ✓ Sanitized search query input
+   - ✓ Impact: Prevents data exfiltration
+   - **Status:** Input validation implemented
+
+4. ✅ **Error message disclosure fixed**
+   - ✓ Errors logged server-side only
+   - ✓ Generic messages shown to users
+   - ✓ Impact: Reduces information disclosure
+   - **Status:** Centralized error handling in 7 files
+
+### 🔄 In Progress - Urgent Actions (High - Within 1 week):
+
+5. **Sanitize CSV exports** against formula injection
    - Add `sanitizeCSVValue()` function
    - Apply to all CSV exports
    - Impact: Prevents RCE on admin machines
 
-4. **Remove detailed error messages**
-   - Log errors server-side only
-   - Show generic messages to users
-   - Impact: Reduces information disclosure
+6. **Improve file upload security**
+   - Add content validation
+   - Check for malicious content
+   - Impact: Prevents code execution
 
-### Urgent Actions (High - Within 1 week):
-
-5. **Move encryption key** to environment variables
+7. **Move encryption key** to environment variables
    - Remove filesystem key storage
    - Use `getenv('CHEFS_ENCRYPTION_KEY')`
    - Rotate existing keys
    - Impact: Protects API credentials
 
-6. **Enforce HTTPS** for all API calls
-   - Validate URLs start with https://
-   - Enable SSL verification
-   - Impact: Prevents credential theft
-
-7. **Improve email validation**
+8. **Improve email validation**
    - Implement comprehensive validation function
    - Add length and format checks
    - Impact: Prevents injection attacks
-
-8. **Secure file uploads**
-   - Add content validation
-   - Check for malicious content
-   - Impact: Prevents code execution
 
 ### Short-term Actions (Medium - Within 1 month):
 
