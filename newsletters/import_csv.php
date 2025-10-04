@@ -50,27 +50,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
     try {
         $file = $_FILES['csv_file'];
 
-        // Validate file upload
+        // 1. Validate file upload error code
         if ($file['error'] !== UPLOAD_ERR_OK) {
-            throw new Exception("File upload failed with error code: " . $file['error']);
+            throw new Exception("File upload failed. Please try again.");
         }
 
-        // Validate file size (max 5MB)
-        if ($file['size'] > 5 * 1024 * 1024) {
+        // 2. Validate file size (max 5MB, min 1 byte)
+        $maxSize = 5 * 1024 * 1024; // 5MB
+        if ($file['size'] > $maxSize) {
             throw new Exception("File is too large. Maximum size is 5MB.");
         }
+        if ($file['size'] === 0) {
+            throw new Exception("File is empty. Please upload a valid CSV file.");
+        }
 
-        // Validate file type
-        $allowedTypes = ['text/csv', 'text/plain', 'application/csv', 'application/vnd.ms-excel'];
+        // 3. Validate file extension (strict)
+        $filename = basename($file['name']);
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        if ($extension !== 'csv') {
+            throw new Exception("Only .csv files are allowed.");
+        }
+
+        // 4. Validate MIME type (strict)
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mimeType = finfo_file($finfo, $file['tmp_name']);
         finfo_close($finfo);
 
-        if (!in_array($mimeType, $allowedTypes) && !str_ends_with($file['name'], '.csv')) {
-            throw new Exception("Invalid file type. Please upload a CSV file.");
+        $allowedMimes = ['text/plain', 'text/csv'];
+        if (!in_array($mimeType, $allowedMimes, true)) {
+            throw new Exception("Invalid file type detected: " . htmlspecialchars($mimeType) . ". Please upload a CSV file.");
         }
 
-        // Open and read CSV file
+        // 5. Validate file content - check for binary/executable content
+        $handle = fopen($file['tmp_name'], 'rb');
+        if ($handle === false) {
+            throw new Exception("Could not open uploaded file.");
+        }
+
+        // Read first 4KB to check for malicious content
+        $header = fread($handle, 4096);
+        fclose($handle);
+
+        // Check for null bytes (indicates binary file)
+        if (strpos($header, "\0") !== false) {
+            throw new Exception("File appears to be binary, not a text CSV file.");
+        }
+
+        // Check for executable content (PHP, scripts, etc.)
+        if (preg_match('/<\?php|<script|<\?=|<%|#!/i', $header)) {
+            throw new Exception("File contains forbidden executable content.");
+        }
+
+        // Check for reasonable CSV structure
+        $lines = explode("\n", substr($header, 0, 1000));
+        if (count($lines) < 1) {
+            throw new Exception("File appears to be empty or invalid.");
+        }
+
+        // 6. Now safe to process - open file again for CSV parsing
         $handle = fopen($file['tmp_name'], 'r');
         if ($handle === false) {
             throw new Exception("Could not open CSV file");

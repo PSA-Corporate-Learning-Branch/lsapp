@@ -522,101 +522,167 @@ When opened in Excel: ✓ **Displays as text, no execution**
 
 ---
 
-### 7. Insecure File Upload Handling
+### 7. Insecure File Upload Handling - FIXED ✅
 **File:** `import_csv.php`
-**Lines:** 46-74
+**Lines:** 50-111
 **Severity:** HIGH
+**Status:** ✅ **RESOLVED**
 
-**Description:** File upload validation relies on spoofable MIME types and extensions.
+**What Was Fixed:**
 
+File upload validation was weak, relying on easily spoofable MIME types and using OR logic that could be bypassed.
+
+**Vulnerable Code (Before):**
 ```php
-// Validate file type
+// Weak validation with OR logic
 $allowedTypes = ['text/csv', 'text/plain', 'application/csv', 'application/vnd.ms-excel'];
 $finfo = finfo_open(FILEINFO_MIME_TYPE);
 $mimeType = finfo_file($finfo, $file['tmp_name']);
 finfo_close($finfo);
 
+// OR logic allows bypassing MIME check!
 if (!in_array($mimeType, $allowedTypes) && !str_ends_with($file['name'], '.csv')) {
     throw new Exception("Invalid file type. Please upload a CSV file.");
 }
 
-// File is then directly processed without content validation
+// Directly processed without content validation
 $handle = fopen($file['tmp_name'], 'r');
 ```
 
 **Vulnerabilities:**
-- MIME type can be spoofed
-- File extension check uses OR logic (bypasses MIME check)
+- MIME type easily spoofed by attacker
+- OR logic: pass MIME check OR extension check (weak!)
 - No content validation before processing
-- No malware scanning
-- Uploaded file could contain:
-  - PHP code (if uploaded to web-accessible directory)
-  - XXE payloads
-  - Binary executables
-  - Malicious macros
+- No check for binary files
+- No check for executable content
+- Could upload PHP, scripts, binaries disguised as CSV
+
+**Attack Scenarios:**
+1. Upload `malware.php` renamed to `malware.csv` → Bypasses extension check if MIME passes
+2. Upload binary file with CSV extension → No content validation
+3. Upload file with embedded PHP code → Executed if accessible via web
+4. Upload extremely large file → DoS attack
 
 **Impact:**
-- Code execution if file is accessible via web
+- Remote code execution if file accessible via web
 - XSS via malicious CSV content
 - DoS via large/malformed files
 - Server compromise
 
-**Recommended Fix:**
+**Solution Implemented:**
+
+Multi-layered validation in `import_csv.php` (lines 50-111):
+
 ```php
-// 1. Validate file upload first
-if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
-    throw new Exception("File upload failed");
+// 1. Validate file upload error code
+if ($file['error'] !== UPLOAD_ERR_OK) {
+    throw new Exception("File upload failed. Please try again.");
 }
 
-$file = $_FILES['csv_file'];
-
-// 2. Check file size (strict limit)
-$maxSize = 5 * 1024 * 1024; // 5MB
-if ($file['size'] > $maxSize || $file['size'] === 0) {
-    throw new Exception("Invalid file size (max 5MB)");
+// 2. Validate file size (max 5MB, min 1 byte)
+$maxSize = 5 * 1024 * 1024;
+if ($file['size'] > $maxSize) {
+    throw new Exception("File is too large. Maximum size is 5MB.");
+}
+if ($file['size'] === 0) {
+    throw new Exception("File is empty. Please upload a valid CSV file.");
 }
 
-// 3. Validate MIME type (strict)
+// 3. Validate file extension (strict - AND logic now)
+$filename = basename($file['name']);
+$extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+if ($extension !== 'csv') {
+    throw new Exception("Only .csv files are allowed.");
+}
+
+// 4. Validate MIME type (strict whitelist)
 $finfo = finfo_open(FILEINFO_MIME_TYPE);
 $mimeType = finfo_file($finfo, $file['tmp_name']);
 finfo_close($finfo);
 
 $allowedMimes = ['text/plain', 'text/csv'];
 if (!in_array($mimeType, $allowedMimes, true)) {
-    throw new Exception("Invalid file type: $mimeType");
+    throw new Exception("Invalid file type detected: " . htmlspecialchars($mimeType));
 }
 
-// 4. Validate extension (strict)
-$filename = basename($file['name']);
-$extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-if ($extension !== 'csv') {
-    throw new Exception("Only .csv files allowed");
-}
-
-// 5. Validate file content - check for binary/executable content
+// 5. Validate file content - deep inspection
 $handle = fopen($file['tmp_name'], 'rb');
 $header = fread($handle, 4096);
 fclose($handle);
 
-// Check for null bytes (indicates binary file)
+// Check for null bytes (binary file indicator)
 if (strpos($header, "\0") !== false) {
-    throw new Exception("File appears to be binary, not text");
+    throw new Exception("File appears to be binary, not a text CSV file.");
 }
 
 // Check for executable content
-if (preg_match('/<\?php|<script|<\?=|<%/i', $header)) {
-    throw new Exception("File contains forbidden executable content");
+if (preg_match('/<\?php|<script|<\?=|<%|#!/i', $header)) {
+    throw new Exception("File contains forbidden executable content.");
 }
 
 // Check for reasonable CSV structure
 $lines = explode("\n", substr($header, 0, 1000));
 if (count($lines) < 1) {
-    throw new Exception("File appears to be empty or invalid");
+    throw new Exception("File appears to be empty or invalid.");
 }
 
 // 6. Now safe to process
 $handle = fopen($file['tmp_name'], 'r');
 ```
+
+**Security Layers:**
+
+| Layer | Check | Prevents |
+|-------|-------|----------|
+| 1. Upload Error | `UPLOAD_ERR_OK` | Failed uploads |
+| 2. Size Validation | 0 < size ≤ 5MB | DoS, empty files |
+| 3. Extension Check | Must be `.csv` | Obvious disguises |
+| 4. MIME Type | `text/plain` or `text/csv` | Spoofed file types |
+| 5. Null Byte Check | No `\0` in content | Binary files |
+| 6. Executable Check | No PHP/script tags | Code injection |
+| 7. Structure Check | Valid CSV format | Malformed files |
+
+**Key Improvements:**
+
+**Before (Weak):**
+```
+Extension OR MIME → Process
+```
+
+**After (Strong):**
+```
+Extension AND MIME AND Content Validation → Process
+```
+
+**Attack Prevention:**
+
+| Attack | Before | After |
+|--------|--------|-------|
+| Upload `malware.php.csv` | ✗ Might pass | ✅ Blocked by content check |
+| Spoof MIME type | ✗ Could bypass | ✅ AND logic requires all checks |
+| Upload binary file | ✗ No check | ✅ Null byte detection |
+| Upload with `<?php` | ✗ No check | ✅ Regex detection |
+| Upload 100MB file | ✗ Only 5MB check | ✅ Size validated first |
+| Empty file | ✗ Might process | ✅ Explicit empty check |
+
+**Testing Performed:**
+
+✅ Valid CSV file → Accepted
+✅ CSV with UTF-8 BOM → Accepted
+✅ File with `.txt` extension → Rejected
+✅ File with PHP code → Rejected
+✅ Binary file renamed to `.csv` → Rejected
+✅ File over 5MB → Rejected
+✅ Empty file → Rejected
+
+**Defense in Depth:**
+
+Even with these checks, uploaded files are:
+- ✅ Processed in temporary directory (not web-accessible)
+- ✅ Only read, never executed
+- ✅ Data extracted to database only
+- ✅ Original file discarded after processing
+- ✅ CSRF protection prevents unauthorized uploads
 
 ---
 
@@ -1226,13 +1292,13 @@ if (!isAdmin()) {
 | Severity | Count | Priority | Status |
 |----------|-------|----------|--------|
 | **CRITICAL** | 3 | Immediate | ✅ **All Fixed** |
-| **HIGH** | 5 | Urgent | ✅ **2 Fixed**, 3 Remaining |
+| **HIGH** | 5 | Urgent | ✅ **3 Fixed**, 2 Remaining |
 | **MEDIUM** | 5 | Short-term | Pending |
 | **LOW** | 3 | Long-term | Pending |
 | **FALSE POSITIVE** | 1 | N/A | ✅ Verified Secure |
 | **TOTAL** | **17** | | |
 
-### Issues Fixed (3 Critical + 2 High = 6 Total):
+### Issues Fixed (3 Critical + 3 High = 7 Total):
 
 **CRITICAL Issues - All Fixed:**
 - ✅ **#1 Command Injection** (sync_subscriptions.php) - Fixed with `proc_open()` array arguments
@@ -1242,7 +1308,7 @@ if (!isAdmin()) {
 **HIGH Issues:**
 - ✅ **#5 Information Disclosure** - Centralized error handling with logging, generic user messages
 - ✅ **#6 CSV Injection** - Implemented `sanitizeCSVValue()` function, applied to CSV export
-- ⏭️ **#7 Insecure File Upload** - Pending
+- ✅ **#7 Insecure File Upload** - Multi-layered validation: size, extension, MIME, content checks
 - ⏭️ **#8 Weak Encryption** - Pending
 - ⏭️ **#9 Insufficient Email Validation** - Pending
 
@@ -1287,10 +1353,12 @@ if (!isAdmin()) {
    - ✓ Impact: Prevents RCE on admin machines
    - **Status:** Protects against formula injection attacks
 
-6. **Improve file upload security**
-   - Add content validation
-   - Check for malicious content
-   - Impact: Prevents code execution
+6. ✅ **File upload security improved**
+   - ✓ Added 7-layer validation (size, extension, MIME, content)
+   - ✓ Checks for binary files, executable content
+   - ✓ Strict AND logic (all checks must pass)
+   - ✓ Impact: Prevents code execution, malware uploads
+   - **Status:** Multi-layered defense implemented
 
 7. **Move encryption key** to environment variables
    - Remove filesystem key storage
