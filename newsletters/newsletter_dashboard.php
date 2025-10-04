@@ -33,6 +33,26 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     $exportStatusFilter = $_GET['status'] ?? 'active';
     $exportSearchQuery = $_GET['search'] ?? '';
 
+    // Validate status filter against whitelist
+    $allowedStatuses = ['active', 'unsubscribed', 'all'];
+    if (!in_array($exportStatusFilter, $allowedStatuses, true)) {
+        $exportStatusFilter = 'active'; // Default to safe value
+    }
+
+    // Sanitize and validate search query
+    if (!empty($exportSearchQuery)) {
+        // Remove any characters that aren't valid for email addresses
+        $exportSearchQuery = preg_replace('/[^a-zA-Z0-9@._\-+]/', '', $exportSearchQuery);
+
+        // Limit length to prevent abuse
+        if (strlen($exportSearchQuery) > 100) {
+            $exportSearchQuery = substr($exportSearchQuery, 0, 100);
+        }
+
+        // Escape LIKE wildcards to prevent SQL wildcard injection
+        $exportSearchQuery = str_replace(['%', '_'], ['\\%', '\\_'], $exportSearchQuery);
+    }
+
     // Build export query
     $exportQuery = "SELECT email, status, created_at, updated_at FROM subscriptions";
     $exportParams = [];
@@ -47,7 +67,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     }
 
     if (!empty($exportSearchQuery)) {
-        $exportConditions[] = "email LIKE :search";
+        $exportConditions[] = "email LIKE :search ESCAPE '\\'";
         $exportParams[':search'] = "%$exportSearchQuery%";
     }
 
@@ -233,9 +253,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Get filter from query string
+// Get filter from query string with validation
 $statusFilter = $_GET['status'] ?? 'active';
 $searchQuery = $_GET['search'] ?? '';
+
+// Validate status filter against whitelist
+$allowedStatuses = ['active', 'unsubscribed', 'all'];
+if (!in_array($statusFilter, $allowedStatuses, true)) {
+    $statusFilter = 'active'; // Default to safe value
+}
+
+// Sanitize and validate search query
+if (!empty($searchQuery)) {
+    // Remove any characters that aren't valid for email addresses
+    $searchQuery = preg_replace('/[^a-zA-Z0-9@._\-+]/', '', $searchQuery);
+
+    // Limit length to prevent abuse
+    if (strlen($searchQuery) > 100) {
+        $searchQuery = substr($searchQuery, 0, 100);
+    }
+
+    // Escape LIKE wildcards to prevent SQL wildcard injection
+    $searchQuery = str_replace(['%', '_'], ['\\%', '\\_'], $searchQuery);
+}
 
 // Build query based on filters
 $query = "SELECT email, status, created_at, updated_at FROM subscriptions";
@@ -252,7 +292,7 @@ if ($statusFilter !== 'all') {
 }
 
 if (!empty($searchQuery)) {
-    $conditions[] = "email LIKE :search";
+    $conditions[] = "email LIKE :search ESCAPE '\\'";
     $params[':search'] = "%$searchQuery%";
 }
 
