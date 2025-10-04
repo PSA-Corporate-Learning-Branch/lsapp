@@ -59,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $formId = !empty($_POST['form_id']) ? trim($_POST['form_id']) : null;
         $apiUsername = !empty($_POST['api_username']) ? trim($_POST['api_username']) : null;
         $apiPassword = !empty($_POST['api_password']) ? trim($_POST['api_password']) : null;
+        $trackingUrl = !empty($_POST['tracking_url']) ? trim($_POST['tracking_url']) : null;
 
         // Encrypt the password before storing (only if provided)
         $encryptedPassword = null;
@@ -90,12 +91,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $db->prepare("
                 UPDATE newsletters
                 SET name = ?, description = ?, form_id = ?, api_username = ?,
-                    api_password = ?, api_url = ?, updated_at = ?
+                    api_password = ?, api_url = ?, tracking_url = ?, updated_at = ?
                 WHERE id = ?
             ");
             $stmt->execute([
                 $name, $description, $formId, $apiUsername,
-                $encryptedPassword, $apiUrl, $now, $newsletterId
+                $encryptedPassword, $apiUrl, $trackingUrl, $now, $newsletterId
             ]);
             $message = "Newsletter updated successfully";
         } else {
@@ -110,12 +111,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Insert new
             $stmt = $db->prepare("
-                INSERT INTO newsletters (name, description, form_id, api_username, api_password, api_url, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO newsletters (name, description, form_id, api_username, api_password, api_url, tracking_url, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $name, $description, $formId, $apiUsername,
-                $encryptedPassword, $apiUrl, $now, $now
+                $encryptedPassword, $apiUrl, $trackingUrl, $now, $now
             ]);
             $newsletterId = $db->lastInsertId();
             $message = "Newsletter created successfully";
@@ -308,11 +309,26 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         <div class="mb-3">
                             <label for="api_url" class="form-label">API Base URL</label>
-                            <input type="url" class="form-control font-monospace" id="api_url" name="api_url" 
+                            <input type="url" class="form-control font-monospace" id="api_url" name="api_url"
                                    value="<?php echo htmlspecialchars($_POST['api_url'] ?? $newsletter['api_url'] ?? 'https://submit.digital.gov.bc.ca/app/api/v1/forms'); ?>">
                             <div class="form-text">Leave default unless using a different API endpoint</div>
                         </div>
-                        
+
+                        <hr class="my-4">
+                        <h5>Email Tracking Configuration <span class="text-secondary small">(Optional)</span></h5>
+                        <p class="text-muted small">Tracking pixels are automatically added to sent emails to track opens.</p>
+
+                        <div class="mb-3">
+                            <label for="tracking_url" class="form-label">Tracking Pixel URL</label>
+                            <input type="url" class="form-control font-monospace" id="tracking_url" name="tracking_url"
+                                   value="<?php echo htmlspecialchars($_POST['tracking_url'] ?? $newsletter['tracking_url'] ?? 'https://learn.bcpublicservice.gov.bc.ca/newsletter-tracker/track.php'); ?>"
+                                   placeholder="https://your-server.com/track.php">
+                            <div class="form-text">
+                                Base URL for the tracking pixel (track.php). Leave blank to disable tracking.
+                                <br><small class="text-warning">⚠️ Note: Most email clients block images by default, so actual open rates are typically 20-40% higher than tracked rates.</small>
+                            </div>
+                        </div>
+
                         <!-- Live region for form feedback -->
                         <div id="form-feedback" aria-live="polite" class="visually-hidden"></div>
                         

@@ -142,21 +142,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 // Queue emails for background processing instead of sending directly
                 $db->beginTransaction();
-                
+
                 try {
                     // Insert all emails into the queue
                     $queueStmt = $db->prepare("
                         INSERT INTO email_queue (campaign_id, recipient_email, subject, html_body, text_body, from_email, status, created_at)
                         VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)
                     ");
-                    
+
                     $queuedCount = 0;
                     foreach ($activeSubscribers as $subscriber) {
+                        // Inject tracking pixel for this recipient
+                        $htmlBodyWithTracking = injectTrackingPixel(
+                            $htmlBody,
+                            $newsletter['tracking_url'] ?? null,
+                            $subscriber,
+                            $newsletterId,
+                            $campaignId
+                        );
+
                         $queueStmt->execute([
                             $campaignId,
                             $subscriber,
                             $subject,
-                            $htmlBody,
+                            $htmlBodyWithTracking,
                             $textBody,
                             $fromEmail,
                             $now
@@ -518,7 +527,7 @@ try {
                                     </small>
                                 </div>
                                 <div class="text-end">
-                                    <?php 
+                                    <?php
                                     $statusText = str_replace('_', ' ', $campaign['processing_status'] ?? $campaign['status']);
                                     $badgeClass = 'badge ';
                                     switch($campaign['processing_status'] ?? $campaign['status']) {
@@ -548,12 +557,16 @@ try {
                                     <span class="<?php echo $badgeClass; ?> mb-2">
                                         <?php echo ucfirst($statusText); ?>
                                     </span>
-                                    
+                                    <br>
                                     <?php if (in_array($campaign['processing_status'], ['pending', 'processing', 'paused'])): ?>
-                                        <br>
-                                        <a href="campaign_monitor.php?campaign_id=<?php echo $campaign['id']; ?>" 
+                                        <a href="campaign_monitor.php?campaign_id=<?php echo $campaign['id']; ?>"
+                                           class="btn btn-sm btn-outline-warning mt-1">
+                                            📊 Monitor
+                                        </a>
+                                    <?php else: ?>
+                                        <a href="campaign_dashboard.php?campaign_id=<?php echo $campaign['id']; ?>"
                                            class="btn btn-sm btn-outline-primary mt-1">
-                                            📊 View
+                                            📊 View Stats
                                         </a>
                                     <?php endif; ?>
                                 </div>
