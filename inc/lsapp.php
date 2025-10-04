@@ -2467,3 +2467,27 @@ function getUserFriendlyError($e) {
     // Return generic message
     return "An error occurred while processing your request. Please try again.";
 }
+
+/**
+ * Sanitize CSV value to prevent formula injection
+ * Prevents CSV injection attacks when opening in Excel/LibreOffice
+ *
+ * @param mixed $value The value to sanitize
+ * @return string Sanitized value safe for CSV export
+ */
+function sanitizeCSVValue($value) {
+    if ($value === null) {
+        return '';
+    }
+
+    $value = (string)$value;
+
+    // If value starts with dangerous characters, prepend single quote
+    // Excel/LibreOffice/Google Sheets treat leading single quote as text indicator
+    // Dangerous characters: = + - @ \t \r (formula injection characters)
+    if (preg_match('/^[=+\-@\t\r]/', $value)) {
+        return "'" . $value;
+    }
+
+    return $value;
+}

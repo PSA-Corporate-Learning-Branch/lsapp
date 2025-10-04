@@ -92,13 +92,13 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     // Add header row
     fputcsv($output, ['Email', 'Status', 'Subscribed Date', 'Last Updated']);
 
-    // Add data rows
+    // Add data rows with CSV injection protection
     foreach ($exportData as $row) {
         fputcsv($output, [
-            $row['email'],
-            $row['status'],
-            $row['created_at'],
-            $row['updated_at']
+            sanitizeCSVValue($row['email']),
+            sanitizeCSVValue($row['status']),
+            sanitizeCSVValue($row['created_at']),
+            sanitizeCSVValue($row['updated_at'])
         ]);
     }
 
