@@ -11,6 +11,16 @@ define('SLASH', DIRECTORY_SEPARATOR);
 $docroot = $_SERVER['DOCUMENT_ROOT'] . '/lsapp//';
 define('BASE_DIR', $docroot);
 
+// Initialize session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Generate CSRF token if not present
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 function build_path(...$segments) {
     return implode(SLASH, $segments);
 }
@@ -2386,4 +2396,44 @@ function truncateStringByWords($string, $wordLimit, $ellipsis = true) {
         return $truncated . ($ellipsis ? '...' : '');
     }
     return $string;
+}
+
+/**
+ * Get CSRF token for forms
+ * @return string The CSRF token
+ */
+function getCsrfToken() {
+    return $_SESSION['csrf_token'] ?? '';
+}
+
+/**
+ * Output CSRF token hidden input field
+ * Use this in all forms
+ */
+function csrfField() {
+    $token = htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8');
+    echo '<input type="hidden" name="csrf_token" value="' . $token . '">';
+}
+
+/**
+ * Validate CSRF token from POST request
+ * @return bool True if valid, false otherwise
+ */
+function validateCsrfToken() {
+    if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token'])) {
+        return false;
+    }
+
+    return hash_equals($_SESSION['csrf_token'], $_POST['csrf_token']);
+}
+
+/**
+ * Require valid CSRF token or die
+ * Call this at the start of any POST request handler
+ */
+function requireCsrfToken() {
+    if (!validateCsrfToken()) {
+        http_response_code(403);
+        die('CSRF token validation failed. Please refresh the page and try again.');
+    }
 }

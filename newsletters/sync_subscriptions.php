@@ -33,6 +33,9 @@ $syncSuccess = false;
 $errorMessage = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'sync') {
+    // Validate CSRF token
+    requireCsrfToken();
+
     $syncRequested = true;
     
     // Simple rate limiting check
@@ -270,6 +273,7 @@ try {
                     </p>
                     
                     <form method="post" action="" onsubmit="document.getElementById('syncBtn').disabled = true; document.getElementById('syncBtn').innerHTML = 'Syncing... Please wait';">
+                        <?php csrfField(); ?>
                         <input type="hidden" name="action" value="sync">
                         <input type="hidden" name="newsletter_id" value="<?php echo $newsletterId; ?>">
                         <button type="submit" id="syncBtn" class="btn btn-primary btn-lg">
