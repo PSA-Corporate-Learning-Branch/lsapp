@@ -36,11 +36,34 @@ if ($newsletterId !== null && (!is_numeric($newsletterId) || $newsletterId < 1))
     $newsletterId = null;
 }
 
-// Sanitize email if provided (basic validation)
+// Sanitize and validate email if provided
 if ($email !== null) {
-    $email = filter_var($email, FILTER_SANITIZE_EMAIL);
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    // Check for dangerous characters BEFORE trimming
+    if (strpos($email, "\0") !== false ||                 // No null bytes
+        preg_match('/[\x00-\x1F\x7F]/', $email)) {       // No control chars
         $email = null;
+    } else {
+        $email = trim($email);
+
+        // Comprehensive email validation
+        if (strlen($email) > 254 ||                       // RFC max length
+            $email === '' ||                              // Not empty
+            !filter_var($email, FILTER_VALIDATE_EMAIL) || // Basic format
+            substr_count($email, '@') !== 1) {            // Exactly one @
+            $email = null;
+        } else {
+            // Additional checks for valid emails
+            list($local, $domain) = explode('@', $email);
+            if (strlen($local) > 64 || strlen($local) < 1 ||  // Local part length
+                strlen($domain) > 255 || strlen($domain) < 1 || // Domain part length
+                strpos($local, '..') !== false ||              // No consecutive dots
+                strpos($domain, '..') !== false ||
+                $local[0] === '.' ||                           // No leading dot
+                $local[strlen($local) - 1] === '.' ||          // No trailing dot
+                strpos($domain, '.') === false) {              // Domain must have dot
+                $email = null;
+            }
+        }
     }
 }
 

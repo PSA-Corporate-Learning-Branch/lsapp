@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception("Message content is required");
         }
         
-        if (!filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
+        if (!validateEmail($fromEmail)) {
             throw new Exception("Invalid sender email address");
         }
         

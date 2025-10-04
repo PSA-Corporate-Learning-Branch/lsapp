@@ -141,10 +141,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
 
                 if (empty($email)) {
                     $stats['skipped']++;
-                } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                } elseif (!validateEmail($email)) {
                     $stats['invalid']++;
                     if (count($stats['errors']) < 10) {
-                        $stats['errors'][] = "Row $rowNumber: Invalid email '$email'";
+                        $stats['errors'][] = "Row $rowNumber: Invalid email '" . htmlspecialchars($email) . "'";
                     }
                 } else {
                     $email = strtolower($email);
@@ -211,10 +211,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
             }
 
             // Validate email
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            if (!validateEmail($email)) {
                 $stats['invalid']++;
                 if (count($stats['errors']) < 10) {
-                    $stats['errors'][] = "Row $rowNumber: Invalid email '$email'";
+                    $stats['errors'][] = "Row $rowNumber: Invalid email '" . htmlspecialchars($email) . "'";
                 }
                 continue;
             }

@@ -125,8 +125,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (empty($email)) {
                     throw new Exception("Email address is required");
                 }
-                
-                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+
+                if (!validateEmail($email)) {
                     throw new Exception("Invalid email address format");
                 }
                 
