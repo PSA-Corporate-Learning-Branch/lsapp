@@ -527,7 +527,7 @@ try {
                                     </small>
                                 </div>
                                 <div class="text-end">
-                                    <?php 
+                                    <?php
                                     $statusText = str_replace('_', ' ', $campaign['processing_status'] ?? $campaign['status']);
                                     $badgeClass = 'badge ';
                                     switch($campaign['processing_status'] ?? $campaign['status']) {
@@ -557,12 +557,16 @@ try {
                                     <span class="<?php echo $badgeClass; ?> mb-2">
                                         <?php echo ucfirst($statusText); ?>
                                     </span>
-                                    
+                                    <br>
                                     <?php if (in_array($campaign['processing_status'], ['pending', 'processing', 'paused'])): ?>
-                                        <br>
-                                        <a href="campaign_monitor.php?campaign_id=<?php echo $campaign['id']; ?>" 
+                                        <a href="campaign_monitor.php?campaign_id=<?php echo $campaign['id']; ?>"
+                                           class="btn btn-sm btn-outline-warning mt-1">
+                                            📊 Monitor
+                                        </a>
+                                    <?php else: ?>
+                                        <a href="campaign_dashboard.php?campaign_id=<?php echo $campaign['id']; ?>"
                                            class="btn btn-sm btn-outline-primary mt-1">
-                                            📊 View
+                                            📊 View Stats
                                         </a>
                                     <?php endif; ?>
                                 </div>
