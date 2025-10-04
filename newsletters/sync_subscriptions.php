@@ -65,18 +65,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         
         // Run the sync script as a separate process
         $startTime = microtime(true);
-        
+
         try {
-            // Run the sync script as a separate process to avoid database locks
-            $command = "cd " . escapeshellarg(__DIR__) . " && E:\php-8.3.16\php.exe manage_subscriptions.php " . escapeshellarg($newsletterId) . " 2>&1";
-            $syncOutput = shell_exec($command);
-            
-            if ($syncOutput === null) {
-                throw new Exception("Failed to execute sync command");
+            // Use proc_open to execute safely without shell interpretation
+            // This prevents command injection attacks
+            $descriptorspec = [
+                0 => ["pipe", "r"],  // stdin
+                1 => ["pipe", "w"],  // stdout
+                2 => ["pipe", "w"]   // stderr
+            ];
+
+            // Build command array - no shell, direct execution
+            $scriptPath = __DIR__ . '/manage_subscriptions.php';
+            $newsletterIdSafe = (string)(int)$newsletterId;  // Ensure integer
+
+            // Get PHP executable path safely
+            $phpBinary = defined('PHP_BINARY') && PHP_BINARY ? PHP_BINARY : PHP_BINDIR . '/php';
+
+            // Fallback for Windows if needed
+            if (!file_exists($phpBinary)) {
+                $phpBinary = 'E:\php-8.3.16\php.exe';
             }
-            
+
+            $process = proc_open(
+                [$phpBinary, $scriptPath, $newsletterIdSafe],
+                $descriptorspec,
+                $pipes,
+                __DIR__  // Working directory
+            );
+
+            if (!is_resource($process)) {
+                throw new Exception("Failed to start sync process");
+            }
+
+            // Close stdin (not needed)
+            fclose($pipes[0]);
+
+            // Read stdout and stderr
+            $syncOutput = stream_get_contents($pipes[1]);
+            $syncError = stream_get_contents($pipes[2]);
+
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+
+            // Wait for process to finish and get exit code
+            $returnCode = proc_close($process);
+
+            if ($returnCode !== 0) {
+                throw new Exception("Sync process failed with exit code $returnCode" .
+                                  ($syncError ? ": $syncError" : ""));
+            }
+
             $syncSuccess = true;
-            
+
         } catch (Exception $e) {
             $syncOutput = "Error during sync: " . $e->getMessage();
             $syncSuccess = false;
