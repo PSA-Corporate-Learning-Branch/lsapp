@@ -142,21 +142,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 // Queue emails for background processing instead of sending directly
                 $db->beginTransaction();
-                
+
                 try {
                     // Insert all emails into the queue
                     $queueStmt = $db->prepare("
                         INSERT INTO email_queue (campaign_id, recipient_email, subject, html_body, text_body, from_email, status, created_at)
                         VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)
                     ");
-                    
+
                     $queuedCount = 0;
                     foreach ($activeSubscribers as $subscriber) {
+                        // Inject tracking pixel for this recipient
+                        $htmlBodyWithTracking = injectTrackingPixel(
+                            $htmlBody,
+                            $newsletter['tracking_url'] ?? null,
+                            $subscriber,
+                            $newsletterId,
+                            $campaignId
+                        );
+
                         $queueStmt->execute([
                             $campaignId,
                             $subscriber,
                             $subject,
-                            $htmlBody,
+                            $htmlBodyWithTracking,
                             $textBody,
                             $fromEmail,
                             $now
