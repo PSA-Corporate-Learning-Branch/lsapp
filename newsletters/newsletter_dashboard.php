@@ -91,10 +91,13 @@ $message = '';
 $messageType = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Validate CSRF token
+    requireCsrfToken();
+
     if (isset($_POST['action'])) {
         $action = $_POST['action'];
-        
-        try {
+
+        try{
             if ($action === 'add_subscriber') {
                 $email = trim($_POST['email']);
                 
@@ -446,20 +449,23 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
                                         <td>
                                             <?php if ($sub['status'] === 'active'): ?>
                                                 <form method="post" action="" class="d-inline" onsubmit="return confirm('Are you sure you want to unsubscribe <?php echo htmlspecialchars($sub['email']); ?>?')">
+                                                    <?php csrfField(); ?>
                                                     <input type="hidden" name="action" value="unsubscribe">
                                                     <input type="hidden" name="email" value="<?php echo htmlspecialchars($sub['email']); ?>">
                                                     <button type="submit" class="btn btn-outline-secondary btn-sm">Unsubscribe</button>
                                                 </form>
                                             <?php else: ?>
                                                 <form method="post" action="" class="d-inline" onsubmit="return confirm('Are you sure you want to reactivate <?php echo htmlspecialchars($sub['email']); ?>?')">
+                                                    <?php csrfField(); ?>
                                                     <input type="hidden" name="action" value="add_subscriber">
                                                     <input type="hidden" name="email" value="<?php echo htmlspecialchars($sub['email']); ?>">
                                                     <button type="submit" class="btn btn-primary btn-sm">Reactivate</button>
                                                 </form>
                                             <?php endif; ?>
-                                            
+
                                             <?php if ($isAdminUser): ?>
                                                 <form method="post" action="" class="d-inline ms-1" onsubmit="return confirm('⚠️ ADMIN ACTION: Are you sure you want to PERMANENTLY DELETE <?php echo htmlspecialchars($sub['email']); ?> from the database? This cannot be undone.')">
+                                                    <?php csrfField(); ?>
                                                     <input type="hidden" name="action" value="delete">
                                                     <input type="hidden" name="email" value="<?php echo htmlspecialchars($sub['email']); ?>">
                                                     <button type="submit" class="btn btn-outline-danger btn-sm" title="Permanently delete (Admin only)">
@@ -484,6 +490,7 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
                     <div class="col-md-4">
                         <h3 class="h5">Add New Subscriber</h3>
                         <form method="post" action="">
+                            <?php csrfField(); ?>
                             <input type="hidden" name="action" value="add_subscriber">
                             <div class="mb-3">
                                 <label for="add-email" class="form-label">Email Address</label>
@@ -498,6 +505,7 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
                     <div class="col-md-4">
                         <h3 class="h5">Unsubscribe Email</h3>
                         <form method="post" action="" onsubmit="return confirm('Are you sure you want to unsubscribe this email address?')">
+                            <?php csrfField(); ?>
                             <input type="hidden" name="action" value="unsubscribe">
                             <div class="mb-3">
                                 <label for="unsubscribe-email" class="form-label">Email Address</label>

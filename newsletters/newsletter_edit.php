@@ -50,6 +50,9 @@ $messageType = '';
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Validate CSRF token
+    requireCsrfToken();
+
     try {
         $name = trim($_POST['name']);
         $description = trim($_POST['description']);
@@ -252,6 +255,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="card">
                 <div class="card-body">
                     <form method="post" action="">
+                        <?php csrfField(); ?>
                         <div class="mb-3">
                             <label for="name" class="form-label">Newsletter Name <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="name" name="name" 

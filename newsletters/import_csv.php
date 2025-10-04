@@ -44,6 +44,9 @@ $importStats = null;
 
 // Handle CSV upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
+    // Validate CSRF token
+    requireCsrfToken();
+
     try {
         $file = $_FILES['csv_file'];
 
@@ -398,6 +401,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <h3 class="card-title">Upload CSV File</h3>
 
                     <form id="import-form" method="post" enctype="multipart/form-data">
+                        <?php csrfField(); ?>
                         <div id="drop-zone" class="drop-zone">
                             <p class="mb-2"><strong>Click to browse</strong> or drag and drop your CSV file here</p>
                             <p class="text-secondary small mb-0">Maximum file size: 5MB</p>

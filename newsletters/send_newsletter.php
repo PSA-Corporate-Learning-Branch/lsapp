@@ -55,6 +55,9 @@ $isPreview = false;
 $previewData = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Validate CSRF token
+    requireCsrfToken();
+
     try {
         $action = $_POST['action'] ?? '';
         $subject = trim($_POST['subject'] ?? '');
@@ -342,7 +345,8 @@ try {
                     
                     <form method="post" class="mt-4" role="group" aria-labelledby="final-send-label">
                         <div id="final-send-label" class="visually-hidden">Final newsletter sending confirmation</div>
-                        
+
+                        <?php csrfField(); ?>
                         <input type="hidden" name="action" value="send">
                         <input type="hidden" name="subject" value="<?php echo htmlspecialchars($previewData['subject']); ?>">
                         <input type="hidden" name="html_body" value="<?php echo htmlspecialchars($previewData['html_body']); ?>">
@@ -422,6 +426,7 @@ try {
                 </div>
                 
                 <form method="post">
+                    <?php csrfField(); ?>
                     <div class="mb-3">
                         <label for="from_email" class="form-label">From Email Address</label>
                         <input type="email" id="from_email" name="from_email" class="form-control" value="<?php echo htmlspecialchars($fromEmail ?? 'donotreply_psa@gov.bc.ca'); ?>" required>
