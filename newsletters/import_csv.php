@@ -25,7 +25,7 @@ try {
     $db = new PDO("sqlite:../data/subscriptions.db");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+    handleDatabaseError($e);
 }
 
 // Get newsletter details
@@ -238,7 +238,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
         $messageType = 'success';
 
     } catch (Exception $e) {
-        $message = "Error: " . $e->getMessage();
+        $message = getUserFriendlyError($e);
         $messageType = 'error';
     }
 }

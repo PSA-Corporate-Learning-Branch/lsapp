@@ -2437,3 +2437,33 @@ function requireCsrfToken() {
         die('CSRF token validation failed. Please refresh the page and try again.');
     }
 }
+
+/**
+ * Handle database connection errors securely
+ * Logs detailed error, shows generic message to user
+ *
+ * @param Exception $e The exception to handle
+ */
+function handleDatabaseError($e) {
+    // Log detailed error for administrators
+    error_log("Database error: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
+
+    // Show generic error to user
+    http_response_code(500);
+    die("A database error occurred. Please try again later or contact support if the problem persists.");
+}
+
+/**
+ * Get user-friendly error message
+ * Logs detailed error, returns generic message
+ *
+ * @param Exception $e The exception
+ * @return string Generic error message for display
+ */
+function getUserFriendlyError($e) {
+    // Log detailed error for administrators
+    error_log("Application error: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
+
+    // Return generic message
+    return "An error occurred while processing your request. Please try again.";
+}

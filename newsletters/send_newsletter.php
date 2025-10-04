@@ -24,7 +24,7 @@ try {
         exit();
     }
 } catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+    handleDatabaseError($e);
 }
 
 // Initialize email history table
@@ -194,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
     } catch (Exception $e) {
-        $message = "Error: " . $e->getMessage();
+        $message = getUserFriendlyError($e);
         $messageType = 'error';
     }
 }
