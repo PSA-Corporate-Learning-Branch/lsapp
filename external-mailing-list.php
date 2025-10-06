@@ -56,7 +56,7 @@ Step 2.
 </li>
 <li class="list-group-item">
 Step 3.
-<a class="btn btn-block btn-primary" href="mailto:learning.centre.admin@gov.bc.ca?BCC=
+<a class="btn btn-block btn-primary" href="mailto:Corporatelearning.admin@gov.bc.ca?BCC=
 <?php foreach($people as $p): ?>
 <?= $p[1] ?>;
 <?php endforeach ?>
