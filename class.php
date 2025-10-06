@@ -126,8 +126,8 @@ else:
 	<?php endif ?>
 
 	<!-- CHEFS Eval Link -->
-	<?php $in_development = true; // To remove when it's time to launch ?>
-	<?php if(!empty($course[46]) && !empty($deets[7]) && !$in_development): ?>
+	<!-- Check that our course has a form id and our class has an ITEM code -->
+	<?php if(!empty($course[46]) && !empty($deets[7])): ?>
 		<?php
 			// verify our CHEFS form id matches the pattern
 			$pattern = '/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/';

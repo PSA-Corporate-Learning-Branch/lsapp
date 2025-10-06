@@ -69,8 +69,8 @@ foreach($c as $row) {
 	<input class="search form-control my-2 mx-auto w-50" placeholder="search">
 	<div class="w-50 row mt-2 mx-auto">
 
-		<div class="alert alert-primary col-4 p-0 text-center">Shipped</div>
-		<div class="alert alert-success col-4 p-0 text-center">Arrived</div>
+		<!-- <div class="alert alert-primary col-4 p-0 text-center">Shipped</div> -->
+		<!-- <div class="alert alert-success col-4 p-0 text-center">Arrived</div> -->
 		<!--<div class="alert alert-warning col-4 p-0 text-center"><a href="#" class="sort asc" data-sort="status">Requested</a></div>-->
 		<!--<div class="alert alert-danger col-4 p-0 text-center">Alert!</div>-->
 	</div>
@@ -89,6 +89,7 @@ foreach($c as $row) {
                 <!--<th scope="col" width="50"><a href="#" class="sort" data-sort="region">Region</th>-->
 				<th scope="col" width="50"><a href="#" class="sort" data-sort="enrolled">Enrolled</a></th>
 				<th scope="col" width="50"><a href="#" class="sort" data-sort="attendance">Attendance</a></th>
+				<th scope="col" width="50"><a href="#" class="sort" data-sort="survey">Survey</a></th>
             </tr>
         </thead>
 	<tbody class="list">
@@ -97,7 +98,7 @@ foreach($c as $row) {
 	<?php
 	$statrow = '';
 	$issueflag = '';
-	if(!$row[7] && $row[4] != 'Dedicated' && $row[1] != 'Requested') {
+	if(!$row[7] && $row[4] != 'Dedicated' && $row[1] != 'Requested' && $row[1] != 'Inactive') {
 		$issueflag = '<span class="badge bg-danger text-white">???</span>';
 	}
 	//if($row[1] == 'Pending') {
@@ -116,48 +117,53 @@ foreach($c as $row) {
 	}
 	?>
 	<tr class="<?= $statrow ?>">
+		<!-- ELM -->
 		<td class="status">
 			<div style="display:block" title="ELM status">
 			<?= h($row[1]) ?>
 			</div>
 		</td>
+		<!-- Shipping -->
 		<td class="shippingstatus">
 			<div style="display:block" title="current shipping status">
 			<?= h($row[49]) ?>
 			</div>
 		</td>
-
+		<!-- Item Code -->
 		<td class="text-right itemcode">
 			<?= $issueflag ?>
 			<small><?= h($row[7]) ?></small>
 			<?php if($row[4] == 'Dedicated'): ?>
-			<span class="badge bg-light-subtle ">Dedicated</span>
+				<span class="badge bg-light-subtle text-primary-emphasis">Dedicated</span>
 			<?php endif ?>
 		</td>
+		<!-- Class Date -->
 		<td class="text-right">
 			<a href="class.php?classid=<?= h($row[0]) ?>">
 				<?php print goodDateShort($row[8],$row[9]) ?>
 			</a>
 			<div class="startdate" style="display: none"><?= h($row[8]) ?></div>
 		</td>
+		<!-- Course -->
 		<td class="course"><a href="course.php?courseid=<?= h($row[5]) ?>"><?= h($row[6]) ?></a></td>
+		<!-- Venue -->
 		<td class="venue"><a href="venue.php?vid=<?= h($row[23]) ?>"><?= h($row[24]) ?></a>
-		<div style="display: none">
-			<?= h($row[28]) ?><br>
-			<?= h($row[29]) ?><br>
-			<?= h($row[30]) ?><br>
-			<?= h($row[26]) ?><br>
-			<?= h($row[25]) ?><br>
-			<?= h($row[27]) ?>
-		</div>
+			<div style="display: none">
+				<?= h($row[28]) ?><br>
+				<?= h($row[29]) ?><br>
+				<?= h($row[30]) ?><br>
+				<?= h($row[26]) ?><br>
+				<?= h($row[25]) ?><br>
+				<?= h($row[27]) ?>
+			</div>
 		</td>
+		<!-- City -->
 		<td class="city">
             <a href="city.php?name=<?= h($row[25]) ?>"><?= h($row[25]) ?></a>
-            <?php if(!$row[25]): ?>
-			<span class="badge bg-light-subtle text-primary-emphasis"><?= h($row[45]) ?></span>
+            <?php if(!$row[25] && $row[1] != 'Inactive'): ?>
+				<span class="badge bg-light-subtle text-primary-emphasis"><?= h($row[45]) ?></span>
 			<?php endif ?>
         </td>
-		
 		<!-- Facilitator -->
         <td class="facilitator">
 	      <?php $facilitators = explode(' ', $row[14]); ?>
@@ -167,24 +173,35 @@ foreach($c as $row) {
 			</a>
 		  <?php endforeach ?>
 		</td>
-		<!--<td><?= h($row[47]) ?></td>-->
-		
-		
+		<!-- Enrolled -->
 		<td class="enrolled">
-		<?php if($row['18'] < $row[11] && $row[1] != 'Inactive'): ?>
-		<span class="badge bg-danger text-white" title="Enrollment is currently below the set minimum"><?= h($row[18]) ?></span>
-		<?php else: ?>
-		<span class="badge bg-light-subtle text-primary-emphasis"><?= h($row[18]) ?></span>
-		<?php endif ?>
-		</td>
-		<td class="attendance">
-		<?php if($row[1] != 'Inactive'): ?>	
-			<?php if($row[39] != 'Yes'): ?>
-				<span class="badge bg-danger text-white">No</a>
+			<?php if($row['18'] < $row[11] && $row[1] != 'Inactive'): ?>
+				<span class="badge bg-danger text-white" title="Enrollment is currently below the set minimum"><?= h($row[18]) ?></span>
+			<?php elseif($row[1] == 'Inactive'): ?>
 			<?php else: ?>
-				<span class="badge bg-success text-white">Yes</a>
+				<span class="badge bg-light-subtle text-primary-emphasis"><?= h($row[18]) ?></span>
 			<?php endif ?>
-		<?php endif ?>
+		</td>
+		<!-- Attendance -->
+		<td class="attendance">
+			<?php if($row[1] != 'Inactive'): ?>	
+				<?php if($row[39] != 'Yes'): ?>
+					<span class="badge bg-danger text-white">No</a>
+				<?php else: ?>
+					<span class="badge bg-success text-white">Yes</a>
+				<?php endif ?>
+			<?php endif ?>
+		</td>
+		<!-- Survey -->
+		<td class="survey">
+			<!-- Don't show the badge if the class is inactive or ends before we started using CHEFS -->
+			<?php if($row[1] != 'Inactive' && $row[9] > '2025-10-06'): ?>	
+				<?php if($row[40] != 'Yes'): ?>
+					<span class="badge bg-danger text-white">No</a>
+				<?php else: ?>
+					<span class="badge bg-success text-white">Yes</a>
+				<?php endif ?>
+			<?php endif ?>
 		</td>
 	</tr>
 <?php endforeach ?>
@@ -206,7 +223,7 @@ $(document).ready(function(){
 	$('.search').focus();
 
 	var upcomingoptions = {
-		valueNames: [ 'status', 'shippingstatus', 'startdate', 'course', 'facilitator', 'region', 'venue', 'city', 'itemcode', 'enrolled', 'attendance' ]
+		valueNames: [ 'status', 'shippingstatus', 'startdate', 'course', 'facilitator', 'region', 'venue', 'city', 'itemcode', 'enrolled', 'attendance', 'survey' ]
 	};
 	var upcomingClasses = new List('upcoming-classes', upcomingoptions);
 	upcomingClasses.on('searchComplete', function(){
