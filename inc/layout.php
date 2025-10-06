@@ -267,7 +267,7 @@ $teams = getTeams();
         <?php endforeach; ?>
 				<hr class="dropdown-divider">
 				<span class="dropdown-item-text fw-bold">Miscellaneous</span>
-        <a class="dropdown-item" href="/lsapp/newsletters/">Newsletter Subscriptions</a>
+        <a class="dropdown-item" href="/lsapp/newsletters/">Newsletter Manager</a>
 				<!-- <a class="dropdown-item" href="/lsapp/learning-hub-partners.php">Learning Hub Partners</a> -->
 				<a class="dropdown-item" href="/lsapp/audits.php">Resource Reviews</a>
 				<a class="dropdown-item" href="/lsapp/function-map.php">Functions</a>

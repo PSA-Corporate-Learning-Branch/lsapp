@@ -11,6 +11,16 @@ define('SLASH', DIRECTORY_SEPARATOR);
 $docroot = $_SERVER['DOCUMENT_ROOT'] . '/lsapp//';
 define('BASE_DIR', $docroot);
 
+// Initialize session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Generate CSRF token if not present
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 function build_path(...$segments) {
     return implode(SLASH, $segments);
 }
@@ -2386,4 +2396,228 @@ function truncateStringByWords($string, $wordLimit, $ellipsis = true) {
         return $truncated . ($ellipsis ? '...' : '');
     }
     return $string;
+}
+
+/**
+ * Get CSRF token for forms
+ * @return string The CSRF token
+ */
+function getCsrfToken() {
+    return $_SESSION['csrf_token'] ?? '';
+}
+
+/**
+ * Output CSRF token hidden input field
+ * Use this in all forms
+ */
+function csrfField() {
+    $token = htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8');
+    echo '<input type="hidden" name="csrf_token" value="' . $token . '">';
+}
+
+/**
+ * Validate CSRF token from POST request
+ * @return bool True if valid, false otherwise
+ */
+function validateCsrfToken() {
+    if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token'])) {
+        return false;
+    }
+
+    return hash_equals($_SESSION['csrf_token'], $_POST['csrf_token']);
+}
+
+/**
+ * Require valid CSRF token or die
+ * Call this at the start of any POST request handler
+ */
+function requireCsrfToken() {
+    if (!validateCsrfToken()) {
+        http_response_code(403);
+        die('CSRF token validation failed. Please refresh the page and try again.');
+    }
+}
+
+/**
+ * Handle database connection errors securely
+ * Logs detailed error, shows generic message to user
+ *
+ * @param Exception $e The exception to handle
+ */
+function handleDatabaseError($e) {
+    // Log detailed error for administrators
+    error_log("Database error: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
+
+    // Show generic error to user
+    http_response_code(500);
+    die("A database error occurred. Please try again later or contact support if the problem persists.");
+}
+
+/**
+ * Get user-friendly error message
+ * Logs detailed error, returns generic message
+ *
+ * @param Exception $e The exception
+ * @return string Generic error message for display
+ */
+function getUserFriendlyError($e) {
+    // Log detailed error for administrators
+    error_log("Application error: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
+
+    // Return generic message
+    return "An error occurred while processing your request. Please try again.";
+}
+
+/**
+ * Sanitize CSV value to prevent formula injection
+ * Prevents CSV injection attacks when opening in Excel/LibreOffice
+ *
+ * @param mixed $value The value to sanitize
+ * @return string Sanitized value safe for CSV export
+ */
+function sanitizeCSVValue($value) {
+    if ($value === null) {
+        return '';
+    }
+
+    $value = (string)$value;
+
+    // If value starts with dangerous characters, prepend single quote
+    // Excel/LibreOffice/Google Sheets treat leading single quote as text indicator
+    // Dangerous characters: = + - @ \t \r (formula injection characters)
+    if (preg_match('/^[=+\-@\t\r]/', $value)) {
+        return "'" . $value;
+    }
+
+    return $value;
+}
+
+/**
+ * Inject tracking pixel into HTML email content
+ * Automatically appends tracking pixel to email body for open tracking
+ *
+ * @param string $htmlBody The HTML email content
+ * @param string $trackingUrl Base URL for tracking pixel (e.g., https://server.com/track.php)
+ * @param string $recipientEmail Email address of recipient
+ * @param int $newsletterId Newsletter ID
+ * @param int $campaignId Campaign ID
+ * @return string HTML with tracking pixel appended
+ */
+function injectTrackingPixel($htmlBody, $trackingUrl, $recipientEmail, $newsletterId, $campaignId) {
+    // Return original if no tracking URL configured
+    if (empty($trackingUrl)) {
+        return $htmlBody;
+    }
+
+    // Generate unique tracking ID for this recipient/campaign
+    $trackingId = md5($recipientEmail . $campaignId . time() . bin2hex(random_bytes(8)));
+
+    // Build tracking pixel URL with parameters
+    $pixelUrl = $trackingUrl . '?' . http_build_query([
+        'id' => $trackingId,
+        'e' => $recipientEmail,
+        'n' => $newsletterId,
+        'c' => $campaignId
+    ]);
+
+    // Tracking pixel HTML (1x1 transparent image at end of email)
+    $trackingPixel = sprintf(
+        '<img src="%s" width="1" height="1" border="0" alt="" style="display:block;width:1px;height:1px;border:0;">',
+        htmlspecialchars($pixelUrl, ENT_QUOTES, 'UTF-8')
+    );
+
+    // Try to inject before closing </body> tag if present
+    if (stripos($htmlBody, '</body>') !== false) {
+        return str_ireplace('</body>', $trackingPixel . '</body>', $htmlBody);
+    }
+
+    // Otherwise append to end
+    return $htmlBody . $trackingPixel;
+}
+
+/**
+ * Comprehensive email validation
+ * Validates email format with security checks to prevent injection attacks
+ *
+ * @param string $email Email address to validate
+ * @return bool True if valid, false otherwise
+ */
+function validateEmail($email) {
+    // Basic type check
+    if (!is_string($email)) {
+        return false;
+    }
+
+    // Check for null bytes BEFORE trimming (security risk)
+    if (strpos($email, "\0") !== false) {
+        return false;
+    }
+
+    // Check for control characters and newlines BEFORE trimming (prevents email header injection)
+    // Blocks ASCII control chars: 0x00-0x1F and DEL 0x7F
+    if (preg_match('/[\x00-\x1F\x7F]/', $email)) {
+        return false;
+    }
+
+    // Now safe to trim
+    $email = trim($email);
+
+    // Check if empty after trimming
+    if ($email === '') {
+        return false;
+    }
+
+    // Length check (RFC 5321: local part max 64, domain max 255, total max 254)
+    if (strlen($email) > 254) {
+        return false;
+    }
+
+    // Basic format validation using PHP's built-in filter
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return false;
+    }
+
+    // Must have exactly one @ symbol
+    if (substr_count($email, '@') !== 1) {
+        return false;
+    }
+
+    // Split into local and domain parts
+    list($local, $domain) = explode('@', $email);
+
+    // Validate local part length (before @)
+    if (strlen($local) > 64 || strlen($local) < 1) {
+        return false;
+    }
+
+    // Validate domain part length (after @)
+    if (strlen($domain) > 255 || strlen($domain) < 1) {
+        return false;
+    }
+
+    // Check for consecutive dots (not allowed in email addresses)
+    if (strpos($local, '..') !== false || strpos($domain, '..') !== false) {
+        return false;
+    }
+
+    // Check for leading/trailing dots in local part
+    if ($local[0] === '.' || $local[strlen($local) - 1] === '.') {
+        return false;
+    }
+
+    // Domain must contain at least one dot
+    if (strpos($domain, '.') === false) {
+        return false;
+    }
+
+    // Optional: Check DNS records (verify domain exists)
+    // This is disabled by default as it can cause performance issues
+    // Uncomment to enable DNS validation:
+    /*
+    if (!checkdnsrr($domain, 'MX') && !checkdnsrr($domain, 'A') && !checkdnsrr($domain, 'AAAA')) {
+        return false;
+    }
+    */
+
+    return true;
 }

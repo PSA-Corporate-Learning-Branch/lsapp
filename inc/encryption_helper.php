@@ -14,24 +14,13 @@ class EncryptionHelper {
      */
     private static function getEncryptionKey() {
         // Try to get from environment variable first
-        $key = getenv('APP_ENCRYPTION_KEY');
+        $key = getenv('CHEFS_ENCRYPTION_KEY');
         
         if (!$key) {
-            // Fall back to a file-based key (should be outside web root)
-            $keyFile = dirname(__DIR__) . '/.encryption_key';
             
-            if (file_exists($keyFile)) {
-                $key = trim(file_get_contents($keyFile));
-            } else {
-                // Generate a new key if none exists
-                $key = base64_encode(random_bytes(32));
-                
-                // Try to save it (may fail due to permissions)
-                @file_put_contents($keyFile, $key);
-                @chmod($keyFile, 0600);
-                
-                error_log("WARNING: New encryption key generated. Please secure this key: " . $key);
-            }
+            error_log("No CHEFs encryption key set in environment variable CHEFS_ENCRYPTION_KEY");
+            throw new Exception("Encryption key not configured. Please set CHEFS_ENCRYPTION_KEY environment variable.");
+            
         }
         
         return base64_decode($key);

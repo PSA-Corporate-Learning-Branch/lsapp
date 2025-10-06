@@ -24,7 +24,7 @@ try {
         exit();
     }
 } catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+    handleDatabaseError($e);
 }
 
 // Initialize email history table
@@ -55,6 +55,9 @@ $isPreview = false;
 $previewData = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Validate CSRF token
+    requireCsrfToken();
+
     try {
         $action = $_POST['action'] ?? '';
         $subject = trim($_POST['subject'] ?? '');
@@ -71,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception("Message content is required");
         }
         
-        if (!filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
+        if (!validateEmail($fromEmail)) {
             throw new Exception("Invalid sender email address");
         }
         
@@ -139,21 +142,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 // Queue emails for background processing instead of sending directly
                 $db->beginTransaction();
-                
+
                 try {
                     // Insert all emails into the queue
                     $queueStmt = $db->prepare("
                         INSERT INTO email_queue (campaign_id, recipient_email, subject, html_body, text_body, from_email, status, created_at)
                         VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)
                     ");
-                    
+
                     $queuedCount = 0;
                     foreach ($activeSubscribers as $subscriber) {
+                        // Inject tracking pixel for this recipient
+                        $htmlBodyWithTracking = injectTrackingPixel(
+                            $htmlBody,
+                            $newsletter['tracking_url'] ?? null,
+                            $subscriber,
+                            $newsletterId,
+                            $campaignId
+                        );
+
                         $queueStmt->execute([
                             $campaignId,
                             $subscriber,
                             $subject,
-                            $htmlBody,
+                            $htmlBodyWithTracking,
                             $textBody,
                             $fromEmail,
                             $now
@@ -191,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
     } catch (Exception $e) {
-        $message = "Error: " . $e->getMessage();
+        $message = getUserFriendlyError($e);
         $messageType = 'error';
     }
 }
@@ -342,7 +354,8 @@ try {
                     
                     <form method="post" class="mt-4" role="group" aria-labelledby="final-send-label">
                         <div id="final-send-label" class="visually-hidden">Final newsletter sending confirmation</div>
-                        
+
+                        <?php csrfField(); ?>
                         <input type="hidden" name="action" value="send">
                         <input type="hidden" name="subject" value="<?php echo htmlspecialchars($previewData['subject']); ?>">
                         <input type="hidden" name="html_body" value="<?php echo htmlspecialchars($previewData['html_body']); ?>">
@@ -422,6 +435,7 @@ try {
                 </div>
                 
                 <form method="post">
+                    <?php csrfField(); ?>
                     <div class="mb-3">
                         <label for="from_email" class="form-label">From Email Address</label>
                         <input type="email" id="from_email" name="from_email" class="form-control" value="<?php echo htmlspecialchars($fromEmail ?? 'donotreply_psa@gov.bc.ca'); ?>" required>
@@ -513,7 +527,7 @@ try {
                                     </small>
                                 </div>
                                 <div class="text-end">
-                                    <?php 
+                                    <?php
                                     $statusText = str_replace('_', ' ', $campaign['processing_status'] ?? $campaign['status']);
                                     $badgeClass = 'badge ';
                                     switch($campaign['processing_status'] ?? $campaign['status']) {
@@ -543,12 +557,16 @@ try {
                                     <span class="<?php echo $badgeClass; ?> mb-2">
                                         <?php echo ucfirst($statusText); ?>
                                     </span>
-                                    
+                                    <br>
                                     <?php if (in_array($campaign['processing_status'], ['pending', 'processing', 'paused'])): ?>
-                                        <br>
-                                        <a href="campaign_monitor.php?campaign_id=<?php echo $campaign['id']; ?>" 
+                                        <a href="campaign_monitor.php?campaign_id=<?php echo $campaign['id']; ?>"
+                                           class="btn btn-sm btn-outline-warning mt-1">
+                                            📊 Monitor
+                                        </a>
+                                    <?php else: ?>
+                                        <a href="campaign_dashboard.php?campaign_id=<?php echo $campaign['id']; ?>"
                                            class="btn btn-sm btn-outline-primary mt-1">
-                                            📊 View
+                                            📊 View Stats
                                         </a>
                                     <?php endif; ?>
                                 </div>
