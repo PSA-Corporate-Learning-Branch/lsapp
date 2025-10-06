@@ -63,7 +63,7 @@ Step 3.
 &body=Hello,%0D%0D
 Please see the attached weekly course stats.%0D%0D
 Access LSApp for more up-to-date statistics throughout the week.%0D%0D
-Thank you,%0D%0DThe Learning Centre&subject=Weekly Learning System 
+Thank you,%0D%0DThe Corporate Learning Branch&subject=Weekly Learning System 
 enrollment stats as of <?php echo date('D M dS') ?>">
 	Email everyone
 </a>
