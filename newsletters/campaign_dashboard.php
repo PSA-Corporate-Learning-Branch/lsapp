@@ -70,13 +70,13 @@ if (file_exists($trackingDbPath)) {
         $trackingDb = new PDO("sqlite:$trackingDbPath");
         $trackingDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        // Total opens
-        $stmt = $trackingDb->prepare("SELECT COUNT(*) FROM email_opens WHERE campaign_id = ?");
+        // Total opens (cast campaign_id to match type)
+        $stmt = $trackingDb->prepare("SELECT COUNT(*) FROM email_opens WHERE CAST(campaign_id AS INTEGER) = ?");
         $stmt->execute([$campaignId]);
         $trackingStats['total_opens'] = $stmt->fetchColumn();
 
         // Unique opens (by email address)
-        $stmt = $trackingDb->prepare("SELECT COUNT(DISTINCT email) FROM email_opens WHERE campaign_id = ?");
+        $stmt = $trackingDb->prepare("SELECT COUNT(DISTINCT email) FROM email_opens WHERE CAST(campaign_id AS INTEGER) = ?");
         $stmt->execute([$campaignId]);
         $trackingStats['unique_opens'] = $stmt->fetchColumn();
 
@@ -89,7 +89,7 @@ if (file_exists($trackingDbPath)) {
         $stmt = $trackingDb->prepare("
             SELECT MIN(opened_at) as first_open, MAX(opened_at) as last_open
             FROM email_opens
-            WHERE campaign_id = ?
+            WHERE CAST(campaign_id AS INTEGER) = ?
         ");
         $stmt->execute([$campaignId]);
         $openTimes = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -102,7 +102,7 @@ if (file_exists($trackingDbPath)) {
                 strftime('%Y-%m-%d %H:00:00', opened_at) as hour,
                 COUNT(*) as count
             FROM email_opens
-            WHERE campaign_id = ?
+            WHERE CAST(campaign_id AS INTEGER) = ?
             GROUP BY hour
             ORDER BY hour
         ");
@@ -117,7 +117,7 @@ if (file_exists($trackingDbPath)) {
                 MIN(opened_at) as first_opened,
                 MAX(opened_at) as last_opened
             FROM email_opens
-            WHERE campaign_id = ? AND email IS NOT NULL
+            WHERE CAST(campaign_id AS INTEGER) = ? AND email IS NOT NULL
             GROUP BY email
             ORDER BY open_count DESC
             LIMIT 10
@@ -131,7 +131,7 @@ if (file_exists($trackingDbPath)) {
                 user_agent,
                 COUNT(*) as count
             FROM email_opens
-            WHERE campaign_id = ?
+            WHERE CAST(campaign_id AS INTEGER) = ?
             GROUP BY user_agent
             ORDER BY count DESC
             LIMIT 10
