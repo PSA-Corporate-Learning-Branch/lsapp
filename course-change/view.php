@@ -305,7 +305,7 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
                         <?php if ($event['field'] === 'comment'): ?>
                             <li class="list-group-item bg-dark-subtle">
                                 <strong><?= htmlspecialchars($event['changed_by']) ?>:</strong> 
-                                <?= nl2br(htmlspecialchars($event['new_value'])) ?>
+                                <?= $Parsedown->text(htmlspecialchars($event['new_value'])) ?>
                                 <br><small class="text-muted">At: <?= date('Y-m-d H:i:s', $event['changed_at']) ?></small>
                                 
                                 <!-- Delete Comment Form -->
