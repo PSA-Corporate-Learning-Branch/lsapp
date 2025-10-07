@@ -208,21 +208,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Get recent campaigns with queue progress
-$recentCampaigns = [];
+// Get incomplete campaigns
 $incompleteCampaigns = [];
 try {
-    // Get incomplete campaigns first
     $stmt = $db->prepare("
-        SELECT 
-            c.id, 
-            c.subject, 
-            c.from_email, 
-            c.sent_to_count, 
-            c.sent_at, 
-            c.status, 
+        SELECT
+            c.id,
+            c.subject,
+            c.from_email,
+            c.sent_to_count,
+            c.sent_at,
+            c.status,
             c.processing_status,
-            c.ches_transaction_id, 
+            c.ches_transaction_id,
             c.error_message,
             c.processed_count,
             (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id) as total_count,
@@ -235,33 +233,8 @@ try {
     ");
     $stmt->execute([$newsletterId]);
     $incompleteCampaigns = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Get all recent campaigns
-    $stmt = $db->prepare("
-        SELECT 
-            c.id, 
-            c.subject, 
-            c.from_email, 
-            c.sent_to_count, 
-            c.sent_at, 
-            c.status, 
-            c.processing_status,
-            c.ches_transaction_id, 
-            c.error_message,
-            c.processed_count,
-            (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id) as total_count,
-            (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id AND status = 'sent') as sent_count,
-            (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id AND status = 'pending') as pending_count,
-            (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id AND status = 'failed') as failed_count
-        FROM email_campaigns c
-        WHERE c.newsletter_id = ?
-        ORDER BY c.sent_at DESC 
-        LIMIT 10
-    ");
-    $stmt->execute([$newsletterId]);
-    $recentCampaigns = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    error_log("Failed to fetch recent campaigns: " . $e->getMessage());
+    error_log("Failed to fetch incomplete campaigns: " . $e->getMessage());
 }
 
 // Get subscriber count for this specific newsletter
@@ -490,91 +463,5 @@ try {
                 </form>
             </div>
         </section>
-
-        <?php if (!empty($recentCampaigns)): ?>
-            <section class="card bg-light-subtle">
-                <div class="card-header">
-                    <h2 class="card-title h4 mb-0">Recent Newsletter Campaigns</h2>
-                </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        <?php foreach ($recentCampaigns as $campaign): ?>
-                            <div class="list-group-item d-flex justify-content-between align-items-start">
-                                <div class="flex-grow-1">
-                                    <strong><?php echo htmlspecialchars($campaign['subject']); ?></strong><br>
-                                    <small class="text-secondary">
-                                        Created <?php echo date('M j, Y g:i A', strtotime($campaign['sent_at'])); ?> 
-                                        for <?php echo $campaign['sent_to_count']; ?> subscribers
-                                        
-                                        <?php if ($campaign['status'] == 'queued' || $campaign['status'] == 'sending'): ?>
-                                            <br>📊 Progress: <?php echo $campaign['sent_count']; ?> sent, 
-                                            <?php echo $campaign['pending_count']; ?> pending
-                                            <?php if ($campaign['failed_count'] > 0): ?>
-                                                , <span class="text-danger"><?php echo $campaign['failed_count']; ?> failed</span>
-                                            <?php endif; ?>
-                                        <?php endif; ?>
-                                        
-                                        <?php if ($campaign['status'] == 'sent' || $campaign['status'] == 'completed_with_errors'): ?>
-                                            <br>✅ Completed: <?php echo $campaign['sent_count']; ?> sent
-                                            <?php if ($campaign['failed_count'] > 0): ?>
-                                                , <span class="text-danger"><?php echo $campaign['failed_count']; ?> failed</span>
-                                            <?php endif; ?>
-                                        <?php endif; ?>
-                                        
-                                        <?php if ($campaign['error_message']): ?>
-                                            <br><span class="text-danger">Error: <?php echo htmlspecialchars($campaign['error_message']); ?></span>
-                                        <?php endif; ?>
-                                    </small>
-                                </div>
-                                <div class="text-end">
-                                    <?php
-                                    $statusText = str_replace('_', ' ', $campaign['processing_status'] ?? $campaign['status']);
-                                    $badgeClass = 'badge ';
-                                    switch($campaign['processing_status'] ?? $campaign['status']) {
-                                        case 'completed':
-                                        case 'sent':
-                                            $badgeClass .= 'bg-success';
-                                            break;
-                                        case 'failed':
-                                        case 'cancelled':
-                                            $badgeClass .= 'bg-danger';
-                                            break;
-                                        case 'processing':
-                                        case 'sending':
-                                            $badgeClass .= 'bg-info';
-                                            break;
-                                        case 'paused':
-                                            $badgeClass .= 'bg-warning text-dark';
-                                            break;
-                                        case 'pending':
-                                        case 'queued':
-                                            $badgeClass .= 'bg-secondary';
-                                            break;
-                                        default:
-                                            $badgeClass .= 'bg-secondary';
-                                    }
-                                    ?>
-                                    <span class="<?php echo $badgeClass; ?> mb-2">
-                                        <?php echo ucfirst($statusText); ?>
-                                    </span>
-                                    <br>
-                                    <?php if (in_array($campaign['processing_status'], ['pending', 'processing', 'paused'])): ?>
-                                        <a href="campaign_monitor.php?campaign_id=<?php echo $campaign['id']; ?>"
-                                           class="btn btn-sm btn-outline-warning mt-1">
-                                            📊 Monitor
-                                        </a>
-                                    <?php else: ?>
-                                        <a href="campaign_dashboard.php?campaign_id=<?php echo $campaign['id']; ?>"
-                                           class="btn btn-sm btn-outline-primary mt-1">
-                                            📊 View Stats
-                                        </a>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            </section>
-        <?php endif; ?>
     </div>
 <?php include('../templates/footer.php') ?>
