@@ -75,6 +75,7 @@ function getGuidanceByCategory($cat, $categoriesFile) {
 $cat = urldecode($formData['category']) ?? '';
 $categoriesFile = 'guidance.json';
 $guidance = getGuidanceByCategory($cat, $categoriesFile);
+$peopleActive = getPeopleAll($filteractive = true);
 
 ?>
 
@@ -199,7 +200,7 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                     <input list="people" name="assign_to" id="assign_to" class="form-control" placeholder="Select a person" value="<?= htmlspecialchars($formData['assign_to'] ?? '') ?>">
                     <datalist id="people">
                         <?php
-                        foreach ($people as $person) {
+                        foreach ($peopleActive as $person) {
                             if (!empty($person[0]) && !empty($person[2])) {
                                 $value = htmlspecialchars($person[0]);
                                 $label = htmlspecialchars($person[2]);
