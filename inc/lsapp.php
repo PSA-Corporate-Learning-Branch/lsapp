@@ -1225,26 +1225,40 @@ function getTips() {
 	return $tips;
 }
 
-//
-// Get a list of colleagues
-//
-function getPeopleAll() {
+/**
+ * Get a list of colleagues.
+ * 
+ * @param bool $filteractive return active people if true else all.
+ * 
+ * @return array returns an array of people.
+ */
+function getPeopleAll($filteractive = null) {
 
 	$path = build_path(BASE_DIR, 'data', 'people.csv');
 	$f = fopen($path, 'r');
 	fgetcsv($f); // Pop off the header
 	$list = array();
-	while ($row = fgetcsv($f)) {
-		// maybe check to see if active here?
-			array_push($list,$row);
+	// If we want to filter for active only
+	if ($filteractive) {
+		while ($row = fgetcsv($f)) {
+			if ($row[4] === 'Active') {
+				array_push($list,$row);
+			}
+		}
 	}
-	// Create a temp array to hold course names for sorting
+	// Otherwise get everyone
+	else {
+		while ($row = fgetcsv($f)) {
+			array_push($list,$row);
+		}
+	}
+	// Create a temp array to hold names for sorting
 	$tmp = array();
-	// Loop through the whole classes and add start dates to the temp array
+	// Loop through the whole people and add names to the temp array
 	foreach($list as $line) {
 		$tmp[] = $line[2];
 	}
-	// Use the temp array to sort all the classes by start date
+	// Use the temp array to sort all the people by name
 	array_multisort($tmp, SORT_ASC, $list);
 	
 	fclose($f);
