@@ -64,7 +64,7 @@ $trackingStats = [
     'user_agents' => []
 ];
 
-$trackingDbPath = 'E:\WebSites\NonSSOLearning\newsletter-tracker\data\email_tracking.db';
+$trackingDbPath = 'E:\WebSites\data\email_tracking.db';
 if (file_exists($trackingDbPath)) {
     try {
         $trackingDb = new PDO("sqlite:$trackingDbPath");
