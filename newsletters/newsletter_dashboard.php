@@ -455,73 +455,197 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </section>
 
-        <section class="card mb-4" role="region" aria-label="Subscriptions">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th scope="col" class="text-uppercase small">Email Address</th>
-                                <th scope="col" class="text-uppercase small">Status</th>
-                                <th scope="col" class="text-uppercase small">Subscribed Date</th>
-                                <th scope="col" class="text-uppercase small">Last Updated</th>
-                                <th scope="col" class="text-uppercase small">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($subscriptions)): ?>
-                                <tr>
-                                    <td colspan="5" class="text-center text-secondary py-5">No subscriptions found</td>
-                                </tr>
-                            <?php else: ?>
-                                <?php foreach ($subscriptions as $sub): ?>
+        <?php
+        // Get recent campaigns with queue progress
+        $recentCampaigns = [];
+        try {
+            $stmt = $db->prepare("
+                SELECT
+                    c.id,
+                    c.subject,
+                    c.from_email,
+                    c.sent_to_count,
+                    c.sent_at,
+                    c.status,
+                    c.processing_status,
+                    c.ches_transaction_id,
+                    c.error_message,
+                    c.processed_count,
+                    (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id) as total_count,
+                    (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id AND status = 'sent') as sent_count,
+                    (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id AND status = 'pending') as pending_count,
+                    (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id AND status = 'failed') as failed_count
+                FROM email_campaigns c
+                WHERE c.newsletter_id = ?
+                ORDER BY c.sent_at DESC
+                LIMIT 10
+            ");
+            $stmt->execute([$newsletterId]);
+            $recentCampaigns = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Failed to fetch recent campaigns: " . $e->getMessage());
+        }
+        ?>
+
+        <div class="row">
+            <div class="col-lg-7 mb-4">
+                <section class="card h-100" role="region" aria-label="Subscriptions">
+                    <div class="card-header">
+                        <h2 class="h5 mb-0">Subscriptions</h2>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light-subtle">
                                     <tr>
-                                        <td><?php echo htmlspecialchars($sub['email']); ?></td>
-                                        <td>
-                                            <?php if($sub['status'] === 'active'): ?>
-                                                <span class="badge bg-success"><?php echo ucfirst($sub['status']); ?></span>
-                                            <?php else: ?>
-                                                <span class="badge bg-danger"><?php echo ucfirst($sub['status']); ?></span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td><?php echo date('Y-m-d H:i', strtotime($sub['created_at'])); ?></td>
-                                        <td><?php echo date('Y-m-d H:i', strtotime($sub['updated_at'])); ?></td>
-                                        <td>
-                                            <?php if ($sub['status'] === 'active'): ?>
-                                                <form method="post" action="" class="d-inline" onsubmit="return confirm('Are you sure you want to unsubscribe <?php echo htmlspecialchars($sub['email']); ?>?')">
-                                                    <?php csrfField(); ?>
-                                                    <input type="hidden" name="action" value="unsubscribe">
-                                                    <input type="hidden" name="email" value="<?php echo htmlspecialchars($sub['email']); ?>">
-                                                    <button type="submit" class="btn btn-outline-secondary btn-sm">Unsubscribe</button>
-                                                </form>
-                                            <?php else: ?>
-                                                <form method="post" action="" class="d-inline" onsubmit="return confirm('Are you sure you want to reactivate <?php echo htmlspecialchars($sub['email']); ?>?')">
-                                                    <?php csrfField(); ?>
-                                                    <input type="hidden" name="action" value="add_subscriber">
-                                                    <input type="hidden" name="email" value="<?php echo htmlspecialchars($sub['email']); ?>">
-                                                    <button type="submit" class="btn btn-primary btn-sm">Reactivate</button>
-                                                </form>
+                                        <th scope="col" class="text-uppercase small">Email Address</th>
+                                        <th scope="col" class="text-uppercase small">Status</th>
+                                        <th scope="col" class="text-uppercase small">Subscribed Date</th>
+                                        <th scope="col" class="text-uppercase small">Last Updated</th>
+                                        <th scope="col" class="text-uppercase small">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if (empty($subscriptions)): ?>
+                                        <tr>
+                                            <td colspan="5" class="text-center text-secondary py-5">No subscriptions found</td>
+                                        </tr>
+                                    <?php else: ?>
+                                        <?php foreach ($subscriptions as $sub): ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($sub['email']); ?></td>
+                                                <td>
+                                                    <?php if($sub['status'] === 'active'): ?>
+                                                        <span class="badge bg-success"><?php echo ucfirst($sub['status']); ?></span>
+                                                    <?php else: ?>
+                                                        <span class="badge bg-danger"><?php echo ucfirst($sub['status']); ?></span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td><?php echo date('Y-m-d H:i', strtotime($sub['created_at'])); ?></td>
+                                                <td><?php echo date('Y-m-d H:i', strtotime($sub['updated_at'])); ?></td>
+                                                <td>
+                                                    <?php if ($sub['status'] === 'active'): ?>
+                                                        <form method="post" action="" class="d-inline" onsubmit="return confirm('Are you sure you want to unsubscribe <?php echo htmlspecialchars($sub['email']); ?>?')">
+                                                            <?php csrfField(); ?>
+                                                            <input type="hidden" name="action" value="unsubscribe">
+                                                            <input type="hidden" name="email" value="<?php echo htmlspecialchars($sub['email']); ?>">
+                                                            <button type="submit" class="btn btn-outline-secondary btn-sm">Unsubscribe</button>
+                                                        </form>
+                                                    <?php else: ?>
+                                                        <form method="post" action="" class="d-inline" onsubmit="return confirm('Are you sure you want to reactivate <?php echo htmlspecialchars($sub['email']); ?>?')">
+                                                            <?php csrfField(); ?>
+                                                            <input type="hidden" name="action" value="add_subscriber">
+                                                            <input type="hidden" name="email" value="<?php echo htmlspecialchars($sub['email']); ?>">
+                                                            <button type="submit" class="btn btn-primary btn-sm">Reactivate</button>
+                                                        </form>
+                                                    <?php endif; ?>
+
+                                                    <?php if ($isAdminUser): ?>
+                                                        <form method="post" action="" class="d-inline ms-1" onsubmit="return confirm('⚠️ ADMIN ACTION: Are you sure you want to PERMANENTLY DELETE <?php echo htmlspecialchars($sub['email']); ?> from the database? This cannot be undone.')">
+                                                            <?php csrfField(); ?>
+                                                            <input type="hidden" name="action" value="delete">
+                                                            <input type="hidden" name="email" value="<?php echo htmlspecialchars($sub['email']); ?>">
+                                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Permanently delete (Admin only)">
+                                                                🗑️ Delete
+                                                            </button>
+                                                        </form>
+                                                    <?php endif; ?>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="col-lg-5 mb-4">
+                <?php if (!empty($recentCampaigns)): ?>
+                    <section class="card bg-light-subtle h-100">
+                        <div class="card-header">
+                            <h2 class="h5 mb-0">Recent Newsletter Campaigns</h2>
+                        </div>
+                        <div class="card-body p-0" style="max-height: 600px; overflow-y: auto;">
+                            <div class="list-group list-group-flush">
+                                <?php foreach ($recentCampaigns as $campaign): ?>
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <strong class="flex-grow-1"><?php echo htmlspecialchars($campaign['subject']); ?></strong>
+                                            <?php
+                                            $statusText = str_replace('_', ' ', $campaign['processing_status'] ?? $campaign['status']);
+                                            $badgeClass = 'badge ';
+                                            switch($campaign['processing_status'] ?? $campaign['status']) {
+                                                case 'completed':
+                                                case 'sent':
+                                                    $badgeClass .= 'bg-success';
+                                                    break;
+                                                case 'failed':
+                                                case 'cancelled':
+                                                    $badgeClass .= 'bg-danger';
+                                                    break;
+                                                case 'processing':
+                                                case 'sending':
+                                                    $badgeClass .= 'bg-info';
+                                                    break;
+                                                case 'paused':
+                                                    $badgeClass .= 'bg-warning text-dark';
+                                                    break;
+                                                case 'pending':
+                                                case 'queued':
+                                                    $badgeClass .= 'bg-secondary';
+                                                    break;
+                                                default:
+                                                    $badgeClass .= 'bg-secondary';
+                                            }
+                                            ?>
+                                            <span class="<?php echo $badgeClass; ?> ms-2">
+                                                <?php echo ucfirst($statusText); ?>
+                                            </span>
+                                        </div>
+                                        <small class="text-secondary d-block mb-2">
+                                            <?php echo date('M j, Y g:i A', strtotime($campaign['sent_at'])); ?> •
+                                            <?php echo $campaign['sent_to_count']; ?> subscribers
+
+                                            <?php if ($campaign['status'] == 'queued' || $campaign['status'] == 'sending'): ?>
+                                                <br>📊 <?php echo $campaign['sent_count']; ?> sent,
+                                                <?php echo $campaign['pending_count']; ?> pending
+                                                <?php if ($campaign['failed_count'] > 0): ?>
+                                                    , <span class="text-danger"><?php echo $campaign['failed_count']; ?> failed</span>
+                                                <?php endif; ?>
                                             <?php endif; ?>
 
-                                            <?php if ($isAdminUser): ?>
-                                                <form method="post" action="" class="d-inline ms-1" onsubmit="return confirm('⚠️ ADMIN ACTION: Are you sure you want to PERMANENTLY DELETE <?php echo htmlspecialchars($sub['email']); ?> from the database? This cannot be undone.')">
-                                                    <?php csrfField(); ?>
-                                                    <input type="hidden" name="action" value="delete">
-                                                    <input type="hidden" name="email" value="<?php echo htmlspecialchars($sub['email']); ?>">
-                                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Permanently delete (Admin only)">
-                                                        🗑️ Delete
-                                                    </button>
-                                                </form>
+                                            <?php if ($campaign['status'] == 'sent' || $campaign['status'] == 'completed_with_errors'): ?>
+                                                <br>✅ <?php echo $campaign['sent_count']; ?> sent
+                                                <?php if ($campaign['failed_count'] > 0): ?>
+                                                    , <span class="text-danger"><?php echo $campaign['failed_count']; ?> failed</span>
+                                                <?php endif; ?>
                                             <?php endif; ?>
-                                        </td>
-                                    </tr>
+
+                                            <?php if ($campaign['error_message']): ?>
+                                                <br><span class="text-danger">Error: <?php echo htmlspecialchars($campaign['error_message']); ?></span>
+                                            <?php endif; ?>
+                                        </small>
+                                        <?php if (in_array($campaign['processing_status'], ['pending', 'processing', 'paused'])): ?>
+                                            <a href="campaign_monitor.php?campaign_id=<?php echo $campaign['id']; ?>"
+                                               class="btn btn-sm btn-outline-warning">
+                                                📊 Monitor
+                                            </a>
+                                        <?php else: ?>
+                                            <a href="campaign_dashboard.php?campaign_id=<?php echo $campaign['id']; ?>"
+                                               class="btn btn-sm btn-outline-primary">
+                                                📊 View Stats
+                                            </a>
+                                        <?php endif; ?>
+                                    </div>
                                 <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
+                            </div>
+                        </div>
+                    </section>
+                <?php endif; ?>
             </div>
-        </section>
+        </div>
 
         <section class="card bg-light-subtle mb-4" role="region" aria-label="Manual Management">
             <div class="card-body">
