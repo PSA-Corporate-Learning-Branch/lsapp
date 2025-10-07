@@ -63,7 +63,7 @@ function getGuidanceByCategory($cat, $categoriesFile) {
 $cat = isset($_GET['cat']) ? urldecode($_GET['cat']) : '';
 $categoriesFile = 'guidance.json';
 $guidance = getGuidanceByCategory($cat, $categoriesFile);
-
+$peopleActive = getPeopleAll($filteractive = true);
 
 ?>
 
@@ -325,7 +325,7 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                 <datalist id="people">
                     <?php
                     // Generate the datalist options
-                    foreach ($people as $person) {
+                    foreach ($peopleActive as $person) {
                         // Ensure the array has at least 3 elements for IDIR and Name
                         if (!empty($person[0]) && !empty($person[2])) {
                             $value = htmlspecialchars($person[0]); // Use IDIR (index 0) as the value
