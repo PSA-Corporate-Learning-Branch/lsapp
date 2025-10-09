@@ -109,6 +109,6 @@ if (!copy($jsonFilename, $newfile)) {
 }
 
 // header('Location: ' . $jsonFilename);
-header('Location: course-openaccess-publish.php');
-// header('Location: index.php?message=Success');
+// header('Location: course-openaccess-publish.php');
+header('Location: index.php?message=Success');
 // header('Location: rss2-feed-create.php');

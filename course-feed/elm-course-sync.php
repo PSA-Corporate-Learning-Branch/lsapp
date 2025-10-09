@@ -112,7 +112,15 @@ $persistentLogPath = build_path(BASE_DIR, 'data', 'course-sync-logs', 'elm_sync_
 $lsappCourses = getCoursesFromCSV($coursesPath, false, 4);
 $hubCourses = getCoursesFromCSV($hubCoursesPath, false, 0);
 
+// Build a lookup index by course name for duplicate detection
+$lsappCoursesByName = [];
+foreach ($lsappCourses as $lsCode => $lsCourse) {
+    $normalizedName = strtolower(trim($lsCourse[2])); // CourseName at index 2
+    $lsappCoursesByName[$normalizedName] = $lsCode;
+}
+
 $updatedCourses = [];
+$potentialDuplicates = [];
 $count = 0;
 foreach ($hubCourses as $hcCode => $hc) {
     if (isset($lsappCourses[$hcCode])) {
@@ -120,6 +128,28 @@ foreach ($hubCourses as $hcCode => $hc) {
         $itemCode = $updatedCourse[4];
         $updatedCourses[$itemCode] = $updatedCourse;
     } else {
+        // Check for duplicate by course name before creating new course
+        $elmCourseName = strtolower(trim($hc[1])); // ELM CourseName at index 1
+
+        if (isset($lsappCoursesByName[$elmCourseName])) {
+            // Found a course with the same name - potential duplicate!
+            $matchedItemCode = $lsappCoursesByName[$elmCourseName];
+            $matchedCourse = $lsappCourses[$matchedItemCode];
+
+            $potentialDuplicates[] = [
+                'elm_item_code' => $hcCode,
+                'elm_course_name' => $hc[1],
+                'lsapp_course_id' => $matchedCourse[0],
+                'lsapp_item_code' => $matchedCourse[4],
+                'lsapp_course_name' => $matchedCourse[2]
+            ];
+
+            $logEntries[] = "DUPLICATE DETECTED: ELM course '$hcCode - {$hc[1]}' matches existing LSApp course '{$matchedCourse[4]} - {$matchedCourse[2]}' by name. Skipped creation.";
+
+            // Skip creating the new course
+            continue;
+        }
+
         $courseId = $timestamp . '-' . ++$count;
         $slug = createSlug($hc[1]);
         $newCourse = [
@@ -187,7 +217,9 @@ foreach ($lsappCourses as $lsappCode => $lsappCourse) {
         // 3. It isn't already 'No'
         if ($hubIncludeSync !== 'no' && $hubIncludePersist !== 'yes' && $lsappCourse[53] !== 'No') {
             $lsappCourse[53] = 'No';
-            $updatedCourses[$lsappCode] = $lsappCourse;
+            // Use CourseID as key to avoid collisions when ItemCode is empty
+            $courseId = $lsappCourse[0];
+            $updatedCourses[$courseId] = $lsappCourse;
             $logEntries[] = "Set HUBInclude to No for '{$lsappCourse[2]}' (Class code: $lsappCode)";
         } elseif ($hubIncludeSync === 'no') {
             $logEntries[] = "Skipped setting HUBInclude to No for '{$lsappCourse[2]}' (Class code: $lsappCode) - HubIncludeSync is 'no'";
@@ -195,7 +227,9 @@ foreach ($lsappCourses as $lsappCode => $lsappCourse) {
             // For persistent courses, set HubIncludePersistState to 'inactive' instead of removing from feed
             if (!isset($lsappCourse[61]) || $lsappCourse[61] !== 'inactive') {
                 $lsappCourse[61] = 'inactive';
-                $updatedCourses[$lsappCode] = $lsappCourse;
+                // Use CourseID as key to avoid collisions when ItemCode is empty
+                $courseId = $lsappCourse[0];
+                $updatedCourses[$courseId] = $lsappCourse;
                 $logEntries[] = "Set HubIncludePersistState to 'inactive' for '{$lsappCourse[2]}' (Class code: $lsappCode) - HubIncludePersist is 'yes'";
             }
         }
@@ -210,9 +244,82 @@ foreach ($lsappCourses as $lsappCode => $lsappCourse) {
         // Only update if HUBInclude is not already 'No'
         if ($lsappCourse[53] !== 'No') {
             $lsappCourse[53] = 'No';
-            $updatedCourses[$lsappCode] = $lsappCourse;
+            // Use CourseID as key to avoid collisions when ItemCode is empty
+            $courseId = $lsappCourse[0];
+            $updatedCourses[$courseId] = $lsappCourse;
             $logEntries[] = "Set HUBInclude to No for '{$lsappCourse[2]}' (Class code: $lsappCode) - Expired on {$lsappCourse[56]}";
         }
+    }
+}
+
+// Send email notification if duplicates were detected
+if (!empty($potentialDuplicates)) {
+    require_once(BASE_DIR . '/inc/ches_client.php');
+
+    try {
+        $ches = new CHESClient();
+
+        // Build email content
+        $duplicateCount = count($potentialDuplicates);
+        $subject = "Course Sync Alert: $duplicateCount Potential Duplicate" . ($duplicateCount > 1 ? 's' : '') . " Detected";
+
+        $bodyHtml = "<h2>ELM Course Sync - Duplicate Detection Report</h2>";
+        $bodyHtml .= "<p>The course sync process detected <strong>$duplicateCount potential duplicate course" . ($duplicateCount > 1 ? 's' : '') . "</strong>.</p>";
+        $bodyHtml .= "<p>These courses were found in the ELM feed but matched existing LSApp courses by name. No new courses were created to prevent duplicates.</p>";
+        $bodyHtml .= "<h3>Action Required:</h3>";
+        $bodyHtml .= "<p>Please review the following courses and update the LSApp ItemCode if they are the same course:</p>";
+        $bodyHtml .= "<table border='1' cellpadding='8' cellspacing='0' style='border-collapse: collapse; font-family: Arial, sans-serif;'>";
+        $bodyHtml .= "<tr style='background-color: #f2f2f2;'>";
+        $bodyHtml .= "<th>ELM Item Code</th><th>ELM Course Name</th><th>LSApp Course ID</th><th>LSApp Item Code</th><th>LSApp Course Name</th>";
+        $bodyHtml .= "</tr>";
+
+        foreach ($potentialDuplicates as $dup) {
+            $bodyHtml .= "<tr>";
+            $bodyHtml .= "<td>" . htmlspecialchars($dup['elm_item_code']) . "</td>";
+            $bodyHtml .= "<td>" . htmlspecialchars($dup['elm_course_name']) . "</td>";
+            $bodyHtml .= "<td>" . htmlspecialchars($dup['lsapp_course_id']) . "</td>";
+            $bodyHtml .= "<td>" . htmlspecialchars($dup['lsapp_item_code']) . "</td>";
+            $bodyHtml .= "<td>" . htmlspecialchars($dup['lsapp_course_name']) . "</td>";
+            $bodyHtml .= "</tr>";
+        }
+
+        $bodyHtml .= "</table>";
+        $bodyHtml .= "<p><strong>Next Steps:</strong></p>";
+        $bodyHtml .= "<ol>";
+        $bodyHtml .= "<li>Verify if the ELM course and LSApp course are the same</li>";
+        $bodyHtml .= "<li>If they are the same, update the ItemCode in LSApp to match the ELM Item Code</li>";
+        $bodyHtml .= "<li>The next sync will then update the existing course instead of trying to create a duplicate</li>";
+        $bodyHtml .= "</ol>";
+        $bodyHtml .= "<p>Sync timestamp: $isoDateTime</p>";
+
+        $bodyText = "ELM Course Sync - Duplicate Detection Report\n\n";
+        $bodyText .= "The course sync process detected $duplicateCount potential duplicate course" . ($duplicateCount > 1 ? 's' : '') . ".\n\n";
+        $bodyText .= "These courses were found in the ELM feed but matched existing LSApp courses by name.\n\n";
+
+        foreach ($potentialDuplicates as $dup) {
+            $bodyText .= "ELM: {$dup['elm_item_code']} - {$dup['elm_course_name']}\n";
+            $bodyText .= "LSApp: {$dup['lsapp_course_id']} ({$dup['lsapp_item_code']}) - {$dup['lsapp_course_name']}\n\n";
+        }
+
+        $bodyText .= "Please review and update the ItemCode in LSApp if these are the same course.\n";
+        $bodyText .= "Sync timestamp: $isoDateTime\n";
+
+        // Send email
+        $result = $ches->sendEmail(
+            ['allan.haggett@gov.bc.ca'],
+            $subject,
+            $bodyText,
+            $bodyHtml,
+            'LearningHUB.Notification@gov.bc.ca',
+            null, // cc
+            null, // bcc
+            'high' // priority
+        );
+
+        $logEntries[] = "Sent duplicate detection email to allan.haggett@gov.bc.ca (Transaction ID: {$result['txId']})";
+
+    } catch (Exception $e) {
+        $logEntries[] = "ERROR: Failed to send duplicate detection email: " . $e->getMessage();
     }
 }
 
@@ -251,15 +358,21 @@ if ($fpTemp !== false) {
         fgetcsv($fpOriginal); // Skip header row
 
         while (($row = fgetcsv($fpOriginal)) !== false) {
-            $itemCode = $row[4]; // Assuming ItemCode is at index 4
+            $itemCode = $row[4]; // ItemCode at index 4
+            $courseId = $row[0]; // CourseID at index 0
 
             // Sanitize CourseAbstract (index 17)
             $row[17] = sanitizeText($row[17] ?? '');
 
+            // Check both ItemCode and CourseID for updates (to handle both keying strategies)
             if (isset($updatedCourses[$itemCode])) {
                 $updatedCourses[$itemCode][17] = sanitizeText($updatedCourses[$itemCode][17] ?? '');
                 fputcsv($fpTemp, $updatedCourses[$itemCode]);
                 unset($updatedCourses[$itemCode]);
+            } elseif (isset($updatedCourses[$courseId])) {
+                $updatedCourses[$courseId][17] = sanitizeText($updatedCourses[$courseId][17] ?? '');
+                fputcsv($fpTemp, $updatedCourses[$courseId]);
+                unset($updatedCourses[$courseId]);
             } else {
                 fputcsv($fpTemp, $row);
             }
