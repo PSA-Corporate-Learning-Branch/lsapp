@@ -554,6 +554,7 @@ $finalcount = $upcount - $inactive - $closed;
 	if (empty($files)): ?>
 		<p>No requests found for this course.</p>
 	<?php else: ?>
+		<?php rsort($files); ?> 
 		<ul class="list-group mb-4">
 			<?php foreach ($files as $file): 
 				$request = json_decode(file_get_contents($file), true);
