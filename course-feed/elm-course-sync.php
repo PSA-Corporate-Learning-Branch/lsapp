@@ -205,7 +205,7 @@ foreach ($hubCourses as $hcCode => $hc) {
 
 foreach ($lsappCourses as $lsappCode => $lsappCourse) {
     
-    if ($lsappCourse[52] === 'PSA Learning System' && !isset($hubCourses[$lsappCode])) {
+    if ($lsappCourse[52] === 'PSA Learning System' && $lsappCourse[1] === 'Active' && !isset($hubCourses[$lsappCode])) {
         // Check if course has HubIncludeSync set to 'no' (index 58)
         $hubIncludeSync = isset($lsappCourse[58]) ? $lsappCourse[58] : 'yes';
         // Check if course has HubIncludePersist set to 'yes' (index 59)

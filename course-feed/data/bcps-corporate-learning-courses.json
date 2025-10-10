@@ -147,26 +147,6 @@
             "url": "https:\/\/learning.gov.bc.ca\/psc\/CHIPSPLM\/EMPLOYEE\/ELM\/c\/LM_OD_EMPLOYEE_FL.LM_CRS_DTL_FL.GBL?Page=LM_CRS_DTL_FL&Action=U&ForceSearch=Y&LM_CI_ID=18106"
         },
         {
-            "id": "ITEM-1134",
-            "title": "Health and Well-Being: Successful Transition to Retirement",
-            "summary": "This 1 hour Teams workshop will teach participants how to plan early to set retirement goals in all areas, explore available resources and identify ways to overcome any possible obstacles in reaching their goals.",
-            "content_text": "Health and Well-Being: Successful Transition to Retirement",
-            "delivery_method": "Webinar",
-            "_course_id": "20190801-224002",
-            "_keywords": "Workplace Health and Safety",
-            "_audience": "All Employees",
-            "_topic": "Health, Safety and Well-Being",
-            "_slug": "health-well-being-successful-transition-retirement",
-            "_learning_partner": "Workplace Health and Safety",
-            "_platform": "PSA Learning System",
-            "_persistent": "no",
-            "author": "Workplace Health and Safety",
-            "date_published": "2019-08-01T00:00:00",
-            "date_modified": "2025-09-29T16:01:15",
-            "tags": "",
-            "url": "https:\/\/learning.gov.bc.ca\/psc\/CHIPSPLM\/EMPLOYEE\/ELM\/c\/LM_OD_EMPLOYEE_FL.LM_CRS_DTL_FL.GBL?Page=LM_CRS_DTL_FL&Action=U&ForceSearch=Y&LM_CI_ID=18417"
-        },
-        {
             "id": "ITEM-1144",
             "title": "L@WW 2019: Leading Workplace Strategies for Building Cultural Safety and Humility Skills in the BC Public Service",
             "summary": "Join us online for practical tools and tips on how to build a culturally safe space that can also contribute to your own health and well being.  For folks at all levels of government with an interest in approaching their work with a reconciliation lens.",
@@ -5007,26 +4987,6 @@
             "url": "https:\/\/learning.gov.bc.ca\/psc\/CHIPSPLM\/EMPLOYEE\/ELM\/c\/LM_OD_EMPLOYEE_FL.LM_CRS_DTL_FL.GBL?Page=LM_CRS_DTL_FL&Action=U&ForceSearch=Y&LM_CI_ID=19772"
         },
         {
-            "id": "ITEM-2664",
-            "title": "HoIL - Province of British Columbia&#039;s Foundational Commitments to Indigenous People (Restricted to Senior Leaders - Bands 4-6)",
-            "summary": "In this virtual 90-minute session, you will learn key foundational commitments of the Province of BC that are imperative and embedded in law to ensure the inherent rights of all First Nations, Mtis and Inuit people are recognized and honored.",
-            "content_text": "HoIL - Province of British Columbia&#039;s Foundational Commitments to Indigenous People (Restricted to Senior Leaders - Bands 4-6)",
-            "delivery_method": "Webinar",
-            "_course_id": "20250808113642",
-            "_keywords": "Cultural Competency, Distinction, House of Indigenous Learning, Self-Discovery, awareness, continuous learning, indigenous, reconciliation",
-            "_audience": "Senior Leaders",
-            "_topic": "Being a Public Service Employee",
-            "_slug": "hoil-province-british-columbia-s-foundational-commitments-indigenous",
-            "_learning_partner": "House of Indigenous Learning",
-            "_platform": "PSA Learning System",
-            "_persistent": "no",
-            "author": "House of Indigenous Learning",
-            "date_published": "2025-08-08T00:00:00",
-            "date_modified": "2025-09-25T12:01:18",
-            "tags": "",
-            "url": "https:\/\/learning.gov.bc.ca\/psc\/CHIPSPLM\/EMPLOYEE\/ELM\/c\/LM_OD_EMPLOYEE_FL.LM_CRS_DTL_FL.GBL?Page=LM_CRS_DTL_FL&Action=U&ForceSearch=Y&LM_CI_ID=19901"
-        },
-        {
             "id": "ITEM-2667",
             "title": "Clearing &quot;Sludge&quot; to Better Serve BC (Restricted to Senior Leaders - Bands 4-6)",
             "summary": "This 2-hour virtually delivered workshop for senior leaders introduces a practical, behaviourally-informed approach to removing \u201csludge\u201d: the excessive or unjustified friction that makes it difficult for staff or citizens to achieve their goals.",
@@ -5185,6 +5145,26 @@
             "date_modified": "2025-10-01T16:01:16",
             "tags": "",
             "url": "https:\/\/learning.gov.bc.ca\/psc\/CHIPSPLM\/EMPLOYEE\/ELM\/c\/LM_OD_EMPLOYEE_FL.LM_CRS_DTL_FL.GBL?Page=LM_CRS_DTL_FL&Action=U&ForceSearch=Y&LM_CI_ID=19928"
+        },
+        {
+            "id": "ITEM-2693",
+            "title": "Quick Guide to Writing Briefing Notes",
+            "summary": "Need to write a briefing note and don\u2019t know where to start? Bookmark this resource and use it in the flow of your work to write briefing notes that inform, influence, and drive decisions.",
+            "content_text": "Quick Guide to Writing Briefing Notes",
+            "delivery_method": "eLearning",
+            "_course_id": "20250924135208",
+            "_keywords": "Cabinet, Indigenous, PSA Corporate Learning Branch, Policy, anti-racism, decision, gba, information",
+            "_audience": "All Employees",
+            "_topic": "Communication and Facilitation",
+            "_slug": "quick-guide-writing-briefing-notes",
+            "_learning_partner": "PSA Corporate Learning Branch",
+            "_platform": "PSA Learning System",
+            "_persistent": "no",
+            "author": "PSA Corporate Learning Branch",
+            "date_published": "2025-09-24T00:00:00",
+            "date_modified": "2025-10-09T17:04:12",
+            "tags": "",
+            "url": "https:\/\/learning.gov.bc.ca\/psc\/CHIPSPLM\/EMPLOYEE\/ELM\/c\/LM_OD_EMPLOYEE_FL.LM_CRS_DTL_FL.GBL?Page=LM_CRS_DTL_FL&Action=U&ForceSearch=Y&LM_CI_ID=19930"
         }
     ]
 }
