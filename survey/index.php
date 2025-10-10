@@ -18,13 +18,20 @@ require($path);
 <body>
 <?php getNavigation() ?>
 
+<div class="container-fluid">
+<div class="row justify-content-md-center mb-3">
+
+    <div class="col-12">
+        <h1 class="mb-5 text-center">Survey Dashboard</h1>
+    </div>
+
+
+    
 
 
 
-
-
-
-
+</div> <!-- /row -->
+</div> <!-- /container -->
 
 
 <?php endif ?> <!-- //canACcess() -->
