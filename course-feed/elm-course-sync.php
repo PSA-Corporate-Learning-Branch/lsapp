@@ -306,17 +306,17 @@ if (!empty($potentialDuplicates)) {
 
         // Send email
         $result = $ches->sendEmail(
-            ['allan.haggett@gov.bc.ca'],
+            ['Corporatelearning.admin@gov.bc.ca'],
             $subject,
             $bodyText,
             $bodyHtml,
-            'LearningHUB.Notification@gov.bc.ca',
+            'lsapp_syncbot_noreply@gov.bc.ca',
             null, // cc
             null, // bcc
             'high' // priority
         );
 
-        $logEntries[] = "Sent duplicate detection email to allan.haggett@gov.bc.ca (Transaction ID: {$result['txId']})";
+        $logEntries[] = "Sent duplicate detection email to Corporatelearning.admin@gov.bc.ca (Transaction ID: {$result['txId']})";
 
     } catch (Exception $e) {
         $logEntries[] = "ERROR: Failed to send duplicate detection email: " . $e->getMessage();
