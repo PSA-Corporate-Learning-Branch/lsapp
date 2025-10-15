@@ -121,6 +121,7 @@ foreach ($lsappCourses as $lsCode => $lsCourse) {
 
 $updatedCourses = [];
 $potentialDuplicates = [];
+$newCourses = [];
 $count = 0;
 foreach ($hubCourses as $hcCode => $hc) {
     if (isset($lsappCourses[$hcCode])) {
@@ -200,6 +201,15 @@ foreach ($hubCourses as $hcCode => $hc) {
         $itemCode = $newCourse[4];
         $updatedCourses[$itemCode] = $newCourse;
         $logEntries[] = "Added new course '{$newCourse[2]}' (Item Code: {$newCourse[4]})";
+
+        // Track new course for email notification
+        $newCourses[] = [
+            'course_id' => $courseId,
+            'course_name' => $hc[1],
+            'item_code' => $hc[0],
+            'method' => $hc[3] ?? '',
+            'partner' => $hc[10] ?? ''
+        ];
     }
 }
 
@@ -306,7 +316,7 @@ if (!empty($potentialDuplicates)) {
 
         // Send email
         $result = $ches->sendEmail(
-            ['Corporatelearning.admin@gov.bc.ca'],
+            ['Corporatelearning.admin@gov.bc.ca', 'allan.haggett@gov.bc.ca'],
             $subject,
             $bodyText,
             $bodyHtml,
@@ -320,6 +330,70 @@ if (!empty($potentialDuplicates)) {
 
     } catch (Exception $e) {
         $logEntries[] = "ERROR: Failed to send duplicate detection email: " . $e->getMessage();
+    }
+}
+
+// Send email notification if new courses were added
+if (!empty($newCourses)) {
+    require_once(BASE_DIR . '/inc/ches_client.php');
+
+    try {
+        $ches = new CHESClient();
+
+        // Build email content
+        $newCourseCount = count($newCourses);
+        $subject = "Course Sync: $newCourseCount New Course" . ($newCourseCount > 1 ? 's' : '') . " Added";
+
+        $bodyHtml = "<h2>ELM Course Sync - New Course" . ($newCourseCount > 1 ? 's' : '') . " Added</h2>";
+        $bodyHtml .= "<p>The course sync process added <strong>$newCourseCount new course" . ($newCourseCount > 1 ? 's' : '') . "</strong> to LSApp.</p>";
+        $bodyHtml .= "<h3>New Courses:</h3>";
+        $bodyHtml .= "<table border='1' cellpadding='8' cellspacing='0' style='border-collapse: collapse; font-family: Arial, sans-serif;'>";
+        $bodyHtml .= "<tr style='background-color: #f2f2f2;'>";
+        $bodyHtml .= "<th>Course Name</th><th>Item Code</th><th>Method</th><th>Partner</th><th>View Course</th>";
+        $bodyHtml .= "</tr>";
+
+        foreach ($newCourses as $course) {
+            $courseUrl = "https://gww.bcpublicservice.gov.bc.ca/lsapp/course.php?courseid=" . urlencode($course['course_id']);
+            $bodyHtml .= "<tr>";
+            $bodyHtml .= "<td>" . htmlspecialchars($course['course_name']) . "</td>";
+            $bodyHtml .= "<td>" . htmlspecialchars($course['item_code']) . "</td>";
+            $bodyHtml .= "<td>" . htmlspecialchars($course['method']) . "</td>";
+            $bodyHtml .= "<td>" . htmlspecialchars($course['partner']) . "</td>";
+            $bodyHtml .= "<td><a href='" . htmlspecialchars($courseUrl) . "'>View Course</a></td>";
+            $bodyHtml .= "</tr>";
+        }
+
+        $bodyHtml .= "</table>";
+        $bodyHtml .= "<p>Sync timestamp: $isoDateTime</p>";
+
+        $bodyText = "ELM Course Sync - New Course" . ($newCourseCount > 1 ? 's' : '') . " Added\n\n";
+        $bodyText .= "The course sync process added $newCourseCount new course" . ($newCourseCount > 1 ? 's' : '') . " to LSApp.\n\n";
+        $bodyText .= "New Courses:\n\n";
+
+        foreach ($newCourses as $course) {
+            $courseUrl = "https://gww.bcpublicservice.gov.bc.ca/lsapp/course.php?courseid=" . urlencode($course['course_id']);
+            $bodyText .= "Course: {$course['course_name']}\n";
+            $bodyText .= "Item Code: {$course['item_code']}\n";
+            $bodyText .= "Method: {$course['method']}\n";
+            $bodyText .= "Partner: {$course['partner']}\n";
+            $bodyText .= "View: $courseUrl\n\n";
+        }
+
+        $bodyText .= "Sync timestamp: $isoDateTime\n";
+
+        // Send email
+        $result = $ches->sendEmail(
+            ['allan.haggett@gov.bc.ca'],
+            $subject,
+            $bodyText,
+            $bodyHtml,
+            'lsapp_syncbot_noreply@gov.bc.ca'
+        );
+
+        $logEntries[] = "Sent new course notification email to Corporatelearning.admin@gov.bc.ca (Transaction ID: {$result['txId']})";
+
+    } catch (Exception $e) {
+        $logEntries[] = "ERROR: Failed to send new course notification email: " . $e->getMessage();
     }
 }
 
