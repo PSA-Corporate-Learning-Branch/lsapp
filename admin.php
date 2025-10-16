@@ -61,23 +61,24 @@ foreach ($files as $file) {
 <h3>Pending Class Changes <span class="badge text-bg-dark"><?= count($classchanges) ?></span></h3>
 <ul class="list-group mb-3">
 
-<?php foreach($classchanges as $change): ?>
+	<?php foreach($classchanges as $change): ?>
 
+		<li class="list-group-item">
+			<a href="class.php?classid=<?= $change[1] ?>"><?php echo goodDateShort($change[3]) ?>
+			<?= $change[2] ?> <?= !empty($change[4]) ? 'in ' . $change[4] : '' ?> </a>
+			<?php $n = preg_replace('/(^|\s)@([\w_\.]+)/', '$1<a href="person.php?idir=$2">@$2</a>', $change[10]) ?>
+			<?php $calert = 'alert-secondary'; if($change[11] == 'Cancel') $calert = 'alert-danger' ?>
+			<div class="alert <?= $calert ?> mb-0 p-0 pl-2">
+				<small><?php echo goodDateShort($change[5]) ?> <a href="person.php?idir=<?= $change[6] ?>"><?= $change[6] ?></a> requests:</small><br>
+				<?php if($change[11]): ?><strong><?= h($change[11]) ?></strong><br><?php endif ?>
+				<?= $n ?>
+			</div>
+		</li>
 
-<li class="list-group-item">
-	<a href="class.php?classid=<?= $change[1] ?>"><?php echo goodDateShort($change[3]) ?>
-	<?= $change[2] ?> in <?= $change[4] ?> </a>
-	<?php $n = preg_replace('/(^|\s)@([\w_\.]+)/', '$1<a href="person.php?idir=$2">@$2</a>', $change[10]) ?>
-	<?php $calert = 'alert-secondary'; if($change[11] == 'Cancel') $calert = 'alert-danger' ?>
-	<div class="alert <?= $calert ?> mb-0 p-0 pl-2">
-		<small><?php echo goodDateShort($change[5]) ?> <a href="person.php?idir=<?= $change[6] ?>"><?= $change[6] ?></a> requests:</small><br>
-		<?php if($change[11]): ?><strong><?= h($change[11]) ?></strong><br><?php endif ?>
-		<?= $n ?>
-	</div>
-</li>
-
-<?php endforeach ?>
+	<?php endforeach ?>
 </ul>
+
+<h3>Upcoming Class Changes <span class="badge text-bg-dark"><?= count($classchanges) ?></span></h3>
 </div>
 <div class="col-md-3">
 
