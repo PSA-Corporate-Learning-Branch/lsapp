@@ -132,19 +132,28 @@ foreach ($classchanges as $classchange) {
 	
 	<?php foreach($upcomingclasschanges as $change): ?>
 
+		<?php
+			// we already know these changes have an action date that is more than $upcomingdays away
+			// so we just need to format our date
+			$actiondate = goodDateShort($change[13]);
+		?>
+
 		<li class="list-group-item">
 			<a href="class.php?classid=<?= $change[1] ?>"><?php echo goodDateShort($change[3]) ?>
 			<?= $change[2] ?> <?= !empty($change[4]) ? 'in ' . $change[4] : '' ?> </a>
 			<?php $n = preg_replace('/(^|\s)@([\w_\.]+)/', '$1<a href="person.php?idir=$2">@$2</a>', $change[10]) ?>
 			<?php $calert = 'alert-secondary'; ?>
 			<?php if($change[11] == 'Cancel') $calert = 'alert-danger' ?>
-			<div class="alert <?= $calert ?> mb-0 p-0 pl-2">
-				<small><?php echo goodDateShort($change[5]) ?> <a href="person.php?idir=<?= $change[6] ?>"><?= $change[6] ?></a> requests:</small><br>
-				<?php if($change[11]): ?>
-					<strong><?= h($change[11]) ?></strong><br>
-				<?php endif ?>
+			<div class="alert <?= $calert ?> mb-0 p-2 pl-2">
+				<div class="d-flex w-100 justify-content-between">
+					<?php if($change[11]): ?>
+						<strong><?= h($change[11]) ?></strong><br>
+					<?php endif ?>
+					<?= isset($actiondate) ? '<small><strong> Action on: ' . $actiondate . '</strong></small>' : ''; ?>
+				</div>
 				<?= $n ?>
 			</div>
+			<small class="text-muted">Requested on <?= goodDateShort($change[5]) ?> by <a href="person.php?idir=<?= $change[6] ?>"><?= $change[6] ?></a></small>
 		</li>
 
 	<?php endforeach ?>
