@@ -132,7 +132,7 @@ foreach ($allCourses as $courseid => $course) {
         }
 
         // Directory where the new index.php will be placed
-        $directory = 'E:/WebSites/NonSSOLearning/openaccess';
+        $directory = 'E:/WebSites/lsapp-data/openaccess';
 
         // Check if directory exists, if not, create it
         if (!is_dir($directory)) {
