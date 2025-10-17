@@ -203,4 +203,5 @@ foreach ($allCourses as $courseid => $course) {
 //     }
 // }
 // Redirect to the requested courses RSS feed generation
-header('Location: requested-courses-rss.php');
+//header('Location: requested-courses-rss.php');
+exit;

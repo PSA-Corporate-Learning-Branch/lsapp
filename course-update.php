@@ -77,6 +77,8 @@ if($_POST) {
     // Clean LAN path
     $lanpath = ltrim(trim($_POST['PathLAN']),'\\');
     $lanpath = rtrim($lanpath,'\\');
+    $pathnik = ltrim(trim($_POST['PathNIK']),'\\');
+    $pathnik = rtrim($pathnik,'\\');
     
     // Create slug
     $slug = createSlug($_POST['CourseName']);
@@ -131,7 +133,7 @@ if($_POST) {
         $lanpath,
         sanitize($_POST['PathStaging']),
         sanitize($_POST['PathLive']),
-        sanitize($_POST['PathNIK']),
+        sanitize($pathnik),
         sanitize($_POST['CHEFSFormID']), // CHEFSFormID
         $isMoodle,
         sanitize($_POST['TaxonomyProcessed'] ?? ''),
@@ -723,13 +725,13 @@ $reportinglist = getReportingList();
             </div>
             <div class="col-md-6 mb-3">
                 <label for="PathStaging" class="form-label">Staging Path</label>
-                <input type="text" name="PathStaging" id="PathStaging" class="form-control" value="<?= sanitize($deets[43]) ?>">
+                <input type="url" name="PathStaging" id="PathStaging" class="form-control" value="<?= sanitize($deets[43]) ?>">
             </div>
         </div>
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label for="PathLive" class="form-label">Live Path</label>
-                <input type="text" name="PathLive" id="PathLive" class="form-control" value="<?= sanitize($deets[44]) ?>">
+                <input type="url" name="PathLive" id="PathLive" class="form-control" value="<?= sanitize($deets[44]) ?>">
             </div>
             <div class="col-md-6 mb-3">
                 <label for="PathNIK" class="form-label">NIK Path</label>

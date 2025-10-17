@@ -368,7 +368,7 @@ $openAccessCode = $accessCodeData[0]['code'] ?? '';
 		<?php if($deets[22]): ?>
 		<div class=""><strong>eLearning link:</strong> <a href="<?= $deets[22] ?>" target="_blank"><?= $deets[22] ?></a></div>
 		<?php endif ?>
-		<!-- //42-PathLAN,43-PathStaging,44-PathLive,45-PathNIK,46-PathTeams -->
+		<!-- //42-PathLAN,43-PathStaging,44-PathLive,45-PathNIK,46-CHEFSFormID -->
 		<div><strong>LAN Path:</strong> \\<?= $deets[42] ?>\ <button class="copy btn btn-sm btn-light" data-clipboard-text="\\<?= $deets[42] ?>\">Copy</button></div>
 		<div><strong>Staging Path:</strong> <?= $deets[43] ?> <button class="copy btn btn-sm btn-light" data-clipboard-text="<?= $deets[43] ?>">Copy</button></div>
 		<div><strong>Live Path:</strong> <?= $deets[44] ?> <button class="copy btn btn-sm btn-light" data-clipboard-text="<?= $deets[44] ?>">Copy</button></div>
@@ -672,7 +672,8 @@ $finalcount = $upcount - $inactive - $closed;
 <div class="col-12">
 	<div class="p-3 my-3 bg-light-subtle rounded-3">
 	<?php if(!empty($deets[13])): ?>
-		Created on <?php echo goodDateLong($deets[13]) ?> by <a href="person.php?idir=<?= $deets[14] ?>"><?= $deets[14] ?></a>
+		Created on <?php echo goodDateLong($deets[13]) ?> by <a href="person.php?idir=<?= $deets[14] ?>"><?= $deets[14] ?></a><br>
+		Last modified <?php echo $deets[51] ?> 
 	<?php endif; ?>
 	</div>
 </div>
