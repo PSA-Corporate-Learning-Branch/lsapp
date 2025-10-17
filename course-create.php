@@ -99,7 +99,7 @@ $newcourse = [
     '',                                             // 43: PathStaging (empty for requests)
     '',                                             // 44: PathLive (empty for requests)
     '',                                             // 45: PathNIK (empty for requests)
-    '',                                             // 46: PathTeams (empty for requests)
+    '',                                             // 46: CHEFSFormID (empty for requests)
     0,                                              // 47: isMoodle (default false)
     0,                                              // 48: TaxonomyProcessed (default false)
     '',                                             // 49: TaxonomyProcessedBy (empty)

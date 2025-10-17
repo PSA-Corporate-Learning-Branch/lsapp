@@ -193,7 +193,7 @@ foreach ($hubCourses as $hcCode => $hc) {
             h($hc[14] ?? ''),       // Audience
             h($hc[13] ?? ''),       // Levels (Group)
             '', '', '', '', '',     // Reporting, PathLAN, PathStaging, PathLive, PathNIK
-            '',                     // PathTeams
+            '',                     // CHEFSFormID
             0,                      // isMoodle
             0, '',                  // TaxProcessed, TaxProcessedBy
             h($hc[11] ?? ''),       // ELMCourseID
@@ -500,7 +500,7 @@ if ($fpTemp !== false) {
         'Responsibility', 'ServiceLine', 'STOB', 'MinEnroll', 'MaxEnroll', 'StartTime', 'EndTime',
         'Color', 'Featured', 'Developer', 'EvaluationsLink', 'LearningHubPartner', 'Alchemer',
         'Topics', 'Audience', 'Levels', 'Reporting', 'PathLAN', 'PathStaging', 'PathLive',
-        'PathNIK', 'PathTeams', 'isMoodle', 'TaxProcessed', 'TaxProcessedBy', 'ELMCourseID',
+        'PathNIK', 'CHEFSFormID', 'isMoodle', 'TaxProcessed', 'TaxProcessedBy', 'ELMCourseID',
         'Modified', 'Platform', 'HUBInclude', 'RegistrationLink', 'CourseNameSlug', 
         'HubExpirationDate', 'OpenAccessOptin', 'HubIncludeSync', 'HubIncludePersist', 'HubPersistMessage',
         'HubIncludePersistState'

@@ -14,7 +14,7 @@ $slug = createSlug($_POST['CourseName']);
 //27-STOB,28-MinEnroll,29-MaxEnroll,30-StartTime,31-EndTime,32-Color
 //33-Featured,34-Developer,35-EvaluationsLink,36-LearningHubPartner,37-Alchemer,
 //38-Topics,39-Audience,40-Levels,41-Reporting
-//42-PathLAN,43-PathStaging,44-PathLive,45-PathNIK,46-PathTeams
+//42-PathLAN,43-PathStaging,44-PathLive,45-PathNIK,46-CHEFSFormID
 // 47-isMoodle,48-TaxProcessed,49-TaxProcessedBy,50-ELMCourseID,51-Modified
 // 52-Platform, 53-HUBInclude, 54-RegistrationLink, 55-CourseNameSlug, 56-HubExpirationDate
 $newcourse = [
@@ -64,7 +64,7 @@ $newcourse = [
     '', // 43 - PathStaging
     '', // 44 - PathLive
     '', // 45 - PathNIK
-    '', // 46 - PathTeams
+    '', // 46 - CHEFSFormID
     0, // 47 - isMoodle
     0, // 48 - TaxProcessed
     '', // 49 - TaxProcessedBy
@@ -103,7 +103,7 @@ if (isset($_POST['update']) && $_POST['update'] === 'yes') {
                 //27-STOB,28-MinEnroll,29-MaxEnroll,30-StartTime,31-EndTime,32-Color
                 //33-Featured,34-Developer,35-EvaluationsLink,36-LearningHubPartner,37-Alchemer,
                 //38-Topic,39-Audience,40-Levels,41-Reporting
-                //42-PathLAN,43-PathStaging,44-PathLive,45-PathNIK,46-PathTeams
+                //42-PathLAN,43-PathStaging,44-PathLive,45-PathNIK,46-CHEFSFormID
                 // 47-isMoodle,48-TaxProcessed,49-TaxProcessedBy,50-ELMCourseID,51-Modified
                 // 52-Platform, 53-HUBInclude, 54-RegistrationLink, 55-CourseNameSlug, 56-HubExpirationDate
                 $data[1] = h($_POST['Status']);
