@@ -35,13 +35,23 @@ require('layout.php');
 // IDIR bit, so this just strips it off and makes it lowercase for nicer display
 //
 function stripIDIR($idir) {
-	
+
 	$justuser = explode('\\', $idir);
 	return strtolower($justuser[1]);
-	
+
 }
-// define('LOGGED_IN_IDIR', stripIDIR($_SERVER["REMOTE_USER"]));
-define('LOGGED_IN_IDIR', 'ahaggett');
+
+// Auto-detect environment and set authentication accordingly
+$isLocalhost = in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1', '::1']) ||
+               in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1', '::1']);
+
+if ($isLocalhost) {
+    // Development environment - use hardcoded user
+    define('LOGGED_IN_IDIR', 'ahaggett');
+} else {
+    // Production environment - use REMOTE_USER from server auth
+    define('LOGGED_IN_IDIR', stripIDIR($_SERVER["REMOTE_USER"]));
+}
 
 // Last synchronization message for everywhere
 $today = date('Y-m-d');

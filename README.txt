@@ -106,7 +106,7 @@ Prerequisites,Keywords,Category,Method,elearning,WeShip,ProjectNumber,Responsibi
 //27-STOB,28-MinEnroll,29-MaxEnroll,30-StartTime,31-EndTime,32-Color
 //33-Featured,34-Developer,35-EvaluationsLink,36-LearningHubPartner,37-Alchemer,
 //38-Topics,39-Audience,40-Levels,41-Reporting
-//42-PathLAN,43-PathStaging,44-PathLive,45-PathNIK,46-PathTeams
+//42-PathLAN,43-PathStaging,44-PathLive,45-PathNIK,46-CHEFSFormID
 // 47-isMoodle,48-TaxProcessed,49-TaxProcessedBy,50-ELMCourseID,51-Modified
 // 52-Platform, 53-HUBInclude, 54-RegistrationLink, 55-CourseNameSlug, 56-HubExpirationDate, 57-OpenAccessOptin
 // 58-HubIncludeSync, 59-HubIncludePersist, 60-HubPersistMessage
