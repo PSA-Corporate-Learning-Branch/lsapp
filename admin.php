@@ -299,11 +299,8 @@ foreach($c as $line) {
 
 
 <?php require('templates/javascript.php') ?>
-<script src="/lsapp/js/summernote-bs4.js"></script>
 <script>
 $(document).ready(function(){
-
-	$('.search').focus();
 
 	var options = {
 		valueNames: [ 'claimed', 
@@ -313,45 +310,6 @@ $(document).ready(function(){
 					]
 	};
 	var requestedclasses = new List('requestedclasses', options);
-	
-	$('.summernote').summernote({
-		//airMode: true,
-		popover: {
-			air: [
-				['color', ['color']],
-				['font', ['bold', 'underline', 'clear']],
-				['table']
-			]
-		},
-		toolbar: [
-			// [groupName, [list of button]]
-			['style'],
-			['style', ['bold', 'italic']],
-			['para', ['ul', 'ol']],
-			['color', ['color']],
-			['link'] //,['codeview']
-		],
-		placeholder: 'Type here',
-		hint: {
-			<?php $peeps = getPeopleAll() ?>
-			mentions: [
-			<?php foreach($peeps as $p): ?>
-			'<?= $p[0] ?>',
-			<?php endforeach ?>
-			],
-			match: /\B@(\w*)$/,
-			search: function (keyword, callback) {
-			callback($.grep(this.mentions, function (item) {
-				return item.indexOf(keyword) == 0;
-			}));
-			},
-			content: function (item) {
-				return '@' + item;
-			}
-		}
-		
-	});	
-	
 	
 $('.claimform').on('submit',function(e){
 
@@ -382,8 +340,6 @@ $('.claimform').on('submit',function(e){
 	e.preventDefault();
 
 });
-
-
 	
 });
 </script>
