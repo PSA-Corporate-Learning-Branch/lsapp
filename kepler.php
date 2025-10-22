@@ -145,7 +145,7 @@ $istorepeople = getiStoreDesignees();
         new email manually and send it to ItServiceRequest@gov.bc.ca</div>
 
 <div class="d-flex w-100 justify-content-between">
-    <label class="m-0" for="template">Request Template:</label>
+    <label for="template">Request Template:</label>
     <button class="copy btn btn-sm bg-light-subtle mb-2 shadow-sm" data-clipboard-target="#template">Copy Text</button>
 </div>
 <textarea name="template" id="template" class="form-control" cols="30" rows="11">
