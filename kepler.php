@@ -136,7 +136,7 @@ $istorepeople = getiStoreDesignees();
         
 
     <div>
-        <a class="btn btn-block btn-primary mb-4" href="mailto:ItServiceRequest@gov.bc.ca?BCC=Corporatelearning.admin@gov.bc.ca&body=Dear IT Service Request Team,%0D%0DPlease add:%0D%0D<?= $person[2] ?> (<?= $person[0] ?>) <?= $person[3] ?> to security group PSA_w_ELM_prod_C on Kepler.%0D%0DThank you,%0D%0DThe Corporate Learning Branch&subject=Request: Add user to PSA_w_ELM_prod_C on Kepler">
+        <a class="btn btn-block btn-primary mb-4 shadow-sm" href="mailto:ItServiceRequest@gov.bc.ca?BCC=Corporatelearning.admin@gov.bc.ca&body=Dear IT Service Request Team,%0D%0DPlease add:%0D%0D<?= $person[2] ?> (<?= $person[0] ?>) <?= $person[3] ?> to security group PSA_w_ELM_prod_C on Kepler.%0D%0DThank you,%0D%0DThe Corporate Learning Branch&subject=Request: Add user to PSA_w_ELM_prod_C on Kepler">
             Send New Request
         </a>
     </div>
@@ -144,8 +144,11 @@ $istorepeople = getiStoreDesignees();
     <div class="alert alert-warning">If the button doesn't work for you, please copy the following text into a 
         new email manually and send it to ItServiceRequest@gov.bc.ca</div>
 
-<label for="template">Request Template</label>
-<textarea name="template" id="template" class="form-control" cols="30" rows="13">
+<div class="d-flex w-100 justify-content-between">
+    <label class="m-0" for="template">Request Template:</label>
+    <button class="copy btn btn-sm bg-light-subtle mb-2 shadow-sm" data-clipboard-target="#template">Copy Text</button>
+</div>
+<textarea name="template" id="template" class="form-control" cols="30" rows="11">
 Dear IT Service Request Team,
 
 Please add:
@@ -159,10 +162,22 @@ Thank you,
 The Corporate Learning Branch 
 </textarea>
 
+
 </div> <!-- /column --> 
 </div> <!-- /row --> 
 </div> <!-- /container --> 
 
+<script src="js/clipboard.min.js"></script>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        var clipboard = new Clipboard('.copy');
+
+    });
+
+</script>
 
 <?php require('templates/javascript.php') ?>
 <?php require('templates/footer.php') ?>
