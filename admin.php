@@ -57,27 +57,109 @@ foreach ($files as $file) {
 
 <div class="col-md-3">
 
-<?php $classchanges = getPendingClassChanges() ?>
-<h3>Pending Class Changes <span class="badge text-bg-dark"><?= count($classchanges) ?></span></h3>
+<?php 
+$classchanges = getPendingClassChanges();
+$pendingcount = 0;
+$upcomingcount = 0;
+$upcomingdays = 7; // at what point do we bring something from upcoming to pending
+$pendingclasschanges = array();
+$upcomingclasschanges = array();
+foreach ($classchanges as $classchange) {
+    // has an action on date
+	if (!empty($classchange[13])) {
+        // if it needs to be actioned further out than our set # of days
+		if (daysFromNow($classchange[13]) > $upcomingdays) {
+			$upcomingcount++;
+			array_push($upcomingclasschanges, $classchange);
+		} else {
+			$pendingcount++;
+			array_push($pendingclasschanges, $classchange);
+		}
+    } else {
+		$pendingcount++;
+		array_push($pendingclasschanges, $classchange);
+	}
+}
+?>
+
+<h3>Pending Class Changes <span class="badge text-bg-dark"><?= $pendingcount ?></span></h3>
 <ul class="list-group mb-3">
 
-<?php foreach($classchanges as $change): ?>
+	<?php foreach($pendingclasschanges as $change): ?>
+		<?php
+			// if request has an action on / scheduled date
+			$action = 'anytime';
+			if (!empty($change[13])) {
+				$actionondays = daysFromNow($change[13]);
+				$actiondate = goodDateShort($change[13]);
+				if ($actionondays <= 0) {
+					$action = 'now';
+				} elseif ($actionondays <= $upcomingdays) {
+					$action = 'soon';
+				}
+			}
+		?>
 
+		<li class="list-group-item">
+			<a href="class.php?classid=<?= $change[1] ?>"><?php echo goodDateShort($change[3]) ?>
+			<?= $change[2] ?> <?= !empty($change[4]) ? 'in ' . $change[4] : '' ?> </a>
+			<?php $n = preg_replace('/(^|\s)@([\w_\.]+)/', '$1<a href="person.php?idir=$2">@$2</a>', $change[10]) ?>
+			<?php $calert = 'alert-secondary'; ?>
+			<?php if($action == 'soon') $calert = 'alert-warning' ?>
+			<?php if($change[11] == 'Cancel' || $action == 'now') $calert = 'alert-danger' ?>
+			<div class="alert <?= $calert ?> mb-0 p-2 pl-2">
+				<div class="d-flex w-100 justify-content-between">
+					<?php if($change[11]): ?>
+						<strong><?= h($change[11]) ?></strong><br>
+					<?php endif ?>
+					<?= isset($actiondate) ? '<small><strong> Action on: ' . $actiondate . '</strong></small>' : ''; ?>
+				</div>
+				<?= $n ?>
+			</div>
+			<small class="text-muted">Requested on <?= goodDateShort($change[5]) ?> by <a href="person.php?idir=<?= $change[6] ?>"><?= $change[6] ?></a></small>
+		</li>
 
-<li class="list-group-item">
-	<a href="class.php?classid=<?= $change[1] ?>"><?php echo goodDateShort($change[3]) ?>
-	<?= $change[2] ?> in <?= $change[4] ?> </a>
-	<?php $n = preg_replace('/(^|\s)@([\w_\.]+)/', '$1<a href="person.php?idir=$2">@$2</a>', $change[10]) ?>
-	<?php $calert = 'alert-secondary'; if($change[11] == 'Cancel') $calert = 'alert-danger' ?>
-	<div class="alert <?= $calert ?> mb-0 p-0 pl-2">
-		<small><?php echo goodDateShort($change[5]) ?> <a href="person.php?idir=<?= $change[6] ?>"><?= $change[6] ?></a> requests:</small><br>
-		<?php if($change[11]): ?><strong><?= h($change[11]) ?></strong><br><?php endif ?>
-		<?= $n ?>
-	</div>
-</li>
-
-<?php endforeach ?>
+	<?php endforeach ?>
 </ul>
+
+<details>
+
+<summary class="mb-2">
+	<h3 style="display: inline;">Upcoming Class Changes <span class="badge text-bg-dark"><?= $upcomingcount ?></span></h3>
+</summary>
+
+<ul class="list-group mb-3">
+	
+	<?php foreach($upcomingclasschanges as $change): ?>
+
+		<?php
+			// we already know these changes have an action date that is more than $upcomingdays away
+			// so we just need to format our date
+			$actiondate = goodDateShort($change[13]);
+		?>
+
+		<li class="list-group-item">
+			<a href="class.php?classid=<?= $change[1] ?>"><?php echo goodDateShort($change[3]) ?>
+			<?= $change[2] ?> <?= !empty($change[4]) ? 'in ' . $change[4] : '' ?> </a>
+			<?php $n = preg_replace('/(^|\s)@([\w_\.]+)/', '$1<a href="person.php?idir=$2">@$2</a>', $change[10]) ?>
+			<?php $calert = 'alert-secondary'; ?>
+			<?php if($change[11] == 'Cancel') $calert = 'alert-danger' ?>
+			<div class="alert <?= $calert ?> mb-0 p-2 pl-2">
+				<div class="d-flex w-100 justify-content-between">
+					<?php if($change[11]): ?>
+						<strong><?= h($change[11]) ?></strong><br>
+					<?php endif ?>
+					<?= isset($actiondate) ? '<small><strong> Action on: ' . $actiondate . '</strong></small>' : ''; ?>
+				</div>
+				<?= $n ?>
+			</div>
+			<small class="text-muted">Requested on <?= goodDateShort($change[5]) ?> by <a href="person.php?idir=<?= $change[6] ?>"><?= $change[6] ?></a></small>
+		</li>
+
+	<?php endforeach ?>
+
+</ul>
+</details>
 </div>
 <div class="col-md-3">
 
@@ -217,11 +299,8 @@ foreach($c as $line) {
 
 
 <?php require('templates/javascript.php') ?>
-<script src="/lsapp/js/summernote-bs4.js"></script>
 <script>
 $(document).ready(function(){
-
-	$('.search').focus();
 
 	var options = {
 		valueNames: [ 'claimed', 
@@ -231,45 +310,6 @@ $(document).ready(function(){
 					]
 	};
 	var requestedclasses = new List('requestedclasses', options);
-	
-	$('.summernote').summernote({
-		//airMode: true,
-		popover: {
-			air: [
-				['color', ['color']],
-				['font', ['bold', 'underline', 'clear']],
-				['table']
-			]
-		},
-		toolbar: [
-			// [groupName, [list of button]]
-			['style'],
-			['style', ['bold', 'italic']],
-			['para', ['ul', 'ol']],
-			['color', ['color']],
-			['link'] //,['codeview']
-		],
-		placeholder: 'Type here',
-		hint: {
-			<?php $peeps = getPeopleAll() ?>
-			mentions: [
-			<?php foreach($peeps as $p): ?>
-			'<?= $p[0] ?>',
-			<?php endforeach ?>
-			],
-			match: /\B@(\w*)$/,
-			search: function (keyword, callback) {
-			callback($.grep(this.mentions, function (item) {
-				return item.indexOf(keyword) == 0;
-			}));
-			},
-			content: function (item) {
-				return '@' + item;
-			}
-		}
-		
-	});	
-	
 	
 $('.claimform').on('submit',function(e){
 
@@ -300,8 +340,6 @@ $('.claimform').on('submit',function(e){
 	e.preventDefault();
 
 });
-
-
 	
 });
 </script>

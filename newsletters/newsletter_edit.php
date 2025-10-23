@@ -17,7 +17,7 @@ try {
     $db = new PDO("sqlite:../data/subscriptions.db");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+    handleDatabaseError($e);
 }
 
 $newsletter = null;
@@ -50,34 +50,38 @@ $messageType = '';
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Validate CSRF token
+    requireCsrfToken();
+
     try {
         $name = trim($_POST['name']);
         $description = trim($_POST['description']);
-        $formId = trim($_POST['form_id']);
-        $apiUsername = trim($_POST['api_username']);
-        $apiPassword = trim($_POST['api_password']);
-        
-        // Encrypt the password before storing
-        $encryptedPassword = EncryptionHelper::encrypt($apiPassword);
-        $apiUrl = trim($_POST['api_url']) ?: 'https://submit.digital.gov.bc.ca/app/api/v1/forms';
-        
+        $formId = !empty($_POST['form_id']) ? trim($_POST['form_id']) : null;
+        $apiUsername = !empty($_POST['api_username']) ? trim($_POST['api_username']) : null;
+        $apiPassword = !empty($_POST['api_password']) ? trim($_POST['api_password']) : null;
+        $trackingUrl = !empty($_POST['tracking_url']) ? trim($_POST['tracking_url']) : null;
+
+        // Encrypt the password before storing (only if provided)
+        $encryptedPassword = null;
+        if ($apiPassword) {
+            $encryptedPassword = EncryptionHelper::encrypt($apiPassword);
+        }
+        $apiUrl = !empty($_POST['api_url']) ? trim($_POST['api_url']) : 'https://submit.digital.gov.bc.ca/app/api/v1/forms';
+
         // Validation
         if (empty($name)) {
             throw new Exception("Newsletter name is required");
         }
-        if (empty($formId)) {
-            throw new Exception("Form ID is required");
-        }
-        if (empty($apiUsername)) {
-            throw new Exception("API Username is required");
-        }
-        if (empty($apiPassword)) {
-            throw new Exception("API Password is required");
-        }
-        
-        // Validate Form ID format (UUID)
-        if (!preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i', $formId)) {
+
+        // Validate Form ID format (UUID) only if provided
+        if ($formId && !preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i', $formId)) {
             throw new Exception("Form ID must be a valid UUID format");
+        }
+
+        // If any API field is provided, all must be provided
+        $hasAnyApiField = $formId || $apiUsername || $apiPassword;
+        if ($hasAnyApiField && (!$formId || !$apiUsername || !$apiPassword)) {
+            throw new Exception("If using form API sync, all API fields (Form ID, Username, Password) are required");
         }
         
         $now = date('Y-m-d H:i:s');
@@ -85,32 +89,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($newsletterId) {
             // Update existing
             $stmt = $db->prepare("
-                UPDATE newsletters 
-                SET name = ?, description = ?, form_id = ?, api_username = ?, 
-                    api_password = ?, api_url = ?, updated_at = ?
+                UPDATE newsletters
+                SET name = ?, description = ?, form_id = ?, api_username = ?,
+                    api_password = ?, api_url = ?, tracking_url = ?, updated_at = ?
                 WHERE id = ?
             ");
             $stmt->execute([
-                $name, $description, $formId, $apiUsername, 
-                $encryptedPassword, $apiUrl, $now, $newsletterId
+                $name, $description, $formId, $apiUsername,
+                $encryptedPassword, $apiUrl, $trackingUrl, $now, $newsletterId
             ]);
             $message = "Newsletter updated successfully";
         } else {
-            // Check if form_id already exists
-            $checkStmt = $db->prepare("SELECT id FROM newsletters WHERE form_id = ?");
-            $checkStmt->execute([$formId]);
-            if ($checkStmt->fetch()) {
-                throw new Exception("A newsletter with this Form ID already exists");
+            // Check if form_id already exists (only if provided)
+            if ($formId) {
+                $checkStmt = $db->prepare("SELECT id FROM newsletters WHERE form_id = ?");
+                $checkStmt->execute([$formId]);
+                if ($checkStmt->fetch()) {
+                    throw new Exception("A newsletter with this Form ID already exists");
+                }
             }
-            
+
             // Insert new
             $stmt = $db->prepare("
-                INSERT INTO newsletters (name, description, form_id, api_username, api_password, api_url, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO newsletters (name, description, form_id, api_username, api_password, api_url, tracking_url, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
-                $name, $description, $formId, $apiUsername, 
-                $encryptedPassword, $apiUrl, $now, $now
+                $name, $description, $formId, $apiUsername,
+                $encryptedPassword, $apiUrl, $trackingUrl, $now, $now
             ]);
             $newsletterId = $db->lastInsertId();
             $message = "Newsletter created successfully";
@@ -118,19 +124,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $messageType = 'success';
         
-        // Optionally test the connection
-        if (isset($_POST['test_connection'])) {
+        // Optionally test the connection (only if API credentials are provided)
+        if (isset($_POST['test_connection']) && $formId && $apiUsername && $apiPassword) {
             $testUrl = $apiUrl . '/' . $formId . '/export?format=json&type=submissions';
-            
+
             $context = stream_context_create([
                 'http' => [
                     'header' => "Authorization: Basic " . base64_encode("$apiUsername:$apiPassword"),
                     'timeout' => 10
                 ]
             ]);
-            
+
             $response = @file_get_contents($testUrl, false, $context);
-            
+
             if ($response === false) {
                 $message .= " (Warning: Could not connect to API with provided credentials)";
                 $messageType = 'warning';
@@ -146,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
     } catch (Exception $e) {
-        $message = "Error: " . $e->getMessage();
+        $message = getUserFriendlyError($e);
         $messageType = 'error';
     }
 }
@@ -250,6 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="card">
                 <div class="card-body">
                     <form method="post" action="">
+                        <?php csrfField(); ?>
                         <div class="mb-3">
                             <label for="name" class="form-label">Newsletter Name <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="name" name="name" 
@@ -265,37 +272,35 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         
                         <hr class="my-4">
-                        <h5>API Configuration</h5>
-                        
+                        <h5>API Configuration <span class="text-secondary small">(Optional - for automated sync)</span></h5>
+                        <p class="text-muted small">Leave these fields empty if you plan to import subscribers manually via CSV instead of using form API sync.</p>
+
                         <div class="mb-3">
-                            <label for="form_id" class="form-label">Form ID <span class="text-danger" aria-label="required">*</span></label>
-                            <input type="text" class="form-control font-monospace" id="form_id" name="form_id" 
-                                   value="<?php echo htmlspecialchars($_POST['form_id'] ?? $newsletter['form_id'] ?? ''); ?>" 
+                            <label for="form_id" class="form-label">Form ID</label>
+                            <input type="text" class="form-control font-monospace" id="form_id" name="form_id"
+                                   value="<?php echo htmlspecialchars($_POST['form_id'] ?? $newsletter['form_id'] ?? ''); ?>"
                                    placeholder="e.g., fd03b54b-84aa-4a05-b5ff-c5536b733f57"
                                    pattern="[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
-                                   aria-describedby="form-id-help form-id-format"
-                                   required>
+                                   aria-describedby="form-id-help form-id-format">
                             <div id="form-id-help" class="form-text">The UUID of the form in BC Gov Digital Forms</div>
                             <div id="form-id-format" class="form-text">Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (lowercase letters and numbers only)</div>
                         </div>
-                        
+
                         <div class="mb-3">
-                            <label for="api_username" class="form-label">API Username <span class="text-danger" aria-label="required">*</span></label>
-                            <input type="text" class="form-control font-monospace" id="api_username" name="api_username" 
-                                   value="<?php echo htmlspecialchars($_POST['api_username'] ?? $newsletter['api_username'] ?? ''); ?>" 
+                            <label for="api_username" class="form-label">API Username</label>
+                            <input type="text" class="form-control font-monospace" id="api_username" name="api_username"
+                                   value="<?php echo htmlspecialchars($_POST['api_username'] ?? $newsletter['api_username'] ?? ''); ?>"
                                    aria-describedby="api-username-help"
-                                   autocomplete="username"
-                                   required>
+                                   autocomplete="username">
                             <div id="api-username-help" class="form-text">Username for Basic Authentication (often same as Form ID)</div>
                         </div>
-                        
+
                         <div class="mb-3">
-                            <label for="api_password" class="form-label">API Password <span class="text-danger" aria-label="required">*</span></label>
-                            <input type="password" class="form-control font-monospace" id="api_password" name="api_password" 
-                                   value="<?php echo htmlspecialchars($_POST['api_password'] ?? $newsletter['api_password_decrypted'] ?? ''); ?>" 
+                            <label for="api_password" class="form-label">API Password</label>
+                            <input type="password" class="form-control font-monospace" id="api_password" name="api_password"
+                                   value="<?php echo htmlspecialchars($_POST['api_password'] ?? $newsletter['api_password_decrypted'] ?? ''); ?>"
                                    aria-describedby="api-password-help api-password-security"
-                                   autocomplete="current-password"
-                                   required>
+                                   autocomplete="current-password">
                             <div id="api-password-help" class="form-text">Password/API Key for Basic Authentication</div>
                             <div id="api-password-security" class="form-text text-info">
                                 <small><span aria-hidden="true">🔒</span> This password is encrypted before storage for security</small>
@@ -304,11 +309,26 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         <div class="mb-3">
                             <label for="api_url" class="form-label">API Base URL</label>
-                            <input type="url" class="form-control font-monospace" id="api_url" name="api_url" 
+                            <input type="url" class="form-control font-monospace" id="api_url" name="api_url"
                                    value="<?php echo htmlspecialchars($_POST['api_url'] ?? $newsletter['api_url'] ?? 'https://submit.digital.gov.bc.ca/app/api/v1/forms'); ?>">
                             <div class="form-text">Leave default unless using a different API endpoint</div>
                         </div>
-                        
+
+                        <hr class="my-4">
+                        <h5>Email Tracking Configuration <span class="text-secondary small">(Optional)</span></h5>
+                        <p class="text-muted small">Tracking pixels are automatically added to sent emails to track opens.</p>
+
+                        <div class="mb-3">
+                            <label for="tracking_url" class="form-label">Tracking Pixel URL</label>
+                            <input type="url" class="form-control font-monospace" id="tracking_url" name="tracking_url"
+                                   value="<?php echo htmlspecialchars($_POST['tracking_url'] ?? $newsletter['tracking_url'] ?? 'https://learn.bcpublicservice.gov.bc.ca/newsletter-tracker/track.php'); ?>"
+                                   placeholder="https://your-server.com/track.php">
+                            <div class="form-text">
+                                Base URL for the tracking pixel (track.php). Leave blank to disable tracking.
+                                <br><small class="text-warning">⚠️ Note: Most email clients block images by default, so actual open rates are typically 20-40% higher than tracked rates.</small>
+                            </div>
+                        </div>
+
                         <!-- Live region for form feedback -->
                         <div id="form-feedback" aria-live="polite" class="visually-hidden"></div>
                         
@@ -337,16 +357,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="card-body">
                     <h5 class="card-title">📋 Configuration Help</h5>
                     <p class="card-text small">
-                        To configure a newsletter, you need:
+                        <strong>Two ways to manage subscribers:</strong>
+                    </p>
+                    <ol class="small">
+                        <li><strong>Form API Sync (Automated):</strong> Provide Form ID and API credentials to automatically sync subscriptions from BC Gov Digital Forms</li>
+                        <li><strong>CSV Import (Manual):</strong> Skip the API fields and import subscribers from a CSV file instead</li>
+                    </ol>
+                    <p class="card-text small">
+                        <strong>API Fields (all required if using sync):</strong>
                     </p>
                     <ul class="small">
-                        <li><strong>Form ID:</strong> The unique identifier of your form in BC Gov Digital Forms</li>
-                        <li><strong>API Credentials:</strong> Username and password for API access (usually provided when creating the form)</li>
-                        <li><strong>API URL:</strong> The base URL of the API (usually the default value)</li>
+                        <li><strong>Form ID:</strong> The unique identifier of your form</li>
+                        <li><strong>API Credentials:</strong> Username and password for API access</li>
+                        <li><strong>API URL:</strong> The base URL (usually the default)</li>
                     </ul>
-                    <p class="card-text small">
-                        The credentials are used to securely fetch subscription data from the form's API.
-                    </p>
                 </div>
             </div>
             

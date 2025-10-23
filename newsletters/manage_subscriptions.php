@@ -134,7 +134,8 @@ class SubscriptionManager {
             ");
             
         } catch (PDOException $e) {
-            die("Database initialization failed: " . $e->getMessage() . "\n");
+            error_log("Database initialization failed: " . $e->getMessage());
+            die("Database initialization failed. Check error log for details.\n");
         }
     }
     

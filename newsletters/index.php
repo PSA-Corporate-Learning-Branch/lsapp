@@ -13,7 +13,7 @@ try {
     $db = new PDO("sqlite:../data/subscriptions.db");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+    handleDatabaseError($e);
 }
 
 // Handle actions
@@ -21,9 +21,12 @@ $message = '';
 $messageType = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAdminUser) {
+    // Validate CSRF token
+    requireCsrfToken();
+
     if (isset($_POST['action'])) {
         $action = $_POST['action'];
-        
+
         try {
             if ($action === 'toggle_active') {
                 $newsletterId = (int)$_POST['newsletter_id'];
@@ -34,23 +37,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAdminUser) {
                 
             } elseif ($action === 'delete') {
                 $newsletterId = (int)$_POST['newsletter_id'];
-                
+                $confirmed = isset($_POST['confirm_delete']) && $_POST['confirm_delete'] === 'yes';
+
                 // Check if newsletter has any subscriptions
                 $checkStmt = $db->prepare("SELECT COUNT(*) FROM subscriptions WHERE newsletter_id = ?");
                 $checkStmt->execute([$newsletterId]);
                 $count = $checkStmt->fetchColumn();
-                
-                if ($count > 0) {
-                    throw new Exception("Cannot delete newsletter with existing subscriptions. Please remove all subscriptions first.");
+
+                if ($count > 0 && !$confirmed) {
+                    throw new Exception("Newsletter has $count subscribers. Use 'Delete with Subscribers' to permanently delete everything.");
                 }
-                
-                $stmt = $db->prepare("DELETE FROM newsletters WHERE id = ?");
-                $stmt->execute([$newsletterId]);
-                $message = "Newsletter deleted successfully";
-                $messageType = 'success';
+
+                // Begin transaction for complete deletion
+                $db->beginTransaction();
+
+                try {
+                    // Delete subscription history
+                    $historyStmt = $db->prepare("DELETE FROM subscription_history WHERE newsletter_id = ?");
+                    $historyStmt->execute([$newsletterId]);
+
+                    // Delete subscriptions
+                    $subsStmt = $db->prepare("DELETE FROM subscriptions WHERE newsletter_id = ?");
+                    $subsStmt->execute([$newsletterId]);
+
+                    // Delete sync history
+                    $syncStmt = $db->prepare("DELETE FROM last_sync WHERE newsletter_id = ?");
+                    $syncStmt->execute([$newsletterId]);
+
+                    // Delete newsletter
+                    $newsStmt = $db->prepare("DELETE FROM newsletters WHERE id = ?");
+                    $newsStmt->execute([$newsletterId]);
+
+                    $db->commit();
+
+                    if ($count > 0) {
+                        $message = "Newsletter and $count subscribers permanently deleted";
+                    } else {
+                        $message = "Newsletter deleted successfully";
+                    }
+                    $messageType = 'success';
+
+                } catch (Exception $e) {
+                    $db->rollBack();
+                    throw $e;
+                }
             }
         } catch (Exception $e) {
-            $message = "Error: " . $e->getMessage();
+            $message = getUserFriendlyError($e);
             $messageType = 'error';
         }
     }
@@ -204,6 +237,7 @@ $newsletters = $db->query($query)->fetchAll(PDO::FETCH_ASSOC);
                                             </li>
                                             <li>
                                                 <form method="post" action="" class="d-inline">
+                                                    <?php csrfField(); ?>
                                                     <input type="hidden" name="action" value="toggle_active">
                                                     <input type="hidden" name="newsletter_id" value="<?php echo $newsletter['id']; ?>">
                                                     <button type="submit" class="dropdown-item">
@@ -211,17 +245,28 @@ $newsletters = $db->query($query)->fetchAll(PDO::FETCH_ASSOC);
                                                     </button>
                                                 </form>
                                             </li>
-                                            <?php if ($newsletter['total_count'] == 0): ?>
                                             <li>
-                                                <form method="post" action="" onsubmit="return confirm('Are you sure you want to delete this newsletter?')">
-                                                    <input type="hidden" name="action" value="delete">
-                                                    <input type="hidden" name="newsletter_id" value="<?php echo $newsletter['id']; ?>">
-                                                    <button type="submit" class="dropdown-item text-danger">
-                                                        🗑️ Delete
-                                                    </button>
-                                                </form>
+                                                <?php if ($newsletter['total_count'] == 0): ?>
+                                                    <form method="post" action="" onsubmit="return confirm('Are you sure you want to delete this newsletter?')">
+                                                        <?php csrfField(); ?>
+                                                        <input type="hidden" name="action" value="delete">
+                                                        <input type="hidden" name="newsletter_id" value="<?php echo $newsletter['id']; ?>">
+                                                        <button type="submit" class="dropdown-item text-danger">
+                                                            🗑️ Delete Newsletter
+                                                        </button>
+                                                    </form>
+                                                <?php else: ?>
+                                                    <form method="post" action="" onsubmit="return confirm('⚠️ WARNING: This will PERMANENTLY delete this newsletter and ALL <?php echo $newsletter['total_count']; ?> subscribers!\n\nThis includes:\n- <?php echo $newsletter['active_count']; ?> active subscribers\n- <?php echo $newsletter['unsubscribed_count']; ?> unsubscribed records\n- All subscription history\n\nThis action CANNOT be undone!\n\nAre you absolutely sure?')">
+                                                        <?php csrfField(); ?>
+                                                        <input type="hidden" name="action" value="delete">
+                                                        <input type="hidden" name="newsletter_id" value="<?php echo $newsletter['id']; ?>">
+                                                        <input type="hidden" name="confirm_delete" value="yes">
+                                                        <button type="submit" class="dropdown-item text-danger">
+                                                            🗑️ Delete with Subscribers
+                                                        </button>
+                                                    </form>
+                                                <?php endif; ?>
                                             </li>
-                                            <?php endif; ?>
                                         <?php endif; ?>
                                     </ul>
                                 </div>

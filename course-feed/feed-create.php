@@ -102,13 +102,19 @@ $jsonOutput = json_encode($json, JSON_PRETTY_PRINT);
 $jsonFilename = 'data/bcps-corporate-learning-courses.json';
 file_put_contents($jsonFilename, $jsonOutput);
 
-$newfile = 'E:/WebSites/NonSSOLearning/learning-hub/bcps-corporate-learning-courses.json';
+// $newfile = 'E:/WebSites/NonSSOLearning/learning-hub/bcps-corporate-learning-courses.json';
+// We used to be able to just copy the file to the NIK public folder, but something changed
+// with the AppPool identity and it no longer has access to that folder. So now we copy it to
+// a folder we have access to and then we have a separate script run from the NIK side that copies
+// it to the public folder. This is all such a hilarious hack but it is what it is. Open a PR
+// if you have a better idea :)
+
+$newfile = 'E:/WebSites/lsapp-data/bcps-corporate-learning-courses.json';
 if (!copy($jsonFilename, $newfile)) {
     echo 'Failed to copy ' . $jsonFilename . '... contact Allan';
     exit;
 }
 
-// header('Location: ' . $jsonFilename);
-header('Location: course-openaccess-publish.php');
-// header('Location: index.php?message=Success');
-// header('Location: rss2-feed-create.php');
+
+header('Location: index.php?message=Success');
+exit;

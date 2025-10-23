@@ -92,7 +92,7 @@ foreach($hubcourses as $hc) {
 						'', // PathStaging
 						'', // PathLive
 						'', // PathNIK
-						'', // PathTeams
+						'', // CHEFSFormID
 						0, // isMoodle,
 						0, // TaxProcessed
 						'', // TaxProcessedBy

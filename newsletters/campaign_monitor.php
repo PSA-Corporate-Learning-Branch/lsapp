@@ -40,7 +40,7 @@ try {
     }
     
 } catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+    handleDatabaseError($e);
 }
 
 // Calculate initial progress

@@ -1,11 +1,24 @@
-<!-- Example of how to embed tracking pixel in your newsletter emails -->
+<!-- Example of how tracking pixels work in newsletter emails -->
 
-<!-- 
+<!--
+✨ AUTOMATIC TRACKING ENABLED ✨
+
+As of the latest update, tracking pixels are now AUTOMATICALLY added to all
+sent newsletters! You no longer need to manually embed tracking code.
+
+HOW IT WORKS:
+1. Configure the "Tracking Pixel URL" in your newsletter settings
+2. When you send a newsletter, the system automatically appends a tracking pixel
+3. The pixel is injected before </body> or at the end of your HTML
+4. Each recipient gets a unique tracking ID for accurate open tracking
+
 IMPORTANT LIMITATIONS:
 - Only tracks when images are loaded
 - Most corporate email blocks images by default
 - Actual open rate will be 20-40% higher than tracked
 - Consider this a "minimum open rate"
+
+The example below shows what the system automatically generates:
 -->
 
 <!DOCTYPE html>
@@ -37,16 +50,34 @@ IMPORTANT LIMITATIONS:
 </body>
 </html>
 
-<!-- 
-TRACKING ID GENERATION:
-In your send_newsletter.php, generate unique tracking IDs like:
-$unique_tracking_id = md5($recipient_email . $campaign_id . time());
-or
-$unique_tracking_id = uniqid('track_', true);
+<!--
+TRACKING ID GENERATION (Automatic):
+The system automatically generates unique tracking IDs using:
+$trackingId = md5($recipientEmail . $campaignId . time() . bin2hex(random_bytes(8)));
+
+This ensures each recipient/campaign combination has a unique, non-guessable ID.
+
+TRACKING URL FORMAT:
+https://your-tracking-server.com/track.php?id=UNIQUE_ID&e=EMAIL&n=NEWSLETTER_ID&c=CAMPAIGN_ID
+
+Where:
+- id = Unique tracking identifier (MD5 hash)
+- e = Recipient email (URL encoded)
+- n = Newsletter ID
+- c = Campaign ID
+
+CONFIGURATION:
+1. Edit your newsletter in the admin panel
+2. Set "Tracking Pixel URL" to your track.php location
+3. Save the newsletter configuration
+4. All sent emails will automatically include tracking pixels
 
 ALTERNATIVES TO CONSIDER:
 1. Track link clicks instead (more reliable, requires user action)
 2. Use "web version" links that open in browser (100% trackable)
 3. Combine both pixel tracking AND link tracking for better data
 4. Add "If you can't see images, click here" link to encourage image loading
+
+TO DISABLE TRACKING:
+Simply leave the "Tracking Pixel URL" field empty in newsletter settings.
 -->

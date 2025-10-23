@@ -17,27 +17,26 @@
     <details id="scopeguide">
     <summary class="mb-2">Scope guidance</summary>
         <div class="mb-2 p-2 bg-light-subtle rounded-2">
-            <h3>Minor Change</h3>
-            <div><strong>1-2 hours </strong></div>
-            <p>Small revisions to existing content that don’t significantly change the 
-                meaning/consultation with the business owner is not required (e.g., typos, 
-                updating links to existing or new versions of small assets (e.g., images), 
-                minor big fixes that don’t significantly alter the user experience, changes 
-                that don’t require extensive testing, small adjustments to quiz questions 
-                in Moodle or HTML).</p>
+            <h3>Minor Change </h3>
+            <div><strong>1/2 day or less </strong></div>
+            <p>Small revisions to existing content that don't significantly change the 
+                meaning/consultation with the business owner is not required e.g., typos, updating 
+                links to existing or new versions of small assets (e.g., images), minor bug fixes 
+                that don't significantly alter the user experience, changes that don't require 
+                extensive testing, small adjustments to quiz questions in Moodle or HTML.</p>
         </div>
         <div class="mb-2 p-2 bg-light-subtle rounded-2">
-            <h3>Moderate </h3>
-            <div><strong>2 hours – 24 hours </strong></div>
+            <h3>Moderate Change </h3>
+            <div><strong>More than &#189; day - 1 day </strong></div>
             <p>Moderate changes to content (needing business owner approval), updating or 
                 reorganizing content in multiple lessons or modules, adding/updating evaluation 
                 surveys, adjustments to quizzes built in Storyline, updating videos/interactive 
-                activities, adding new activities/quizzes, multiple changes from an annual 
-                review, or changes that require more than one person (e.g., developer). </p>
+                activities, adding new activities/quizzes, multiple changes from an annual review, 
+                or changes that require more than one person (e.g., a developer).</p>
         </div>
         <div class="mb-2 p-2 bg-light-subtle rounded-2">
-            <h3>Major</h3>
-            <div><strong>> 24 hours </strong></div>
+            <h3>Major Change </h3>
+            <div><strong>More than one day </strong></div>
             <p>Course overhauls or complete reorganization of existing content, revising learning 
                 objectives, creating videos, simulations, requires extensive consultation with 
                 business owners.</p>
