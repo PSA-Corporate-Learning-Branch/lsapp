@@ -35,25 +35,6 @@ if (!empty($formData['assign_to'])) {
     $assigned_person = getPerson($formData['assign_to']);
 }
 
-// Function to get all people for search
-function getAllPeople() {
-    $path = build_path(BASE_DIR, 'data', 'people.csv');
-    $f = fopen($path, 'r');
-    $people = array();
-    $header = fgetcsv($f); // Skip header
-    while ($row = fgetcsv($f)) {
-        if (strtolower($row[4]) === 'active') { // Only active users
-            $people[] = array(
-                'idir' => $row[0],
-                'name' => $row[2],
-                'email' => $row[3],
-                'title' => isset($row[6]) ? $row[6] : ''
-            );
-        }
-    }
-    fclose($f);
-    return $people;
-}
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -178,7 +159,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$allPeople = getAllPeople();
+// get all of the people
+$allPeopleUnfiltered = getPeopleAll();
+// filter to only active individuals
+$allPeopleFiltered = array_filter($allPeopleUnfiltered, function($person) {
+    return strtolower($person[4]) === 'active';
+});
+// map a subset of values to a new array of associative arrays
+//
+// both array_filter and array_map preserve the original keys which was causing
+// json_encode to convert our people array to an object, so we're using array_values
+// to re-index the array so it's properly converted to a javascript array
+// that can be filtered
+$allPeople = array_values(array_map(function($person) {
+    return [
+        'idir' => $person[0],
+        'name' => $person[2],
+        'email' => $person[3],
+        'title' => isset($person[6]) ? $person[6] : ''
+    ];
+}, $allPeopleFiltered));
 ?>
 
 <?php if(canAccess()): ?>
