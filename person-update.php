@@ -50,7 +50,7 @@ if($_POST):
 					$pronouns,
 					h($fromform['Colors']),
 					h($fromform['iStore']),
-					h($fromform['Kepler'])
+					$fromform['Kepler'] ?? 0
 			);
 		
 		while (($data = fgetcsv($f)) !== FALSE){
@@ -178,8 +178,8 @@ else: ?>
 	<input type="text" name="iStore" id="iStore" class="form-control" value="<?php if(isset($p[11])) echo $p[11] ?>">
 </div>
 <div class="form-group">
-	<label for="Kepler">Kepler Access: </label>
-	<input type="text" name="Kepler" id="Kepler" class="form-control" value="<?php if(isset($p[12])) echo $p[12] ?>">
+	<input type="checkbox" name="Kepler" id="Kepler" class="form-check-input" value="1" <?= $p[12] == 1 ? 'checked' : ''; ?> >
+	<label for="Kepler" class="form-check-label">Kepler Access: </label>
 </div>
 <button type="submit" class="btn btn-block btn-primary my-3">Save Person</button>
 
