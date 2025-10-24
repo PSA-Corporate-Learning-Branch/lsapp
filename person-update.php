@@ -49,7 +49,7 @@ if($_POST):
 					h($fromform['Manager']),
 					$pronouns,
 					h($fromform['Colors']),
-					h($fromform['iStore']),
+					$fromform['iStore'] ?? 0,
 					$fromform['Kepler'] ?? 0
 			);
 		
@@ -173,12 +173,12 @@ else: ?>
 	<label for="Colors">Colors: </label>
 	<input type="text" name="Colors" id="Colors" class="form-control" value="<?php if(isset($p[10])) echo $p[10] ?>">
 </div>
-<div class="form-group">
+<div class="form-group mb-3">
+	<input type="checkbox" name="iStore" id="iStore" class="form-check-input" value="1" <?= $p[11] == 1 ? 'checked' : '' ?>>
 	<label for="iStore">iStore Designee: </label>
-	<input type="text" name="iStore" id="iStore" class="form-control" value="<?php if(isset($p[11])) echo $p[11] ?>">
 </div>
 <div class="form-group">
-	<input type="checkbox" name="Kepler" id="Kepler" class="form-check-input" value="1" <?= $p[12] == 1 ? 'checked' : ''; ?> >
+	<input type="checkbox" name="Kepler" id="Kepler" class="form-check-input" value="1" <?= $p[12] == 1 ? 'checked' : '' ?>>
 	<label for="Kepler" class="form-check-label">Kepler Access: </label>
 </div>
 <button type="submit" class="btn btn-block btn-primary my-3">Save Person</button>
