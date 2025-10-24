@@ -99,8 +99,8 @@ h1, h2 {
 <div class="">
 <div class="my-4 bg-light-subtle border border-secondary-subtle p-3 rounded-3">
 <a href="mailto:<?= $person[3] ?>" class="d-inline-block px-3 py-1 mr-1 bg-light-subtle  rounded-3"><?= $person[3] ?></a> 
-<?php if(isset($person[5])): ?>
-<a href="tel:<?= $person[5] ?>" class="d-inline-block px-3 py-1 bg-light-subtle  rounded-3"><?= $person[5] ?></a>
+<?php if(!empty($person[5])): ?>
+	<a href="tel:<?= $person[5] ?>" class="d-inline-block px-3 py-1 bg-light-subtle rounded-3"><?= $person[5] ?></a>
 <?php endif ?>
 <a href="https://teams.microsoft.com/l/chat/0/0?users=<?= $person[3] ?>" target="_blank" class="d-inline-block px-3 py-1 bg-light-subtle rounded-3">MS Teams</a>
 </div>
