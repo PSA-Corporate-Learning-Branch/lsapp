@@ -50,11 +50,11 @@ h1, h2 {
 
 <div class="">
 
-<div class="float-right">
+<div class="float-end">
 	<?php if(isAdmin()): ?>
-		<a href="person-update.php?idir=<?= $person[0] ?>" class="btn btn-link float-right">Edit</a>
+		<a href="person-update.php?idir=<?= $person[0] ?>" class="btn btn-link float-end">Edit</a>
 	<?php elseif ($person[0] == $currentuser): ?>
-		<a href="person-update.php?idir=<?= $person[0] ?>" class="btn btn-link float-right">Edit</a>
+		<a href="person-update.php?idir=<?= $person[0] ?>" class="btn btn-link float-end">Edit</a>
 	<?php endif ?>
 </div>
 <!--IDIR,Team,Name,Email,Status,Phone,Title-->
@@ -591,7 +591,7 @@ someone tells to me enable it again
 <?php foreach($owned as $course): ?>
 <li class="list-group-item">
 	<?php if($course[1] == 'Active'): ?>
-	<a href="class-bulk-insert.php?courseid=<?= $course[0] ?>" class="float-right btn btn-light ml-3">New Date</a>
+	<a href="class-bulk-insert.php?courseid=<?= $course[0] ?>" class="float-end btn btn-light ml-3">New Date</a>
 	<?php endif ?>
 	<a href="course.php?courseid=<?= $course[0] ?>"><?= $course[2] ?></a>
 	<?php if($course[1] == 'Inactive'): ?>

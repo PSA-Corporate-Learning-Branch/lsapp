@@ -21,7 +21,7 @@
 
 <div class="card mb-3">
 <div class="card-header">
-<div class="float-right">
+<div class="float-end">
 	<a href="material-update.php?mid=<?= $deets[0] ?>" class="btn btn-secondary btn-sm">Edit</a>
 	<?php if(isSuper()): ?>
 	<form method="post" action="material-delete.php">

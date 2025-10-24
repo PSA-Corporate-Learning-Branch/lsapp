@@ -18,7 +18,7 @@ $regions = getRegions();
 
 <div class="col-md-10">
 
-<div class="dropdown float-right">
+<div class="dropdown float-end">
 	<button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 		Regions
 	</button>

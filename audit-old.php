@@ -31,7 +31,7 @@ fgetcsv($elm);
 <?php include('templates/admin-nav.php') ?>
 </div>
 <div class="col-md-6">
-<div class="float-right mb-3">
+<div class="float-end mb-3">
 <?php if(isAdmin()): ?>
 <a class="btn btn-success"  href="upload.php">Upload</a>
 <?php endif  ?>

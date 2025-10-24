@@ -64,7 +64,7 @@ Unknown facilitating.
 
 <div class="col-md-12">
 
-	<div class="float-right">
+	<div class="float-end">
 		<?php if($deets[44]): ?>
 		Assigned to <?= $deets[44] ?>
 		<?php else: ?>
@@ -174,7 +174,7 @@ Last modified on <?= $deets[42] ?> by <?= $deets[43] ?>
 
 <div class="col-md-12">
 
-	<div class="float-right">
+	<div class="float-end">
 		<?php if($deets[44]): ?>
 		Assigned to <?= $deets[44] ?>
 		<?php else: ?>
@@ -269,7 +269,7 @@ Last modified on <?= $deets[42] ?> by <?= $deets[43] ?>
 
 -->
 	<?php if(isAdmin()): ?>
-	<div class="float-right">
+	<div class="float-end">
 		<a href="checklist-update.php?courseid=<?= $deets[5] ?>" class="btn btn-success">Edit</a>
 	</div>
 	<?php endif ?>
@@ -327,7 +327,7 @@ if($checks[7] != 'on') {
 
 
 
-	<div class="float-right">
+	<div class="float-end">
 		<?php if($deets[44]): ?>
 		Assigned to <?= $deets[44] ?>
 		<?php else: ?>

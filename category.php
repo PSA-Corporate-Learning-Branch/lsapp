@@ -13,7 +13,7 @@
 
 <div class="col-md-4">
 <a href="courses.php">All Courses</a>
-<div class="dropdown float-right">
+<div class="dropdown float-end">
 	<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 		Categories
 	</button>

@@ -227,7 +227,7 @@ if($row[0] == $classid) $istoday = 'background: #333; color: #FFF;';
 		<div>
 			<a href="/lsapp/class-process-av-assign.php?classid=<?= $deets[0] ?>&avid=<?= $av[0] ?>&action=return"
 				title="Click to return the AV"
-				class="btn btn-success float-right">
+				class="btn btn-success float-end">
 					Return
 			</a>
 			<h4><a href="/lsapp/av.php?avid=<?= $av[0] ?>"><?= $av[3] ?></a></h4>

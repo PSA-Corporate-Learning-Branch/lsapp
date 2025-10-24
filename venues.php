@@ -13,10 +13,10 @@
 <div class="row justify-content-md-center mb-3">
 
 <div class="col-md-8">
-<div class="btn-group float-right">
-<a href="venue-request.php" class="btn btn-primary float-right">New Venue</a>
+<div class="btn-group float-end">
+<a href="venue-request.php" class="btn btn-primary float-end">New Venue</a>
 <?php if(isAdmin()): ?>
-<a href="venues-dashboard.php" class="btn btn-primary float-right">Venues Dashboard</a>
+<a href="venues-dashboard.php" class="btn btn-primary float-end">Venues Dashboard</a>
 <?php endif ?>
 </div>
 <h1>Venues</h1>

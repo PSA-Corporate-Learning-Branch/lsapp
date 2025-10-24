@@ -11,7 +11,7 @@
 <div class="col-md-12">
 
 <?php if(isAdmin()): ?>
-<button type="button" class="btn btn-success float-right" data-bs-toggle="modal" data-bs-target="#addnewperson">
+<button type="button" class="btn btn-success float-end" data-bs-toggle="modal" data-bs-target="#addnewperson">
   Add New Person
 </button>
 <?php endif ?>
