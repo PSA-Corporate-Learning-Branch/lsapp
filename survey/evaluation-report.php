@@ -388,7 +388,7 @@ function createTextResponses($question, $responses) {
 
 
 <div class="col-9">
-<div class="container-lg p-lg-5 p-4 bg-light-subtle rounded">
+<div class="container-lg p-lg-5 p-4 bg-secondary-subtle rounded">
      
     <!-- Alerts & Errors -->
     <span style="background-color: yellow;"><strong><?= $alert ?></strong></span>

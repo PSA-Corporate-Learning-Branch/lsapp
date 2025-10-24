@@ -25,11 +25,17 @@ require($path);
         <h1 class="mb-5 text-center">Survey Dashboard</h1>
     </div>
 
-
+</div> <!-- /row -->
+<div class="row justify-content-md-center">
+<div class="col-9">
+<div class="container-lg p-lg-5 p-4 bg-secondary-subtle rounded">
     
 
 
 
+
+</div> <!-- /container -->
+</div> <!-- /col -->
 </div> <!-- /row -->
 </div> <!-- /container -->
 
