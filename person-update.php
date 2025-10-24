@@ -92,26 +92,25 @@ else: ?>
 <div class="container mb-3">
 <div class="row justify-content-md-center mb-3">
 <div class="col-md-6 mb-3">
-<div class="float-right">
-<form method="post" action="person-delete.php">
-	<input type="hidden" name="idir" value="<?= $person[0] ?>">
-	<div class="btn-group">
-	<input type="submit" value="Delete" class="btn btn-sm btn-danger del">
-	</div>
+<div class="d-flex justify-content-between align-items-center">
+	<h1>Edit <?= $p[2] ?></h1>
+	<form method="post" action="person-delete.php">
+		<input type="hidden" name="idir" value="<?= $person[0] ?>">
+		<div class="btn-group">
+			<input type="submit" value="Delete" class="btn btn-sm btn-danger del">
+		</div>
 	</form>
 </div>
-<h1>Edit <?= $p[2] ?></h1>
-
 
 <form method="post" action="person-update.php" class="mb-3 pb-3" id="PersonUpdate">
 
 <!-- IDIR,Team,Name,Email,Status,Phone,Title -->
-<div class="form-group">
+<div class="form-group mb-3">
 	<label for="IDIR">IDIR: </label>
 	<input type="text" name="NewIDIR" id="NewIDIR" class="form-control" value="<?= $p[0] ?>">
 	<input type="hidden" name="OldIDIR" id="OldIDIR" value="<?= $p[0] ?>">
 </div>
-<div class="form-group">
+<div class="form-group mb-3">
 	<label for="Team">Team: </label>
 	<select name="Team" id="Team" class="form-select">
 		<?php foreach($teams as $teamId => $team): ?>
@@ -124,16 +123,16 @@ else: ?>
 	</select>
 	
 </div>
-<div class="form-group">
+<div class="form-group mb-3">
 	<label for="Name">Name: </label>
 	<input type="text" name="Name" id="Name" class="form-control" value="<?= $p[2] ?>">
 </div>
 
-<div class="form-group">
+<div class="form-group mb-3">
 	<label for="Email">Email: </label>
 	<input type="text" name="Email" id="Email" class="form-control" value="<?= $p[3] ?>">
 </div>
-<div class="form-group">
+<div class="form-group mb-3">
 	<label for="Status">Status: </label>
 	<select name="Status" id="Status" class="form-select">
 	<?php $stats = array('Active','Inactive') ?>
@@ -146,30 +145,30 @@ else: ?>
 	<?php endforeach ?>
 	</select>
 </div>
-<div class="form-group">
+<div class="form-group mb-3">
 	<label for="Phone">Phone: </label>
 	<input type="text" name="Phone" id="Phone" class="form-control" value="<?php if(isset($p[5])) echo $p[5] ?>">
 </div>
-<div class="form-group">
+<div class="form-group mb-3">
 	<label for="Title">Title: </label>
 	<input type="text" name="Title" id="Title" class="form-control" value="<?php if(isset($p[6])) echo $p[6] ?>">
 </div>
 <?php if(isSuper()): ?>
-<div class="form-group">
+<div class="form-group mb-3">
 	<input type="checkbox" name="Super" id="Super" class="form-check-input" value="1" <?= $p[7] == 1 ? 'checked' : '' ?>>
 	<label for="Super">Super User: </label>
 </div>
-<div class="form-group">
+<div class="form-group mb-3">
 	<label for="Manager">Leadership Role:</label><span class="text-body-secondary"> (leave blank if not applicable)</span>
 	<input type="text" name="Manager" id="Manager" class="form-control" value="<?php if(isset($p[8])) echo $p[8] ?>" placeholder="Eg. Director, Manager">
 </div>
 <?php endif ?>
 
-<div class="form-group">
+<div class="form-group mb-3">
 	<label for="Pronouns">Pronouns: </label>
 	<input type="text" name="Pronouns" id="Pronouns" class="form-control" value="<?php if(isset($p[9])) echo $p[9] ?>">
 </div>
-<div class="form-group">
+<div class="form-group mb-3">
 	<label for="Colors">Colors: </label>
 	<input type="text" name="Colors" id="Colors" class="form-control" value="<?php if(isset($p[10])) echo $p[10] ?>">
 </div>
