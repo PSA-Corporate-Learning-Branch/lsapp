@@ -45,7 +45,7 @@ if($_POST):
 					h($fromform['Status']),
 					h($fromform['Phone']),
 					h($fromform['Title']),
-					h($fromform['Super']),
+					$fromform['Super'] ?? 0,
 					h($fromform['Manager']),
 					$pronouns,
 					h($fromform['Colors']),
@@ -156,8 +156,8 @@ else: ?>
 </div>
 <?php if(isSuper()): ?>
 <div class="form-group">
+	<input type="checkbox" name="Super" id="Super" class="form-check-input" value="1" <?= $p[7] == 1 ? 'checked' : '' ?>>
 	<label for="Super">Super User: </label>
-	<input type="text" name="Super" id="Super" class="form-control" value="<?php if(isset($p[7])) echo $p[7] ?>">
 </div>
 <div class="form-group">
 	<label for="Manager">Leadership Role:</label><span class="text-body-secondary"> (leave blank if not applicable)</span>
