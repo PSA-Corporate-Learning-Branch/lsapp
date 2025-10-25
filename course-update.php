@@ -201,7 +201,80 @@ if($_POST) {
     }
     
     fclose($peoplefp);
-    
+
+    // Send email notification for course update
+    try {
+        require('inc/ches_client.php');
+        $ches = new CHESClient();
+
+        // Get partner name
+        $partnersJson = file_get_contents('data/partners.json');
+        $partnersData = json_decode($partnersJson, true);
+        $partnerName = '';
+        foreach($partnersData as $p) {
+            if($p['id'] == $_POST['LearningHubPartner']) {
+                $partnerName = $p['name'];
+                break;
+            }
+        }
+
+        // Build course URL
+        $courseUrl = "https://gww.bcpublicservice.gov.bc.ca/lsapp/course.php?courseid=" . urlencode($courseid);
+        $dashboardUrl = "https://gww.bcpublicservice.gov.bc.ca/lsapp/partners/dashboard.php";
+
+        // Get user who made the update
+        $updatedBy = defined('LOGGED_IN_IDIR') ? LOGGED_IN_IDIR : 'Unknown';
+
+        $subject = "Course Updated: " . sanitize($_POST['CourseName']);
+
+        $bodyHtml = "<h2>Course Updated</h2>";
+        $bodyHtml .= "<p>A course has been updated in the Learning Hub:</p>";
+        $bodyHtml .= "<table border='1' cellpadding='8' cellspacing='0' style='border-collapse: collapse; font-family: Arial, sans-serif;'>";
+        $bodyHtml .= "<tr><td><strong>Course Name:</strong></td><td>" . htmlspecialchars($_POST['CourseName']) . "</td></tr>";
+        $bodyHtml .= "<tr><td><strong>Course ID:</strong></td><td>" . htmlspecialchars($courseid) . "</td></tr>";
+        $bodyHtml .= "<tr><td><strong>Partner:</strong></td><td>" . htmlspecialchars($partnerName) . "</td></tr>";
+        $bodyHtml .= "<tr><td><strong>Platform:</strong></td><td>" . htmlspecialchars($_POST['Platform']) . "</td></tr>";
+        $bodyHtml .= "<tr><td><strong>Delivery Method:</strong></td><td>" . htmlspecialchars($_POST['Method']) . "</td></tr>";
+        $bodyHtml .= "<tr><td><strong>Status:</strong></td><td>" . htmlspecialchars($_POST['Status']) . "</td></tr>";
+        $bodyHtml .= "<tr><td><strong>Course Owner:</strong></td><td>" . htmlspecialchars($_POST['CourseOwner'] ?? 'Not specified') . "</td></tr>";
+        $bodyHtml .= "<tr><td><strong>HUB Include:</strong></td><td>" . htmlspecialchars($hubInclude) . "</td></tr>";
+        $bodyHtml .= "<tr><td><strong>Updated By:</strong></td><td>" . htmlspecialchars($updatedBy) . "</td></tr>";
+        $bodyHtml .= "<tr><td><strong>Updated:</strong></td><td>" . htmlspecialchars($now) . "</td></tr>";
+        $bodyHtml .= "</table>";
+        $bodyHtml .= "<h3>Course Description:</h3>";
+        $bodyHtml .= "<p>" . nl2br(htmlspecialchars($_POST['CourseDescription'])) . "</p>";
+        $bodyHtml .= "<p><a href='" . htmlspecialchars($courseUrl) . "'>View Course</a> | ";
+        $bodyHtml .= "<a href='" . htmlspecialchars($dashboardUrl) . "'>Partner Dashboard</a></p>";
+
+        $bodyText = "Course Updated\n\n";
+        $bodyText .= "Course Name: " . $_POST['CourseName'] . "\n";
+        $bodyText .= "Course ID: " . $courseid . "\n";
+        $bodyText .= "Partner: " . $partnerName . "\n";
+        $bodyText .= "Platform: " . $_POST['Platform'] . "\n";
+        $bodyText .= "Delivery Method: " . $_POST['Method'] . "\n";
+        $bodyText .= "Status: " . $_POST['Status'] . "\n";
+        $bodyText .= "Course Owner: " . ($_POST['CourseOwner'] ?? 'Not specified') . "\n";
+        $bodyText .= "HUB Include: " . $hubInclude . "\n";
+        $bodyText .= "Updated By: " . $updatedBy . "\n";
+        $bodyText .= "Updated: " . $now . "\n\n";
+        $bodyText .= "Course Description:\n" . $_POST['CourseDescription'] . "\n\n";
+        $bodyText .= "View Course: " . $courseUrl . "\n";
+        $bodyText .= "Partner Dashboard: " . $dashboardUrl . "\n";
+
+        $result = $ches->sendEmail(
+            ['allan.haggett@gov.bc.ca'],
+            $subject,
+            $bodyText,
+            $bodyHtml,
+            'learninghub_noreply@gov.bc.ca'
+        );
+
+        error_log("Sent course update notification email (Transaction ID: {$result['txId']})");
+
+    } catch (Exception $e) {
+        error_log("ERROR: Failed to send course update notification email: " . $e->getMessage());
+    }
+
     // Check if this is from partner portal
     if (!empty($_POST['partner_redirect'])) {
         // Redirect back to partner portal dashboard

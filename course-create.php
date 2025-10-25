@@ -130,28 +130,71 @@ if(fputcsv($fp, $newcourse) === false) {
 fclose($fp);
 
 // Send email notification for new course
-// try {
-//     $chesClient = new CHESClient();
-//     $courseNotificationData = [
-//         'id' => $courseid,
-//         'name' => $_POST['CourseName'],
-//         'description' => $_POST['CourseDescription'],
-//         'owner' => $_POST['CourseOwner'],
-//         'partner' => $_POST['LearningHubPartner'],
-//         'platform' => $_POST['Platform'],
-//         'method' => $_POST['Method'],
-//         'effectiveDate' => $_POST['EffectiveDate'],
-//         'created' => $now
-//     ];
-    
-//     $emailResult = $chesClient->sendCourseCreationNotification($courseNotificationData);
-    
-//     if (!$emailResult) {
-//         error_log("Warning: Failed to send course creation notification for course ID: {$courseid}");
-//     }
-// } catch (Exception $e) {
-//     error_log("CHES Email Exception: " . $e->getMessage());
-// }
+try {
+    $ches = new CHESClient();
+
+    // Get partner name
+    $partnersJson = file_get_contents('data/partners.json');
+    $partnersData = json_decode($partnersJson, true);
+    $partnerName = '';
+    foreach($partnersData as $p) {
+        if($p['id'] == $_POST['LearningHubPartner']) {
+            $partnerName = $p['name'];
+            break;
+        }
+    }
+
+    // Build course URL
+    $courseUrl = "https://gww.bcpublicservice.gov.bc.ca/lsapp/course.php?courseid=" . urlencode($courseid);
+    $dashboardUrl = "https://gww.bcpublicservice.gov.bc.ca/lsapp/partners/dashboard.php";
+
+    $subject = "New Course Created: " . sanitize($_POST['CourseName']);
+
+    $bodyHtml = "<h2>New Course Created</h2>";
+    $bodyHtml .= "<p>A new course has been created in the Learning Hub:</p>";
+    $bodyHtml .= "<table border='1' cellpadding='8' cellspacing='0' style='border-collapse: collapse; font-family: Arial, sans-serif;'>";
+    $bodyHtml .= "<tr><td><strong>Course Name:</strong></td><td>" . htmlspecialchars($_POST['CourseName']) . "</td></tr>";
+    $bodyHtml .= "<tr><td><strong>Course ID:</strong></td><td>" . htmlspecialchars($courseid) . "</td></tr>";
+    $bodyHtml .= "<tr><td><strong>Partner:</strong></td><td>" . htmlspecialchars($partnerName) . "</td></tr>";
+    $bodyHtml .= "<tr><td><strong>Platform:</strong></td><td>" . htmlspecialchars($_POST['Platform']) . "</td></tr>";
+    $bodyHtml .= "<tr><td><strong>Delivery Method:</strong></td><td>" . htmlspecialchars($_POST['Method']) . "</td></tr>";
+    $bodyHtml .= "<tr><td><strong>Status:</strong></td><td>" . htmlspecialchars($_POST['Status']) . "</td></tr>";
+    $bodyHtml .= "<tr><td><strong>Course Owner:</strong></td><td>" . htmlspecialchars($_POST['CourseOwner']) . "</td></tr>";
+    $bodyHtml .= "<tr><td><strong>Effective Date:</strong></td><td>" . htmlspecialchars($_POST['EffectiveDate']) . "</td></tr>";
+    $bodyHtml .= "<tr><td><strong>Created:</strong></td><td>" . htmlspecialchars($now) . "</td></tr>";
+    $bodyHtml .= "</table>";
+    $bodyHtml .= "<h3>Course Description:</h3>";
+    $bodyHtml .= "<p>" . nl2br(htmlspecialchars($_POST['CourseDescription'])) . "</p>";
+    $bodyHtml .= "<p><a href='" . htmlspecialchars($courseUrl) . "'>View Course</a> | ";
+    $bodyHtml .= "<a href='" . htmlspecialchars($dashboardUrl) . "'>Partner Dashboard</a></p>";
+
+    $bodyText = "New Course Created\n\n";
+    $bodyText .= "Course Name: " . $_POST['CourseName'] . "\n";
+    $bodyText .= "Course ID: " . $courseid . "\n";
+    $bodyText .= "Partner: " . $partnerName . "\n";
+    $bodyText .= "Platform: " . $_POST['Platform'] . "\n";
+    $bodyText .= "Delivery Method: " . $_POST['Method'] . "\n";
+    $bodyText .= "Status: " . $_POST['Status'] . "\n";
+    $bodyText .= "Course Owner: " . $_POST['CourseOwner'] . "\n";
+    $bodyText .= "Effective Date: " . $_POST['EffectiveDate'] . "\n";
+    $bodyText .= "Created: " . $now . "\n\n";
+    $bodyText .= "Course Description:\n" . $_POST['CourseDescription'] . "\n\n";
+    $bodyText .= "View Course: " . $courseUrl . "\n";
+    $bodyText .= "Partner Dashboard: " . $dashboardUrl . "\n";
+
+    $result = $ches->sendEmail(
+        ['allan.haggett@gov.bc.ca'],
+        $subject,
+        $bodyText,
+        $bodyHtml,
+        'learninghub_noreply@gov.bc.ca'
+    );
+
+    error_log("Sent course creation notification email (Transaction ID: {$result['txId']})");
+
+} catch (Exception $e) {
+    error_log("ERROR: Failed to send course creation notification email: " . $e->getMessage());
+}
 
 // Add course people relationships if specified
 if(!empty($_POST['CourseOwner']) || !empty($_POST['Developer'])) {
