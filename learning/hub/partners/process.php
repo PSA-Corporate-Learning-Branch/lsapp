@@ -216,10 +216,60 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $subject,
                 $bodyText,
                 $bodyHtml,
-                'lsapp_noreply@gov.bc.ca'
+                'learninghub_noreply@gov.bc.ca'
             );
 
             error_log("Sent new partner request notification email (Transaction ID: {$result['txId']})");
+
+            // Send confirmation emails to each administrative contact
+            if (!empty($newPartner["contacts"])) {
+                foreach ($newPartner["contacts"] as $contact) {
+                    if (!empty($contact["email"])) {
+                        try {
+                            $confirmSubject = "Learning Partner Request Received - " . htmlspecialchars($newPartner["name"]);
+
+                            $confirmBodyHtml = "<h2>Thank you for your Learning Partner request</h2>";
+                            $confirmBodyHtml .= "<p>Hello " . htmlspecialchars($contact["name"]) . ",</p>";
+                            $confirmBodyHtml .= "<p>We have received your request to become a Corporate Learning Partner for <strong>" . htmlspecialchars($newPartner["name"]) . "</strong>.</p>";
+                            $confirmBodyHtml .= "<h3>What happens next?</h3>";
+                            $confirmBodyHtml .= "<p>Our team will review your request and get back to you soon with next steps. Please stay tuned for more information.</p>";
+                            $confirmBodyHtml .= "<h3>Request Summary:</h3>";
+                            $confirmBodyHtml .= "<table border='1' cellpadding='8' cellspacing='0' style='border-collapse: collapse; font-family: Arial, sans-serif;'>";
+                            $confirmBodyHtml .= "<tr><td><strong>Partner Name:</strong></td><td>" . htmlspecialchars($newPartner["name"]) . "</td></tr>";
+                            $confirmBodyHtml .= "<tr><td><strong>Description:</strong></td><td>" . htmlspecialchars($newPartner["description"]) . "</td></tr>";
+                            $confirmBodyHtml .= "<tr><td><strong>Date Submitted:</strong></td><td>" . htmlspecialchars($newPartner["date_requested"]) . "</td></tr>";
+                            $confirmBodyHtml .= "</table>";
+                            $confirmBodyHtml .= "<p>If you have any questions in the meantime, please don't hesitate to reach out.</p>";
+                            $confirmBodyHtml .= "<p>Thank you,<br>LearningHUB Team</p>";
+
+                            $confirmBodyText = "Thank you for your Learning Partner request\n\n";
+                            $confirmBodyText .= "Hello " . $contact["name"] . ",\n\n";
+                            $confirmBodyText .= "We have received your request to become a Corporate Learning Partner for " . $newPartner["name"] . ".\n\n";
+                            $confirmBodyText .= "What happens next?\n";
+                            $confirmBodyText .= "Our team will review your request and get back to you soon with next steps. Please stay tuned for more information.\n\n";
+                            $confirmBodyText .= "Request Summary:\n";
+                            $confirmBodyText .= "Partner Name: " . $newPartner["name"] . "\n";
+                            $confirmBodyText .= "Description: " . $newPartner["description"] . "\n";
+                            $confirmBodyText .= "Date Submitted: " . $newPartner["date_requested"] . "\n\n";
+                            $confirmBodyText .= "If you have any questions in the meantime, please don't hesitate to reach out.\n\n";
+                            $confirmBodyText .= "Thank you,\nLearningHUB Team\n";
+
+                            $confirmResult = $ches->sendEmail(
+                                [$contact["email"]],
+                                $confirmSubject,
+                                $confirmBodyText,
+                                $confirmBodyHtml,
+                                'learninghub_noreply@gov.bc.ca'
+                            );
+
+                            error_log("Sent confirmation email to {$contact['email']} (Transaction ID: {$confirmResult['txId']})");
+
+                        } catch (Exception $confirmException) {
+                            error_log("ERROR: Failed to send confirmation email to {$contact['email']}: " . $confirmException->getMessage());
+                        }
+                    }
+                }
+            }
 
         } catch (Exception $e) {
             error_log("ERROR: Failed to send partner request notification email: " . $e->getMessage());
