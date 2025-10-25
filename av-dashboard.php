@@ -15,7 +15,7 @@
 <?php include('templates/admin-nav.php') ?>
 </div>
 <div class="col-md-10">
-<div class="btn-group float-right">
+<div class="btn-group float-end">
 	<a href="av-create.php" class="btn btn-success">New A/V</a>
 	<a href="onenote:///Z:\The%20Learning%20Centre\2.%20Admin,%20Facilities%20&%20Ops\LSA's%20documents\OneNote\Learning%20Centre\AudioVisual.one#section-id={802D9D34-01CC-4387-9C26-CA63AD0190A4}&end" 
 		class="btn btn-dark">

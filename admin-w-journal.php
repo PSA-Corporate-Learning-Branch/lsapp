@@ -135,7 +135,7 @@ array_multisort($tmp, SORT_ASC, $c);
 	
 	<td>
 	<?php if(isAdmin()): ?>
-	<form method="get" action="class-claim.php" class="float-right claimform">
+	<form method="get" action="class-claim.php" class="float-end claimform">
 		<input type="hidden" name="cid" id="cid" value="<?= h($uclass[0]) ?>">
 		<input type="submit" class="btn btn-sm btn-light ml-3" value="Claim">
 	</form>

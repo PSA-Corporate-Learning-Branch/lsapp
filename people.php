@@ -11,7 +11,7 @@
 <div class="col-md-12">
 
 <?php if(isAdmin()): ?>
-<button type="button" class="btn btn-success float-right" data-bs-toggle="modal" data-bs-target="#addnewperson">
+<button type="button" class="btn btn-success float-end" data-bs-toggle="modal" data-bs-target="#addnewperson">
   Add New Person
 </button>
 <?php endif ?>
@@ -89,7 +89,7 @@
 			<input type="text" name="idir" id="idir" class="form-control  mb-2" placeholder="IDIR" required>
 			<input type="text" name="name" id="name" class="form-control  mb-2" placeholder="Name" required>
 			<input type="text" name="title" id="title" class="form-control  mb-2" placeholder="Title" required>
-			<input type="text" name="phone" id="phone" class="form-control  mb-2" placeholder="Phone" required>
+			<input type="text" name="phone" id="phone" class="form-control  mb-2" placeholder="Phone">
 			<input type="text" name="email" id="email" class="form-control  mb-2" placeholder="full.name@gov.bc.ca" required>
 			<?php if(isSuper()): ?>
 			<input type="hidden" name="Super" id="Super" class="form-control  mb-2" placeholder="Super user? 0 for no, 1 for yes" required>

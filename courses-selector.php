@@ -47,7 +47,7 @@ $activeids = array();
 </div>
 -->
 <div class="col-md-4">
-<div class="dropdown float-right">
+<div class="dropdown float-end">
 	<button class="btn btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 		Categories
 	</button>
@@ -76,7 +76,7 @@ $activeids = array();
 		<?php array_push($activeids,$cdeet) ?>
 	<?php else: ?>
 	<li class="list-group-item">
-		<div class="float-right ml-3">
+		<div class="float-end ml-3">
 			<?php if($cids): ?>
 			<a href="courses-selector.php?courseids=<?= $cids ?>,<?= h($course[0]) ?>" class="btn btn-sm btn-primary">Add</a>  
 			<?php else: ?>

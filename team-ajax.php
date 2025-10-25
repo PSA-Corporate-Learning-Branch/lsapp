@@ -36,7 +36,7 @@ foreach($peeps as $peep) {
 		<span class="badge badge-success">Director</span>
 		<?php endif ?>
 		<?php if(isAdmin()): ?>
-		<div class="float-right"><a href="person-update.php?idir=<?= $peep[0] ?>" class="btn btn-light btn-sm">Edit</a></div>
+		<div class="float-end"><a href="person-update.php?idir=<?= $peep[0] ?>" class="btn btn-light btn-sm">Edit</a></div>
 		<?php endif ?>
 		<div class="name"><strong><a href="/lsapp/person.php?idir=<?= $peep[0] ?>"><?= $peep[2] ?></a></strong>
 		<?php if($peep[9] != 'Unspecified'): ?>

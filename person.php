@@ -50,11 +50,11 @@ h1, h2 {
 
 <div class="">
 
-<div class="float-right">
+<div class="float-end">
 	<?php if(isAdmin()): ?>
-		<a href="person-update.php?idir=<?= $person[0] ?>" class="btn btn-link float-right">Edit</a>
+		<a href="person-update.php?idir=<?= $person[0] ?>" class="btn btn-link float-end">Edit</a>
 	<?php elseif ($person[0] == $currentuser): ?>
-		<a href="person-update.php?idir=<?= $person[0] ?>" class="btn btn-link float-right">Edit</a>
+		<a href="person-update.php?idir=<?= $person[0] ?>" class="btn btn-link float-end">Edit</a>
 	<?php endif ?>
 </div>
 <!--IDIR,Team,Name,Email,Status,Phone,Title-->
@@ -99,8 +99,8 @@ h1, h2 {
 <div class="">
 <div class="my-4 bg-light-subtle border border-secondary-subtle p-3 rounded-3">
 <a href="mailto:<?= $person[3] ?>" class="d-inline-block px-3 py-1 mr-1 bg-light-subtle  rounded-3"><?= $person[3] ?></a> 
-<?php if(isset($person[5])): ?>
-<a href="tel:<?= $person[5] ?>" class="d-inline-block px-3 py-1 bg-light-subtle  rounded-3"><?= $person[5] ?></a>
+<?php if(!empty($person[5])): ?>
+	<a href="tel:<?= $person[5] ?>" class="d-inline-block px-3 py-1 bg-light-subtle rounded-3"><?= $person[5] ?></a>
 <?php endif ?>
 <a href="https://teams.microsoft.com/l/chat/0/0?users=<?= $person[3] ?>" target="_blank" class="d-inline-block px-3 py-1 bg-light-subtle rounded-3">MS Teams</a>
 </div>
@@ -591,7 +591,7 @@ someone tells to me enable it again
 <?php foreach($owned as $course): ?>
 <li class="list-group-item">
 	<?php if($course[1] == 'Active'): ?>
-	<a href="class-bulk-insert.php?courseid=<?= $course[0] ?>" class="float-right btn btn-light ml-3">New Date</a>
+	<a href="class-bulk-insert.php?courseid=<?= $course[0] ?>" class="float-end btn btn-light ml-3">New Date</a>
 	<?php endif ?>
 	<a href="course.php?courseid=<?= $course[0] ?>"><?= $course[2] ?></a>
 	<?php if($course[1] == 'Inactive'): ?>
