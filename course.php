@@ -114,13 +114,11 @@ if (file_exists($categoriesFile)) {
 				Requests
 			</button>
 			<ul class="dropdown-menu">
-				<?php foreach ($categories as $cat): ?>
 				<li class="dropdown-item">
-					<a href="course-change/create.php?cat=<?php echo htmlspecialchars(urlencode($cat['category'])); ?>&courseid=<?= $deets[0] ?>">
-						<?php echo htmlspecialchars($cat['category']); ?>
+					<a href="course-change/create.php?&courseid=<?= $deets[0] ?>">
+						Course Change
 					</a>
 				</li>
-                <?php endforeach; ?>
 				<li class="dropdown-item">
 					<a href="/lsapp/class-bulk-insert.php?courseid=<?= $deets[0] ?>">New Class Date</a>
 				</li>
