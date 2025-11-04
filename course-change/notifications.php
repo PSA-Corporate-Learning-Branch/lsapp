@@ -310,28 +310,32 @@ $allPeople = array_values(array_map(function($person) {
                             ?>
                             <!-- We only want to make our primary recipients checkable if there is more than one -->
                             <?php if (count($primary_people) > 1): ?>
-                            <?php foreach($primary_people as $person): ?>
+                            <?php foreach($primary_people as $idir => $person): ?>
                                 <div class="person-item bg-dark-subtle">
-                                    <label class="d-flex align-items-center">
-                                        <input type="checkbox" name="recipients[]" value="<?= htmlspecialchars($person['email']) ?>" checked>
-                                        <div class="person-info">
-                                            <strong><?= htmlspecialchars($person['name']) ?></strong> (<?= $person['roles'] ?>)
-                                            <br><small><?= htmlspecialchars($person['email']) ?></small>
-                                        </div>
-                                    </label>
+                                    <div class="form-check d-flex align-items-center">
+                                        <input class="form-check-input me-2" type="checkbox" name="recipients[]" id="<?= $idir ?>" value="<?= htmlspecialchars($person['email']) ?>" checked>    
+                                        <label class="form-check-label" for="<?= $idir ?>">
+                                            <div class="person-info">
+                                                <strong><?= htmlspecialchars($person['name']) ?></strong> (<?= $person['roles'] ?>)
+                                                <br><small><?= htmlspecialchars($person['email']) ?></small>
+                                            </div>
+                                        </label>
+                                    </div>
                                 </div>
                             <?php endforeach; ?>
                             <!-- If we only have one recipient, they can't be unchecked -->
                             <?php elseif (count($primary_people) === 1): ?>
                                 <?php $person = $primary_people[array_key_first($primary_people)]; ?>
                                 <div class="person-item bg-dark-subtle">
-                                    <label class="d-flex align-items-center">
-                                        <input type="radio" name="recipients[]" title="Must have at least one primary recipient" value="<?= htmlspecialchars($person['email']) ?>" checked>
-                                        <div class="person-info">
-                                            <strong><?= htmlspecialchars($person['name']) ?></strong> (<?= $person['roles'] ?>)
-                                            <br><small><?= htmlspecialchars($person['email']) ?></small>
-                                        </div>
-                                    </label>
+                                    <div class="form-check d-flex align-items-center">
+                                        <input class="form-check-input me-2" type="radio" name="recipients[]" id="<?= array_key_first($primary_people) ?>" title="Must have at least one primary recipient" value="<?= htmlspecialchars($person['email']) ?>" checked>
+                                        <label class="form-check-label" for="<?= array_key_first($primary_people) ?>">
+                                            <div class="person-info">
+                                                <strong><?= htmlspecialchars($person['name']) ?></strong> (<?= $person['roles'] ?>)
+                                                <br><small><?= htmlspecialchars($person['email']) ?></small>
+                                            </div>
+                                        </label>
+                                    </div>
                                 </div>
                             <?php endif; ?>
 
@@ -359,7 +363,7 @@ $allPeople = array_values(array_map(function($person) {
                         </div>
                     </div>
                 </div>
-
+                </div>
                 <div class="d-flex justify-content-between">
                     <a href="view.php?courseid=<?= $courseid ?>&changeid=<?= $changeid ?>"
                        class="btn btn-secondary">Skip Notifications</a>
