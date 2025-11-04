@@ -59,18 +59,6 @@ if (!empty($deets[52])) {
 // 10-CourseOwner,11-MinMax,12-CourseNotes,
 // 13-Requested, 14-RequestedBy,15-EffectiveDate,16-CourseDescription,17-CourseAbstract,18-Prerequisites,19-Keywords,
 // 20-Category,21-Method,22-elearning
-// Load categories from the JSON file
-$categoriesFile = '../data/course-change-guidance.json';
-$categories = [];
-
-if (file_exists($categoriesFile)) {
-    $categories = json_decode(file_get_contents($categoriesFile), true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        die("Error reading categories.json: " . json_last_error_msg());
-    }
-    // Reindex the array after unsetting
-    $categories = array_values($categories);
-}
 
 ?>
 <?php getHeader() ?>
@@ -698,22 +686,6 @@ $finalcount = $upcount - $inactive - $closed;
 
 <?php require('templates/javascript.php') ?>
 
-<script>
-$(document).ready(function(){
-	$('.guidance').addClass('d-none');
-	$('.RequestType').on('change', function(){
-		let type = $(this).val();
-		$('.guidance').addClass('d-none');
-		if(type == 'Close') {
-			$('.closecoursehelp').removeClass('d-none');
-		}
-		if(type == 'Moodle') {
-			$('.moodlehelp').removeClass('d-none');
-		}
-
-	});
-}); 
-</script>
 
 <script src="/lsapp/js/clipboard.min.js"></script>
 <script>
