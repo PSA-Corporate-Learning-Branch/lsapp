@@ -62,7 +62,7 @@ function getGuidanceByCategory($cat, $categoriesFile) {
 
 
 $cat = urldecode($formData['category']) ?? '';
-$categoriesFile = 'guidance.json';
+$categoriesFile = '../data/course-change-guidance.json';
 $guidance = getGuidanceByCategory($cat, $categoriesFile);
 
 $assignedtoemail = getPerson($formData['assign_to']);

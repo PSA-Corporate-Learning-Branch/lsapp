@@ -61,7 +61,7 @@ function getGuidanceByCategory($cat, $categoriesFile) {
 
 // Example usage
 $cat = isset($_GET['cat']) ? urldecode($_GET['cat']) : '';
-$categoriesFile = 'guidance.json';
+$categoriesFile = '../data/course-change-guidance.json';
 $guidance = getGuidanceByCategory($cat, $categoriesFile);
 $peopleActive = getPeopleAll($filteractive = true);
 

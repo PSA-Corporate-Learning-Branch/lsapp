@@ -60,7 +60,7 @@ if (!empty($deets[52])) {
 // 13-Requested, 14-RequestedBy,15-EffectiveDate,16-CourseDescription,17-CourseAbstract,18-Prerequisites,19-Keywords,
 // 20-Category,21-Method,22-elearning
 // Load categories from the JSON file
-$categoriesFile = 'course-change/guidance.json';
+$categoriesFile = '../data/course-change-guidance.json';
 $categories = [];
 
 if (file_exists($categoriesFile)) {
