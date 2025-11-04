@@ -323,7 +323,7 @@ $reportinglist = getReportingList();
                 <label for="Method" class="form-label">Delivery Method</label>
                 <select name="Method" id="Method" class="form-select" required>
                     <option value="" disabled>Select one</option>
-                    <?php $methods = ['Classroom','eLearning','Blended','Webinar'] ?>
+                    <?php $methods = ['eLearning','Webinar','Curated Pathway','Blended','Classroom'] ?>
                     <?php foreach($methods as $method): ?>
                         <option value="<?= $method ?>" <?= ($method == $deets[21]) ? 'selected' : '' ?>><?= $method ?></option>
                     <?php endforeach ?>

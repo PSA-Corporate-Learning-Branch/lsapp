@@ -103,10 +103,11 @@ array_multisort($tmp, SORT_ASC, $courses);
 <div class="col-md-3">
 <label for="DeliveryMethod">Delivery Method</label>
 <select name="DeliveryMethod" id="DeliveryMethod" class="form-control">
-<option>Classroom</option>
-<option>Webinar</option>
-<option>eLearning</option>
-<option>Blended</option>
+	<option>eLearning</option>
+	<option>Webinar</option>
+	<option>Curated Pathway</option>
+	<option>Blended</option>
+	<option>Classroom</option>
 </select>
 
 </div>
