@@ -29,6 +29,9 @@ if (!file_exists($filePath)) {
 }
 $formData = json_decode(file_get_contents($filePath), true);
 
+// Get requester details
+$requester = getPerson($formData['created_by']);
+
 // Get assigned person details
 $assigned_person = null;
 if (!empty($formData['assign_to'])) {
@@ -273,45 +276,65 @@ $allPeople = array_values(array_map(function($person) {
                         <div class="mb-4">
                             <h5>Primary Recipients (To:)</h5>
 
-                            <?php if ($course_steward && !empty($course_steward[3])): ?>
-                            <div class="person-item bg-dark-subtle">
-                                <label class="d-flex align-items-center">
-                                    <input type="checkbox" name="recipients[]" value="<?= htmlspecialchars($course_steward[3]) ?>" checked>
-                                    <div class="person-info">
-                                        <strong><?= htmlspecialchars($course_steward[2]) ?></strong> (Course Steward)
-                                        <br><small><?= htmlspecialchars($course_steward[3]) ?></small>
-                                    </div>
-                                </label>
-                            </div>
+                            <?php 
+                                $primary_people = array();
+                                // [idir => [name, email, roles]]
+                                // IDIR[0],Role[1],Name[2],Email[3]
+                                if ($course_steward && !empty($course_steward[3])) {
+                                    $primary_people[$course_steward[0]] = ['name' => $course_steward[2], 'email' => $course_steward[3], 'roles' => 'Course Steward'];
+                                }
+                                if ($course_developer && !empty($course_developer[3])) {
+                                    if (isset($primary_people[$course_developer[0]])) {
+                                        $primary_people[$course_developer[0]]['roles'] .= ', Developer';
+                                    }
+                                    else {
+                                        $primary_people[$course_developer[0]] = ['name' => $course_developer[2], 'email' => $course_developer[3], 'roles' => 'Developer'];
+                                    }
+                                }
+                                if ($assigned_person && !empty($assigned_person[3])) {
+                                    if (isset($primary_people[$assigned_person[0]])) {
+                                        $primary_people[$assigned_person[0]]['roles'] .= ', Assigned To';
+                                    }
+                                    else {
+                                        $primary_people[$assigned_person[0]] = ['name' => $assigned_person[2], 'email' => $assigned_person[3], 'roles' => 'Assigned To'];
+                                    }
+                                }
+                                if (!empty($requester[3])) {
+                                    if (isset($primary_people[$requester[0]])) {
+                                        $primary_people[$requester[0]]['roles'] .= ', Requested By';
+                                    }
+                                    else {
+                                        $primary_people[$requester[0]] = ['name' => $requester[2], 'email' => $requester[3], 'roles' => 'Requested By'];
+                                    }
+                                }
+                            ?>
+                            <!-- We only want to make our primary recipients checkable if there is more than one -->
+                            <?php if (count($primary_people) > 1): ?>
+                            <?php foreach($primary_people as $person): ?>
+                                <div class="person-item bg-dark-subtle">
+                                    <label class="d-flex align-items-center">
+                                        <input type="checkbox" name="recipients[]" value="<?= htmlspecialchars($person['email']) ?>" checked>
+                                        <div class="person-info">
+                                            <strong><?= htmlspecialchars($person['name']) ?></strong> (<?= $person['roles'] ?>)
+                                            <br><small><?= htmlspecialchars($person['email']) ?></small>
+                                        </div>
+                                    </label>
+                                </div>
+                            <?php endforeach; ?>
+                            <!-- If we only have one recipient, they can't be unchecked -->
+                            <?php elseif (count($primary_people) === 1): ?>
+                                <?php $person = $primary_people[array_key_first($primary_people)]; ?>
+                                <div class="person-item bg-dark-subtle">
+                                    <label class="d-flex align-items-center">
+                                        <input type="radio" name="recipients[]" title="Must have at least one primary recipient" value="<?= htmlspecialchars($person['email']) ?>" checked>
+                                        <div class="person-info">
+                                            <strong><?= htmlspecialchars($person['name']) ?></strong> (<?= $person['roles'] ?>)
+                                            <br><small><?= htmlspecialchars($person['email']) ?></small>
+                                        </div>
+                                    </label>
+                                </div>
                             <?php endif; ?>
 
-                            <?php if ($course_developer && !empty($course_developer[3]) &&
-                                      (!$course_steward || $course_developer[0] !== $course_steward[0])): ?>
-                            <div class="person-item bg-dark-subtle">
-                                <label class="d-flex align-items-center">
-                                    <input type="checkbox" name="recipients[]" value="<?= htmlspecialchars($course_developer[3]) ?>" checked>
-                                    <div class="person-info">
-                                        <strong><?= htmlspecialchars($course_developer[2]) ?></strong> (Developer)
-                                        <br><small><?= htmlspecialchars($course_developer[3]) ?></small>
-                                    </div>
-                                </label>
-                            </div>
-                            <?php endif; ?>
-
-                            <?php if ($assigned_person && !empty($assigned_person[3]) &&
-                                      (!$course_steward || $assigned_person[0] !== $course_steward[0]) &&
-                                      (!$course_developer || $assigned_person[0] !== $course_developer[0])): ?>
-                            <div class="person-item bg-dark-subtle">
-                                <label class="d-flex align-items-center">
-                                    <input type="checkbox" name="recipients[]" value="<?= htmlspecialchars($assigned_person[3]) ?>" checked>
-                                    <div class="person-info">
-                                        <strong><?= htmlspecialchars($assigned_person[2]) ?></strong> (Assigned To)
-                                        <br><small><?= htmlspecialchars($assigned_person[3]) ?></small>
-                                    </div>
-                                </label>
-                            </div>
-                            <?php endif; ?>
-                        </div>
 
                         <div class="mb-4">
                             <h5>Additional Recipients (CC:)</h5>
