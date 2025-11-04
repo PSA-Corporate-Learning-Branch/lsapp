@@ -270,7 +270,7 @@ $allPeople = array_values(array_map(function($person) {
                     <div class="card-body">
                         <p>Select people to notify about this course change request. All selected recipients will be visible to each other.</p>
                         <div class="alert alert-info">
-                            <strong>Note:</strong> Primary recipients (course steward, developer, and assigned person) will be in the "To" field. Additional recipients will be CC'd. Everyone will see who else received the notification.
+                            <strong>Note:</strong> Primary recipients (course steward, developer, requester, and assigned person) will be in the "To" field. Additional recipients will be CC'd. Everyone will see who else received the notification.
                         </div>
 
                         <div class="mb-4">
@@ -323,7 +323,7 @@ $allPeople = array_values(array_map(function($person) {
                                     </div>
                                 </div>
                             <?php endforeach; ?>
-                            <!-- If we only have one recipient, they can't be unchecked -->
+                            <!-- If we only have one recipient, they can't be unchecked so make it a radio -->
                             <?php elseif (count($primary_people) === 1): ?>
                                 <?php $person = $primary_people[array_key_first($primary_people)]; ?>
                                 <div class="person-item bg-dark-subtle">
@@ -338,7 +338,18 @@ $allPeople = array_values(array_map(function($person) {
                                     </div>
                                 </div>
                             <?php endif; ?>
+                            
+                            <!-- No course steward alert -->
+                            <?php if (empty($course_steward)): ?>
+                                <div class="alert alert-warning my-1"><strong>Missing Course Steward/Owner</strong>: This course does not currently have an assigned steward/owner.</div>
+                            <?php endif; ?>
 
+                            <!-- No course developer alert -->
+                            <?php if (empty($course_developer)): ?>
+                                <div class="alert alert-warning my-1"><strong>Missing Course Developer</strong>: This course does not currently have an assigned developer.</div>
+                            <?php endif; ?>
+
+                        </div>
 
                         <div class="mb-4">
                             <h5>Additional Recipients (CC:)</h5>
@@ -362,7 +373,6 @@ $allPeople = array_values(array_map(function($person) {
                             <small class="form-text text-muted">You can enter multiple email addresses separated by commas</small>
                         </div>
                     </div>
-                </div>
                 </div>
                 <div class="d-flex justify-content-between">
                     <a href="view.php?courseid=<?= $courseid ?>&changeid=<?= $changeid ?>"
