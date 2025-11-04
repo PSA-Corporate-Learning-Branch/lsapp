@@ -2373,10 +2373,11 @@ function getAllAudiences () {
 function getDeliveryMethods () {
 
 	return [
-		'Classroom',
 		'eLearning',
+		'Curated Pathway',
+		'Webinar',
 		'Blended',
-		'Webinar'
+		'Classroom'
 	];
 }
 
