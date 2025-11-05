@@ -277,12 +277,16 @@ $allPeople = array_values(array_map(function($person) {
                             <h5>Primary Recipients (To:)</h5>
 
                             <?php 
+                                // Here we want to review the possible primary recipients and put them into an associative array
+                                // as we go we can check if that person already exists and add to their existing roles if they do
+                                // looking at the length of this array will help us determine whether we want checkboxes below
                                 $primary_people = array();
-                                // [idir => [name, email, roles]]
-                                // IDIR[0],Role[1],Name[2],Email[3]
+                                
+                                // Steward
                                 if ($course_steward && !empty($course_steward[3])) {
                                     $primary_people[$course_steward[0]] = ['name' => $course_steward[2], 'email' => $course_steward[3], 'roles' => 'Course Steward'];
                                 }
+                                // Developer
                                 if ($course_developer && !empty($course_developer[3])) {
                                     if (isset($primary_people[$course_developer[0]])) {
                                         $primary_people[$course_developer[0]]['roles'] .= ', Developer';
@@ -291,6 +295,7 @@ $allPeople = array_values(array_map(function($person) {
                                         $primary_people[$course_developer[0]] = ['name' => $course_developer[2], 'email' => $course_developer[3], 'roles' => 'Developer'];
                                     }
                                 }
+                                // Assigned to
                                 if ($assigned_person && !empty($assigned_person[3])) {
                                     if (isset($primary_people[$assigned_person[0]])) {
                                         $primary_people[$assigned_person[0]]['roles'] .= ', Assigned To';
@@ -299,6 +304,7 @@ $allPeople = array_values(array_map(function($person) {
                                         $primary_people[$assigned_person[0]] = ['name' => $assigned_person[2], 'email' => $assigned_person[3], 'roles' => 'Assigned To'];
                                     }
                                 }
+                                // Requester
                                 if (!empty($requester[3])) {
                                     if (isset($primary_people[$requester[0]])) {
                                         $primary_people[$requester[0]]['roles'] .= ', Requested By';
@@ -308,6 +314,7 @@ $allPeople = array_values(array_map(function($person) {
                                     }
                                 }
                             ?>
+                            
                             <!-- We only want to make our primary recipients checkable if there is more than one -->
                             <?php if (count($primary_people) > 1): ?>
                             <?php foreach($primary_people as $idir => $person): ?>
@@ -323,6 +330,7 @@ $allPeople = array_values(array_map(function($person) {
                                     </div>
                                 </div>
                             <?php endforeach; ?>
+                            
                             <!-- If we only have one recipient, they can't be unchecked so make it a radio -->
                             <?php elseif (count($primary_people) === 1): ?>
                                 <?php $person = $primary_people[array_key_first($primary_people)]; ?>
@@ -348,7 +356,7 @@ $allPeople = array_values(array_map(function($person) {
                             <?php if (empty($course_developer)): ?>
                                 <div class="alert alert-warning my-1"><strong>Missing Course Developer</strong>: This course does not currently have an assigned developer.</div>
                             <?php endif; ?>
-
+                        
                         </div>
 
                         <div class="mb-4">
