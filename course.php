@@ -16,6 +16,7 @@ $levels = getLevels ();
 $reportinglist = getReportingList();
 $deets = getCourse($courseid);
 $audits = getCourseAudits($courseid);
+$devpartners = getDevPartnersByCourseID($courseid);
 
 $stewsdevs = getCoursePeople($courseid);
 
@@ -250,7 +251,7 @@ if (!empty($deets[52])) {
 <div class="row">
 <div class="col-12">PEOPLE</div>
 
-	<div class="col-md-4">
+	<div class="col-md-6">
 	<div class=""><strong>Steward:</strong></div>
 	<?php if(!empty($stewsdevs['stewards'][0][2])): ?>
 	<a href="/lsapp/person.php?idir=<?= $stewsdevs['stewards'][0][2] ?>"><?= $stewsdevs['stewards'][0][2] ?></a>
@@ -272,7 +273,7 @@ if (!empty($deets[52])) {
 	
 
 </div>
-<div class="col-md-4">
+<div class="col-md-6">
 <?php //$dev = getPerson($deets[34]) ?>
 <div class=""><strong>Developer:</strong></div>
 	<?php if(!empty($stewsdevs['developers'][0][2])): ?>
@@ -291,8 +292,10 @@ if (!empty($deets[52])) {
 		<div class="alert alert-danger">No developer set!</div>
 	<?php endif ?> 
 </div>
-<div class="col-md-4">
-<div class=""><strong>Corp. Partner:</strong><br> 
+</div>
+<div class="row my-3">
+<div class="col-md-6">
+<strong>Corp. Partner:</strong><br> 
 <?php if (!empty($partnerSlug)): ?>
     <a href="/lsapp/partners/view.php?slug=<?= $partnerSlug ?>"><?= sanitize($partnerName) ?></a>
 <?php elseif (!empty($partnerName)): ?>
@@ -301,9 +304,18 @@ if (!empty($deets[52])) {
     <span class="text-muted">Not set</span>
 <?php endif ?>
 </div>
-</div>
+<div class="col-md-6">
+<strong>Development Partner(s):</strong><br> 
+<?php foreach($devpartners as $dp): ?>
+	<div>
+		<a href="<?= $dp[5] ?>" target="_blank">
+			<?= $dp[3] ?>
+		</a>
+	</div>
+<?php endforeach; ?>
 </div>
 
+</div>
 
 <?php if($deets[21] !== 'eLearning'): ?>
 <div class="row my-3">

@@ -904,6 +904,37 @@ function getCoursesByPartnerName($partnerIdentifier) {
 
 
 
+//
+// Return all development partners for a given course ID
+//
+function getDevPartnersByCourseID($courseid) {
+	
+	$joinpath = build_path(BASE_DIR, 'data', 'courses-devpartners.csv');
+	$f = fopen($joinpath, 'r');
+	
+	$devpartners = array();
+	while ($row = fgetcsv($f)) {
+		if($row[1] == $courseid) {
+			array_push($devpartners,$row);
+		}
+	}
+	fclose($f);
+
+	$partnerpath = build_path(BASE_DIR, 'data', 'development-partners.csv');
+	$f = fopen($partnerpath, 'r');
+	
+	$dpartners = array();
+	foreach($devpartners as $index => $dp) {
+		while ($row = fgetcsv($f)) {			
+			if($row[0] == $dp[2]) {
+				$dpartners[] = $row; // Append partner name to the devpartner entry
+				break;
+			}
+		}
+	}
+	
+	return $dpartners;
+}
 
 
 
