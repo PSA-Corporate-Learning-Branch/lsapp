@@ -40,12 +40,17 @@ $json = [
 ];
 
 foreach ($datas as $course) {
+
     $description = $course['CourseDescription'] ?? '';
     $description = str_replace('&nbsp;', ' ', $description);
     $description = html_entity_decode($description, ENT_QUOTES, 'UTF-8');
     $desc = iconv(mb_detect_encoding($description, mb_detect_order(), true), "UTF-8", $description);
     $createdDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Requested'] ?? '')));
     $modifiedDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Modified'] ?? '')));
+
+    // #TODO finish implementing dev partners
+    //$devpartners = getDevPartnersByCourseID($course['CourseID']);
+
 
     if($course['Platform'] !== 'PSA Learning System' || $course['HubIncludeSync'] == 'no') {
         $registrationurl = $course['RegistrationLink'];
