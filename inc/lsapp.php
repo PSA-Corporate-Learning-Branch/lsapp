@@ -2243,6 +2243,53 @@ function isSuper() {
 }
 
 //
+// Is this user a partner admin for the given partner ID?
+// Returns true if the logged-in user is in the partner's contacts list
+//
+function isPartnerAdmin($partnerId) {
+	if (empty($partnerId)) {
+		return false;
+	}
+
+	// Load partners.json
+	$path = build_path(BASE_DIR, 'data', 'partners.json');
+	if (!file_exists($path)) {
+		return false;
+	}
+
+	$json = file_get_contents($path);
+	$partners = json_decode($json, true);
+
+	if (!$partners) {
+		return false;
+	}
+
+	// Find the partner by ID
+	$partner = null;
+	foreach ($partners as $p) {
+		if ($p['id'] == $partnerId) {
+			$partner = $p;
+			break;
+		}
+	}
+
+	if (!$partner) {
+		return false;
+	}
+
+	// Check if LOGGED_IN_IDIR matches any contact IDIR
+	if (isset($partner['contacts']) && is_array($partner['contacts'])) {
+		foreach ($partner['contacts'] as $contact) {
+			if (isset($contact['idir']) && $contact['idir'] === LOGGED_IN_IDIR) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+//
 // Is this user a partner admin for the given course?
 //
 function isCoursePartnerAdmin($courseid) {
@@ -2260,42 +2307,9 @@ function isCoursePartnerAdmin($courseid) {
 		return false;
 	}
 
-	// Load partners.json
-	$path = build_path(BASE_DIR, 'data', 'partners.json');
-	if (!file_exists($path)) {
-		echo "You're not allowed to edit this course, sorry.";
-		return false;
-	}
-
-	$json = file_get_contents($path);
-	$partners = json_decode($json, true);
-
-	if (!$partners) {
-		echo "You're not allowed to edit this course, sorry.";
-		return false;
-	}
-
-	// Find the partner by ID
-	$partner = null;
-	foreach ($partners as $p) {
-		if ($p['id'] == $partnerId) {
-			$partner = $p;
-			break;
-		}
-	}
-
-	if (!$partner) {
-		echo "You're not allowed to edit this course, sorry.";
-		return false;
-	}
-
-	// Check if LOGGED_IN_IDIR matches any contact IDIR
-	if (isset($partner['contacts']) && is_array($partner['contacts'])) {
-		foreach ($partner['contacts'] as $contact) {
-			if (isset($contact['idir']) && $contact['idir'] === LOGGED_IN_IDIR) {
-				return true;
-			}
-		}
+	// Check if user is a partner admin for this partner
+	if (isPartnerAdmin($partnerId)) {
+		return true;
 	}
 
 	// No match found
