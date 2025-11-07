@@ -210,15 +210,19 @@ $updated_config = [];
 // sync the forms in the config file
 foreach ($config as $form_config) {
     
-    // sync the form and return an updated config
-    $synced_form_config = syncForm($form_config);
-    
-    // pass the updated config and get new responses
-    $synced_response_config = getResponses($synced_form_config);
+    // only sync active forms
+    if (isset($form_config['status']) && $form_config['status'] == 'active') {
 
-    // take the fully updated config and add to our array
-    $updated_config[] = $synced_response_config;
-    
+        // sync the form and return an updated config
+        $synced_form_config = syncForm($form_config);
+        
+        // pass the updated config and get new responses
+        $synced_response_config = getResponses($synced_form_config);
+
+        // take the fully updated config and add to our array
+        $updated_config[] = $synced_response_config;
+
+    }
    
 }
 
