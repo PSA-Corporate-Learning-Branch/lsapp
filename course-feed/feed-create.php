@@ -40,12 +40,34 @@ $json = [
 ];
 
 foreach ($datas as $course) {
+
     $description = $course['CourseDescription'] ?? '';
     $description = str_replace('&nbsp;', ' ', $description);
     $description = html_entity_decode($description, ENT_QUOTES, 'UTF-8');
     $desc = iconv(mb_detect_encoding($description, mb_detect_order(), true), "UTF-8", $description);
     $createdDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Requested'] ?? '')));
     $modifiedDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Modified'] ?? '')));
+
+    $devpartners = getDevPartnersByCourseID($course['CourseID']);
+
+    // If there are development partners, append them to the description
+    if (!empty($devpartners)) {
+        $partnerText = "\n\n<p>This course has been developed in partnership with:\n<ul>";
+        foreach ($devpartners as $partner) {
+            $partnerName = $partner[3] ?? '';  // name is in column 3
+            $partnerURL = $partner[5] ?? '';   // URL is in column 5
+
+            if (!empty($partnerName)) {
+                if (!empty($partnerURL)) {
+                    $partnerText .= "\n<li><a href=\"" . htmlspecialchars($partnerURL, ENT_QUOTES, 'UTF-8') . "\" target=\"_blank\" rel=\"noopener noreferrer\">" . htmlspecialchars($partnerName, ENT_QUOTES, 'UTF-8') . "</a></li>";
+                } else {
+                    $partnerText .= "\n<li>" . htmlspecialchars($partnerName, ENT_QUOTES, 'UTF-8') . "</li>";
+                }
+            }
+        }
+        $partnerText .= "\n</ul>";
+        $desc .= $partnerText;
+    }
 
     if($course['Platform'] !== 'PSA Learning System' || $course['HubIncludeSync'] == 'no') {
         $registrationurl = $course['RegistrationLink'];

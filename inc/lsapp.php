@@ -904,6 +904,38 @@ function getCoursesByPartnerName($partnerIdentifier) {
 
 
 
+//
+// Return all development partners for a given course ID
+//
+function getDevPartnersByCourseID($courseid) {
+	
+	$joinpath = build_path(BASE_DIR, 'data', 'courses-devpartners.csv');
+	$f = fopen($joinpath, 'r');
+	
+	$devpartners = array();
+	while ($row = fgetcsv($f)) {
+		if($row[1] == $courseid) {
+			array_push($devpartners,$row);
+		}
+	}
+	fclose($f);
+
+	$partnerpath = build_path(BASE_DIR, 'data', 'development-partners.csv');
+	$f = fopen($partnerpath, 'r');
+	
+	$dpartners = array();
+	foreach($devpartners as $index => $dp) {
+		while ($row = fgetcsv($f)) {			
+			if($row[0] == $dp[2]) {
+				$dpartners[] = $row; // Append partner name to the devpartner entry
+				break;
+			}
+		}
+	}
+	fclose($f);
+	
+	return $dpartners;
+}
 
 
 
@@ -2177,7 +2209,7 @@ function canAccess() {
 
 
 //
-// Is this person on the admin team?
+// Is this person on the admin team? 
 //
 function isAdmin() {
 	
@@ -2208,6 +2240,81 @@ function isSuper() {
 	}
 	fclose($f);
 	if($yup) return true;
+}
+
+//
+// Is this user a partner admin for the given partner ID?
+// Returns true if the logged-in user is in the partner's contacts list
+//
+function isPartnerAdmin($partnerId) {
+	if (empty($partnerId)) {
+		return false;
+	}
+
+	// Load partners.json
+	$path = build_path(BASE_DIR, 'data', 'partners.json');
+	if (!file_exists($path)) {
+		return false;
+	}
+
+	$json = file_get_contents($path);
+	$partners = json_decode($json, true);
+
+	if (!$partners) {
+		return false;
+	}
+
+	// Find the partner by ID
+	$partner = null;
+	foreach ($partners as $p) {
+		if ($p['id'] == $partnerId) {
+			$partner = $p;
+			break;
+		}
+	}
+
+	if (!$partner) {
+		return false;
+	}
+
+	// Check if LOGGED_IN_IDIR matches any contact IDIR
+	if (isset($partner['contacts']) && is_array($partner['contacts'])) {
+		foreach ($partner['contacts'] as $contact) {
+			if (isset($contact['idir']) && $contact['idir'] === LOGGED_IN_IDIR) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+//
+// Is this user a partner admin for the given course?
+//
+function isCoursePartnerAdmin($courseid) {
+	// Get the course to find its partner ID
+	$course = getCourse($courseid);
+	if (!$course) {
+		echo "You're not allowed to edit this course, sorry.";
+		return false;
+	}
+
+	$partnerId = $course[36]; // Partner ID is in column 36
+
+	if (empty($partnerId)) {
+		echo "You're not allowed to edit this course, sorry.";
+		return false;
+	}
+
+	// Check if user is a partner admin for this partner
+	if (isPartnerAdmin($partnerId)) {
+		return true;
+	}
+
+	// No match found
+	echo "You're not allowed to edit this course, sorry.";
+	return false;
 }
 
 
