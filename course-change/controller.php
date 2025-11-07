@@ -86,7 +86,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
-    header("Location: view.php?courseid={$courseid}&changeid={$changeid}&message=Success");
+
+    // Determine redirect based on action
+    $action = $_POST['action'] ?? '';
+
+    // Redirect to notifications page for new requests, or based on action for updates
+    if (isset($_POST['changeid']) && !empty($_POST['changeid'])) {
+        // Existing request - check if we should go to notifications
+        if ($action === 'update_and_notify') {
+            header("Location: notifications.php?courseid={$courseid}&changeid={$changeid}");
+        } else {
+            header("Location: view.php?courseid={$courseid}&changeid={$changeid}&message=Success");
+        }
+    } else {
+        // New request - go to notifications page
+        header("Location: notifications.php?courseid={$courseid}&changeid={$changeid}");
+    }
     exit;
 } else {
     echo "Invalid request method!";
