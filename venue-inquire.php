@@ -256,7 +256,7 @@ if($class[1] == 'Inactive') $canceled = 'cancelled';
 	<?php foreach($bnotes as $note): ?>
 	<li class="list-group-item">
 	<!-- creqID,ClassID,Date,NotedBy,Note-->
-		<!--<div class="float-right"><small><a class="" href="#?NoteID=<?= h($note[0]) ?>">delete</a></small></div>-->
+		<!--<div class="float-end"><small><a class="" href="#?NoteID=<?= h($note[0]) ?>">delete</a></small></div>-->
 		<small>On <?= h($note[2]) ?> <?= h($note[3]) ?> said:</small><br>
 		<?= h($note[4]) ?><br>
 		

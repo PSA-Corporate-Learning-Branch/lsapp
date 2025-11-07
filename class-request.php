@@ -58,7 +58,7 @@ class date to the schedule for administrative processing.</p>
 <label><input type="checkbox" name="Dedicated" id="Dedicated" class="" value="Dedicated"> <strong>Dedicated?</strong></label>
 
 <div class="alert alert-warning dedinfo">
-<a href="docs/dedicated-class-ADHOC-attendance-form.xlsx" class="btn btn-success float-right ml-3 mt-3">Ad hoc attendance spreadsheet</a>
+<a href="docs/dedicated-class-ADHOC-attendance-form.xlsx" class="btn btn-success float-end ml-3 mt-3">Ad hoc attendance spreadsheet</a>
 <small>Dedicated classes don't use the PSA Learning System to handle pre-registration. 
 Contact the Manager of Learning Delivery to arrange an MOU before submitting a dedicated class.</small>
 </div>
@@ -103,10 +103,11 @@ array_multisort($tmp, SORT_ASC, $courses);
 <div class="col-md-3">
 <label for="DeliveryMethod">Delivery Method</label>
 <select name="DeliveryMethod" id="DeliveryMethod" class="form-control">
-<option>Classroom</option>
-<option>Webinar</option>
-<option>eLearning</option>
-<option>Blended</option>
+	<option>eLearning</option>
+	<option>Webinar</option>
+	<option>Curated Pathway</option>
+	<option>Blended</option>
+	<option>Classroom</option>
 </select>
 
 </div>
@@ -644,7 +645,7 @@ $(document).ready(function(){
 				var courseName = cdate[6];
 				let clink = '<li class="list-group-item">';
 				clink += '<a href="/lsapp/class.php?classid=' + cdate[0] + '">';
-				clink += '<span class="badge bg-light-subtle  float-right">';
+				clink += '<span class="badge bg-light-subtle  float-end">';
 				clink += cdate[1];
 				clink += '</span>';
 				clink += '' + moment(cdate[8]).format('MMM Do YY') + ' | ' + cdate[25];

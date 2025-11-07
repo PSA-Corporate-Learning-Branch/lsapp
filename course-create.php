@@ -3,11 +3,6 @@ require('inc/lsapp.php');
 require('inc/ches_client.php');
 opcache_reset();
 
-if(!canAccess()) {
-    header('Location: /lsapp/');
-    exit;
-}
-
 // Validate required fields
 $requiredFields = ['CourseName', 'CourseDescription', 'LearningHubPartner', 'Platform', 'Method', 'CourseOwner', 'EffectiveDate'];
 $missingFields = [];
@@ -23,6 +18,14 @@ if(!empty($missingFields)) {
     $error = urlencode('Missing required fields: ' . implode(', ', $missingFields));
     header("Location: course-request.php?error={$error}");
     exit;
+}
+
+// Check if user is authorized to create courses for this partner
+if(!canAccess()) {
+    // They don't have general access, so check if they're a partner admin for this specific partner
+    if(!isPartnerAdmin($_POST['LearningHubPartner'])) {
+        die("You're not allowed to create courses for this partner, sorry.");
+    }
 }
 
 // Generate unique course ID and timestamp

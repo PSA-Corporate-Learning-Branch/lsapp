@@ -63,9 +63,9 @@ h1, h2 {
 <div class="card-header">
 
 
-<div class="float-right">
+<div class="float-end">
 	<?php if(isAdmin()): ?>
-		<a href="person-update.php?idir=<?= $person[0] ?>" class="btn btn-link float-right">Edit</a>
+		<a href="person-update.php?idir=<?= $person[0] ?>" class="btn btn-link float-end">Edit</a>
 	<?php endif ?>
 </div>
 <!--IDIR,Role,Name,Email,Status,Phone,Title-->
@@ -390,7 +390,7 @@ someone tells to me enable it again
 <?php foreach($owned as $course): ?>
 <li class="list-group-item">
 	<?php if($course[1] == 'Active'): ?>
-	<a href="class-request.php?courseid=<?= $course[0] ?>" class="float-right btn btn-light ml-3">New Date</a>
+	<a href="class-request.php?courseid=<?= $course[0] ?>" class="float-end btn btn-light ml-3">New Date</a>
 	<?php endif ?>
 	<a href="course.php?courseid=<?= $course[0] ?>"><?= $course[2] ?></a>
 	<?php if($course[1] == 'Inactive'): ?>
@@ -417,7 +417,7 @@ someone tells to me enable it again
 
 <?php if(sizeof($facilitating)>0): ?>
 
-<a href="subscribe.php" class="float-right">Subscribe</a>
+<a href="subscribe.php" class="float-end">Subscribe</a>
 <h2 class="mt-5">Facilitating</h2>
 <p>Assigned as the facilitator for these upcoming classes.</p>
 <table class="table table-sm table-striped">

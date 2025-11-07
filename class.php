@@ -140,8 +140,8 @@ else:
 				<div class="alert alert-warning" role="alert">Course Survey Link Error: Invalid Form Id on course page</div>
 			<?php else: ?>
 				<?php $chefsurl = "https://submit.digital.gov.bc.ca/app/form/submit?f=" . h($course[46]) . "&classCode=" . h(trim($deets[7])); ?>
-				<a href="<?= $chefsurl ?>" target="_blank" class="">CHEFS Course Survey Link </a> 
-				<button class="copy btn btn-sm bg-secondary-subtle" data-clipboard-text="<?= $chefsurl ?>">Copy Course Survey URL</button>
+				<a href="<?= $chefsurl ?>" target="_blank" class="">CHEFS Class Survey </a> 
+				<button class="copy btn btn-sm bg-secondary-subtle" data-clipboard-text="<?= $chefsurl ?>">Copy Class Survey URL</button>
 			<?php endif; ?>
 		</div>
 	<?php endif; ?>

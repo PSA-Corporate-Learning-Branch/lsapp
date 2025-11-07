@@ -139,5 +139,142 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     file_put_contents($partnersFile, json_encode(array_values($existingData), JSON_PRETTY_PRINT));
+
+    // Send email notification for new partner requests
+    if ($partnerIndex === -1 && $status === "requested") {
+        require_once('../../../lsapp/inc/ches_client.php');
+
+        try {
+            $ches = new CHESClient();
+
+            // Build email content
+            $subject = "New Learning Partner Request: " . htmlspecialchars($newPartner["name"]);
+
+            $bodyHtml = "<h2>New Learning Partner Request</h2>";
+            $bodyHtml .= "<p>A new learning partner request has been submitted:</p>";
+            $bodyHtml .= "<table border='1' cellpadding='8' cellspacing='0' style='border-collapse: collapse; font-family: Arial, sans-serif;'>";
+            $bodyHtml .= "<tr><td><strong>Partner Name:</strong></td><td>" . htmlspecialchars($newPartner["name"]) . "</td></tr>";
+            $bodyHtml .= "<tr><td><strong>Description:</strong></td><td>" . htmlspecialchars($newPartner["description"]) . "</td></tr>";
+            $bodyHtml .= "<tr><td><strong>Link:</strong></td><td><a href='" . htmlspecialchars($newPartner["link"]) . "'>" . htmlspecialchars($newPartner["link"]) . "</a></td></tr>";
+            $bodyHtml .= "<tr><td><strong>Employee-facing Contact:</strong></td><td>" . htmlspecialchars($newPartner["employee_facing_contact"]) . "</td></tr>";
+            $bodyHtml .= "<tr><td><strong>Date Requested:</strong></td><td>" . htmlspecialchars($newPartner["date_requested"]) . "</td></tr>";
+
+            if (isset($newPartner["requested_idir"]) && $newPartner["requested_idir"]) {
+                $bodyHtml .= "<tr><td><strong>Requested By:</strong></td><td>" . htmlspecialchars($newPartner["requested_idir"]) . "</td></tr>";
+            }
+
+            $bodyHtml .= "</table>";
+
+            if (!empty($newPartner["contacts"])) {
+                $bodyHtml .= "<h3>Contacts:</h3>";
+                $bodyHtml .= "<table border='1' cellpadding='8' cellspacing='0' style='border-collapse: collapse; font-family: Arial, sans-serif;'>";
+                $bodyHtml .= "<tr style='background-color: #f2f2f2;'>";
+                $bodyHtml .= "<th>Name</th><th>Email</th><th>IDIR</th><th>Title</th><th>Role</th>";
+                $bodyHtml .= "</tr>";
+
+                foreach ($newPartner["contacts"] as $contact) {
+                    $bodyHtml .= "<tr>";
+                    $bodyHtml .= "<td>" . htmlspecialchars($contact["name"]) . "</td>";
+                    $bodyHtml .= "<td>" . htmlspecialchars($contact["email"]) . "</td>";
+                    $bodyHtml .= "<td>" . htmlspecialchars($contact["idir"]) . "</td>";
+                    $bodyHtml .= "<td>" . htmlspecialchars($contact["title"]) . "</td>";
+                    $bodyHtml .= "<td>" . htmlspecialchars($contact["role"]) . "</td>";
+                    $bodyHtml .= "</tr>";
+                }
+
+                $bodyHtml .= "</table>";
+            }
+
+            $bodyHtml .= "<p><a href='https://gww.bcpublicservice.gov.bc.ca/lsapp/partners/dashboard.php'>View Partner Dashboard</a></p>";
+
+            $bodyText = "New Learning Partner Request\n\n";
+            $bodyText .= "Partner Name: " . $newPartner["name"] . "\n";
+            $bodyText .= "Description: " . $newPartner["description"] . "\n";
+            $bodyText .= "Link: " . $newPartner["link"] . "\n";
+            $bodyText .= "Employee-facing Contact: " . $newPartner["employee_facing_contact"] . "\n";
+            $bodyText .= "Date Requested: " . $newPartner["date_requested"] . "\n";
+
+            if (isset($newPartner["requested_idir"]) && $newPartner["requested_idir"]) {
+                $bodyText .= "Requested By: " . $newPartner["requested_idir"] . "\n";
+            }
+
+            if (!empty($newPartner["contacts"])) {
+                $bodyText .= "\nContacts:\n";
+                foreach ($newPartner["contacts"] as $contact) {
+                    $bodyText .= "- " . $contact["name"] . " (" . $contact["email"] . ")\n";
+                    $bodyText .= "  IDIR: " . $contact["idir"] . "\n";
+                    $bodyText .= "  Title: " . $contact["title"] . "\n";
+                    $bodyText .= "  Role: " . $contact["role"] . "\n";
+                }
+            }
+
+            $bodyText .= "\nView Partner Dashboard: https://gww.bcpublicservice.gov.bc.ca/lsapp/partners/dashboard.php\n";
+
+            // Send email
+            $result = $ches->sendEmail(
+                ['allan.haggett@gov.bc.ca'],
+                $subject,
+                $bodyText,
+                $bodyHtml,
+                'learninghub_noreply@gov.bc.ca'
+            );
+
+            error_log("Sent new partner request notification email (Transaction ID: {$result['txId']})");
+
+            // Send confirmation emails to each administrative contact
+            if (!empty($newPartner["contacts"])) {
+                foreach ($newPartner["contacts"] as $contact) {
+                    if (!empty($contact["email"])) {
+                        try {
+                            $confirmSubject = "Learning Partner Request Received - " . htmlspecialchars($newPartner["name"]);
+
+                            $confirmBodyHtml = "<h2>Thank you for your Learning Partner request</h2>";
+                            $confirmBodyHtml .= "<p>Hello " . htmlspecialchars($contact["name"]) . ",</p>";
+                            $confirmBodyHtml .= "<p>We have received your request to become a Corporate Learning Partner for <strong>" . htmlspecialchars($newPartner["name"]) . "</strong>.</p>";
+                            $confirmBodyHtml .= "<h3>What happens next?</h3>";
+                            $confirmBodyHtml .= "<p>Our team will review your request and get back to you soon with next steps. Please stay tuned for more information.</p>";
+                            $confirmBodyHtml .= "<h3>Request Summary:</h3>";
+                            $confirmBodyHtml .= "<table border='1' cellpadding='8' cellspacing='0' style='border-collapse: collapse; font-family: Arial, sans-serif;'>";
+                            $confirmBodyHtml .= "<tr><td><strong>Partner Name:</strong></td><td>" . htmlspecialchars($newPartner["name"]) . "</td></tr>";
+                            $confirmBodyHtml .= "<tr><td><strong>Description:</strong></td><td>" . htmlspecialchars($newPartner["description"]) . "</td></tr>";
+                            $confirmBodyHtml .= "<tr><td><strong>Date Submitted:</strong></td><td>" . htmlspecialchars($newPartner["date_requested"]) . "</td></tr>";
+                            $confirmBodyHtml .= "</table>";
+                            $confirmBodyHtml .= "<p>If you have any questions in the meantime, please don't hesitate to reach out.</p>";
+                            $confirmBodyHtml .= "<p>Thank you,<br>LearningHUB Team</p>";
+
+                            $confirmBodyText = "Thank you for your Learning Partner request\n\n";
+                            $confirmBodyText .= "Hello " . $contact["name"] . ",\n\n";
+                            $confirmBodyText .= "We have received your request to become a Corporate Learning Partner for " . $newPartner["name"] . ".\n\n";
+                            $confirmBodyText .= "What happens next?\n";
+                            $confirmBodyText .= "Our team will review your request and get back to you soon with next steps. Please stay tuned for more information.\n\n";
+                            $confirmBodyText .= "Request Summary:\n";
+                            $confirmBodyText .= "Partner Name: " . $newPartner["name"] . "\n";
+                            $confirmBodyText .= "Description: " . $newPartner["description"] . "\n";
+                            $confirmBodyText .= "Date Submitted: " . $newPartner["date_requested"] . "\n\n";
+                            $confirmBodyText .= "If you have any questions in the meantime, please don't hesitate to reach out.\n\n";
+                            $confirmBodyText .= "Thank you,\nLearningHUB Team\n";
+
+                            $confirmResult = $ches->sendEmail(
+                                [$contact["email"]],
+                                $confirmSubject,
+                                $confirmBodyText,
+                                $confirmBodyHtml,
+                                'learninghub_noreply@gov.bc.ca'
+                            );
+
+                            error_log("Sent confirmation email to {$contact['email']} (Transaction ID: {$confirmResult['txId']})");
+
+                        } catch (Exception $confirmException) {
+                            error_log("ERROR: Failed to send confirmation email to {$contact['email']}: " . $confirmException->getMessage());
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception $e) {
+            error_log("ERROR: Failed to send partner request notification email: " . $e->getMessage());
+        }
+    }
+
     header('Location: /learning/hub/partners/new-partner-form.php');
 }

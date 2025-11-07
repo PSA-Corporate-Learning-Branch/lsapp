@@ -194,7 +194,7 @@ else:
 		<div class="col-md-2">
 			<label>Method
 			<select name="DeliveryMethod" id="DeliveryMethod" class="form-select">
-			<?php $dms = array('Classroom','Webinar','eLearning') ?>
+			<?php $dms = getDeliveryMethods() ?>
 			<?php foreach($dms as $dm): ?>
 			<?php if($dm == $deets[45]): ?>
 			<option selected><?= $dm ?></option>

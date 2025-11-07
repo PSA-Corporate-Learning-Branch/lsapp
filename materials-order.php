@@ -19,7 +19,7 @@ $course = getCourse($order[6]);
 <div class="col-md-12">
 
 
-<div class="float-right">
+<div class="float-end">
 <!--<a href="materials-order-update.php?orderid=<?= $order[0] ?>" class="btn btn-secondary">Edit</a>-->
 <?php if(isAdmin()): ?>
 <form method="post" action="materials-order-delete.php">
@@ -29,7 +29,7 @@ $course = getCourse($order[6]);
 <?php endif ?>
 
 </div>
-<div class="btn-group float-right">
+<div class="btn-group float-end">
 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#instructionsModal">
   Instructions
 </button>
@@ -128,7 +128,7 @@ if($class[9] < $today) continue;
 $upcount++;
 endforeach;
 ?>
-<div class="float-right"><span class="badge badge-dark"><?= $upcount ?></span> upcoming classes</div>
+<div class="float-end"><span class="badge badge-dark"><?= $upcount ?></span> upcoming classes</div>
 <h3>Order Items</h3>
 <div class="table-responsive">
 <table class="table table-striped">

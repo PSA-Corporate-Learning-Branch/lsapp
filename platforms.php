@@ -10,7 +10,7 @@
 <div class="row justify-content-md-center mb-3">
 
 <div class="col-md-8">
-<div class="btn-group float-right">
+<div class="btn-group float-end">
 <?php if(isAdmin()): ?>
 <a href="platform-create.php" class="btn btn-primary">New Platform</a>
 <?php endif ?>

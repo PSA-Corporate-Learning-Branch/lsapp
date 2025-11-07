@@ -14,7 +14,7 @@ opcache_reset();
 <div class="card mb-3">
 <div id="userlist">
 <div class="card-header">
-<a href="#" class="btn btn-sm btn-success float-right addemail">Add Email</a>
+<a href="#" class="btn btn-sm btn-success float-end addemail">Add Email</a>
 <h2 class="card-title">Mailing List</h2>
 <div class="card-subtitle">Mostly external folks who don't have IDIRs</div>
 </div>
@@ -30,7 +30,7 @@ opcache_reset();
 <?php $people = getExternalMailList(); ?>
 <?php foreach($people as $p): ?>
 <li class="list-group-item">
-	<form method="post" action="external-list-delete.php" class="float-right">
+	<form method="post" action="external-list-delete.php" class="float-end">
 		<input type="hidden" name="eid" value="<?= $p[0] ?>">
 		<input type="submit" class="btn btn-light btn-sm del" value="x">
 	</form> 

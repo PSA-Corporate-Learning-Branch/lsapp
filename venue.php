@@ -31,7 +31,7 @@ else: ?>
 
 <div class="card">
 <div class="card-header">
-<div class="float-right">
+<div class="float-end">
 			<?php if(isSuper()): ?>
 			<form method="post" action="venue-delete.php">
 			<input type="hidden" name="VenueID" value="<?= $deets[0] ?>">
@@ -43,7 +43,7 @@ else: ?>
 Region: <a href="region.php?name=<?php echo urlencode($deets[12]) ?>"><?= $deets[12] ?></a>
 </div>
 <div class="card-body">
-<div class="float-right w-25 alert alert-success text-center venuevote">
+<div class="float-end w-25 alert alert-success text-center venuevote">
 	<span class="badge badge-light"><?= h($deets[13]) ?> Likes</a></span> <br>
 	<a href="venue-vote.php?venueid=<?= $deets[0] ?>" style="font-size: 22px; font-weight: 1000">&#128077;</a>
 	<a href="venue-vote.php?venueid=<?= $deets[0] ?>&updown=down" style="font-size: 22px; font-weight: 1000">&#128078;</a>
@@ -132,7 +132,7 @@ Region: <a href="region.php?name=<?php echo urlencode($deets[12]) ?>"><?= $deets
 <?php if($notes): ?>
 <?php foreach($notes as $note): ?>
 <li class="list-group-item">
-	<div class="float-right">
+	<div class="float-end">
 		<form method="post" action="venue-note-delete.php">
 		<input type="hidden" name="venueid" value="<?= $deets[0] ?>">
 		<input type="hidden" name="noteid" value="<?= $note[0] ?>">

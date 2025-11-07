@@ -60,7 +60,7 @@ else: ?>
 <div class="container mb-3">
 <div class="row justify-content-md-center mb-3">
 <div class="col-md-6 mb-3">
-<div class="float-right">
+<div class="float-end">
 <form method="post" action="person-delete.php">
 	<input type="hidden" name="idir" value="<?= $person[0] ?>">
 	<div class="btn-group">

@@ -143,7 +143,7 @@ $(document).ready(function(){
 				var courseName = cdate[6];
 				let clink = '<li class="list-group-item">';
 				clink += '<a href="/lsapp/class.php?classid=' + cdate[0] + '">';
-				clink += '<span class="badge badge-secondary float-right">';
+				clink += '<span class="badge badge-secondary float-end">';
 				clink += cdate[1];
 				clink += '</span>';
 				clink += '' + moment(cdate[8]).format('MMM Do YY') + ' | ' + cdate[25];

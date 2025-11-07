@@ -14,7 +14,7 @@
 <a href="av-dashboard.php">AV Inventory List</a>
 <div class="card">
 <div class="card-header">
-<div class="float-right">
+<div class="float-end">
 <?php if(isSuper()): ?>
 <form method="post" action="av-delete.php">
 <input type="hidden" name="avid" value="<?= $deets[0] ?>">

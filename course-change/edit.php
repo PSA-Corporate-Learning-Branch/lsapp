@@ -73,7 +73,7 @@ function getGuidanceByCategory($cat, $categoriesFile) {
 
 // Example usage
 $cat = urldecode($formData['category']) ?? '';
-$categoriesFile = 'guidance.json';
+$categoriesFile = '../data/course-change-guidance.json';
 $guidance = getGuidanceByCategory($cat, $categoriesFile);
 $peopleActive = getPeopleAll($filteractive = true);
 
@@ -347,8 +347,13 @@ $peopleActive = getPeopleAll($filteractive = true);
             </script>
             
 
-            <!-- Submit Button -->
-            <button type="submit" class="btn btn-primary w-100"><?= $changeid ? 'Update' : 'Submit' ?></button>
+            <!-- Submit Buttons -->
+            <div class="d-grid gap-2">
+                <button type="submit" name="action" value="update" class="btn btn-primary"><?= $changeid ? 'Update' : 'Submit' ?></button>
+                <?php if ($changeid): ?>
+                <button type="submit" name="action" value="update_and_notify" class="btn btn-success">Update & Send Notifications</button>
+                <?php endif; ?>
+            </div>
         </form>
 
     </div>

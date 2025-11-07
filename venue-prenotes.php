@@ -16,7 +16,7 @@
 
 <div class="card">
 <div class="card-header">
-<div class="float-right">
+<div class="float-end">
 			<?php if(isSuper()): ?>
 			<form method="post" action="venue-delete.php">
 			<input type="hidden" name="VenueID" value="<?= $deets[0] ?>">
@@ -28,7 +28,7 @@
 Region: <a href="region.php?name=<?php echo urlencode($deets[12]) ?>"><?= $deets[12] ?></a>
 </div>
 <div class="card-body">
-<div class="float-right w-25 alert alert-success text-right">
+<div class="float-end w-25 alert alert-success text-right">
 	<span class="badge badge-light"><?= h($deets[13]) ?> Likes</a></span> 
 	<a href="venue-vote.php?venueid=<?= $deets[0] ?>" style="font-size: 22px; font-weight: 1000">&#8679;</a>
 	<a href="venue-vote.php?venueid=<?= $deets[0] ?>&updown=down" style="font-size: 22px; font-weight: 1000">&#8681;</a>

@@ -32,18 +32,18 @@ elseif($_POST['action'] == 'add'):
 	$fromform = $_POST;
 	$pronouns = $fromform['Pronouns'] ? $fromform['Pronouns'] : 'Unspecified';
 	$newadmin = Array(strtolower(h($fromform['idir'])),
-					h($fromform['role']),
+					h($fromform['role']), 	// Team
 					h($fromform['name']),
 					h($fromform['email']),
-					'Active',
+					'Active',				// Status
 					h($fromform['phone']),
 					h($fromform['title']),
-					h($fromform['Super']),
-					h($fromform['Manager']),
+					0,						// Super
+					'',						// Manager
 					$pronouns,
-					'0|50|50|50|50',
-					0,
-					0
+					'0|50|50|50|50',		// Colors
+					0,						// iStore
+					0						// Kepler
 		);
 
 	$admin = array($newadmin);

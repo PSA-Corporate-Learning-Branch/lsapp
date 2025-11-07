@@ -245,7 +245,7 @@ foreach($c as $line) {
 <tr>
 	<td class="claimed">
 	<?php if(!$uclass[44] || $uclass[44] == 'Unassigned'): ?>
-	<form method="get" action="class-claim.php" class="float-right claimform">
+	<form method="get" action="class-claim.php" class="float-end claimform">
 		<input type="hidden" name="cid" id="cid" value="<?= h($uclass[0]) ?>">
 		<input type="submit" class="btn btn-sm btn-light ml-3" value="Claim">
 	</form>

@@ -57,7 +57,7 @@
 </div>
 </details>
 <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://learningcentre.gww.gov.bc.ca/learninghub/" target="_blank" rel="noopener">LearningHUB - Course Catalog</a>
+    <a href="https://corporatelearning.gww.gov.bc.ca/learninghub/" target="_blank" rel="noopener">LearningHUB - Course Catalog</a>
 </div>
 <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
     <a href="https://learningcurator.gww.gov.bc.ca/" target="_blank" rel="noopener">Learning Curator - Pathways</a>
@@ -66,7 +66,7 @@
     <a href="#" target="_blank" rel="noopener">RightNow (CRM)</a>
 </div>
 <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://bcgov.sharepoint.com/teams/00440" target="_blank" rel="noopener">Learning Centre SharePoint</a>
+    <a href="https://bcgov.sharepoint.com/teams/00440" target="_blank" rel="noopener">CL Branch SharePoint</a>
 </div>
 </details>
 <?php endif ?>
@@ -84,17 +84,17 @@
     <a href="https://insider.gww.gov.bc.ca/" target="_blank" rel="noopener">PSA Insider - PSA-only Intranet</a>
 </div>
 <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://learningcentre.gww.gov.bc.ca/" target="_blank" rel="noopener">Learning Centre - Intranet</a>
+    <a href="https://corporatelearning.gww.gov.bc.ca/" target="_blank" rel="noopener">Corporate Learning - Intranet</a>
 </div>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+<!-- <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
     <a href="https://analytics.psa.gov.bc.ca/Account/Login?ReturnUrl=%2F" target="_blank" rel="noopener">LC Operations Dashboard</a>
-</div>
+</div> -->
 
 <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://learningcentre.gww.gov.bc.ca/learn-at-work-week/" target="_blank" rel="noopener">Learn @ Work Week</a>
+    <a href="https://corporatelearning.gww.gov.bc.ca/learn-at-work-week/" target="_blank" rel="noopener">Learn @ Work Week</a>
 </div>
 <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://learningcentre.gww.gov.bc.ca/supervising-bcps/" target="_blank" rel="noopener">Supervising in the BC Public Service</a>
+    <a href="https://corporatelearning.gww.gov.bc.ca/supervising-bcps/" target="_blank" rel="noopener">Mandatory People Leader Learning</a>
 </div>
 
 
@@ -127,14 +127,14 @@
 <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
     <a href="https://chat.developer.gov.bc.ca/home" target="_blank" rel="noopener">Rocket.Chat - BCDevXHQ</a>
 </div>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+<!-- <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
     <a href="#" target="_blank" rel="noopener">PSA / PSECI Help Jira</a>
-</div>
+</div> -->
 
 
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+<!-- <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
     <a href="#" target="_blank" rel="noopener">Kepler Document Server</a>
-</div>
+</div> -->
 
 <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
     <a href="https://cloud.gov.bc.ca/private-cloud/" target="_blank" rel="noopener">BC Gov Private Cloud Platform as a Service</a>
