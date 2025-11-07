@@ -932,6 +932,7 @@ function getDevPartnersByCourseID($courseid) {
 			}
 		}
 	}
+	fclose($f);
 	
 	return $dpartners;
 }
@@ -2208,7 +2209,7 @@ function canAccess() {
 
 
 //
-// Is this person on the admin team?
+// Is this person on the admin team? 
 //
 function isAdmin() {
 	
@@ -2239,6 +2240,67 @@ function isSuper() {
 	}
 	fclose($f);
 	if($yup) return true;
+}
+
+//
+// Is this user a partner admin for the given course?
+//
+function isCoursePartnerAdmin($courseid) {
+	// Get the course to find its partner ID
+	$course = getCourse($courseid);
+	if (!$course) {
+		echo "You're not allowed to edit this course, sorry.";
+		return false;
+	}
+
+	$partnerId = $course[36]; // Partner ID is in column 36
+
+	if (empty($partnerId)) {
+		echo "You're not allowed to edit this course, sorry.";
+		return false;
+	}
+
+	// Load partners.json
+	$path = build_path(BASE_DIR, 'data', 'partners.json');
+	if (!file_exists($path)) {
+		echo "You're not allowed to edit this course, sorry.";
+		return false;
+	}
+
+	$json = file_get_contents($path);
+	$partners = json_decode($json, true);
+
+	if (!$partners) {
+		echo "You're not allowed to edit this course, sorry.";
+		return false;
+	}
+
+	// Find the partner by ID
+	$partner = null;
+	foreach ($partners as $p) {
+		if ($p['id'] == $partnerId) {
+			$partner = $p;
+			break;
+		}
+	}
+
+	if (!$partner) {
+		echo "You're not allowed to edit this course, sorry.";
+		return false;
+	}
+
+	// Check if LOGGED_IN_IDIR matches any contact IDIR
+	if (isset($partner['contacts']) && is_array($partner['contacts'])) {
+		foreach ($partner['contacts'] as $contact) {
+			if (isset($contact['idir']) && $contact['idir'] === LOGGED_IN_IDIR) {
+				return true;
+			}
+		}
+	}
+
+	// No match found
+	echo "You're not allowed to edit this course, sorry.";
+	return false;
 }
 
 
