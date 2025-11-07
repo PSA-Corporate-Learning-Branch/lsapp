@@ -8,7 +8,7 @@ $Parsedown = new Parsedown();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if(canACcess()) {
     $action = $_POST['action'] ?? '';
-    $categoriesFile = 'guidance.json';
+    $categoriesFile = '../data/course-change-guidance.json';
 
     // Ensure file exists
     if (!file_exists($categoriesFile)) {
@@ -58,7 +58,7 @@ if(canACcess()) {
 }
 
 // Load current categories
-$categoriesFile = 'guidance.json';
+$categoriesFile = '../data/course-change-guidance.json';
 $categories = file_exists($categoriesFile) ? json_decode(file_get_contents($categoriesFile), true) : [];
 if (json_last_error() !== JSON_ERROR_NONE) {
     $categories = [];

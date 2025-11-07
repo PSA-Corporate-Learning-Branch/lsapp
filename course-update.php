@@ -5,18 +5,31 @@ require('inc/Parsedown.php');
 $Parsedown = new Parsedown();
 opcache_reset();
 
-if(!isAdmin()) {
-    header('Location: /lsapp/');
-    exit;
-}
-
-// Handle form submission
+// Check authorization
+// For POST requests, allow admins or partner admins
 if($_POST) {
-    // Validate and sanitize inputs
     $courseid = filter_var($_POST['CourseID']);
     if(!$courseid) {
         die("Invalid course ID");
     }
+
+    if(!isAdmin()) {
+        // They're not an admin, so check if they're a partner admin for this specific course
+        if(!isCoursePartnerAdmin($courseid)) {
+            die("You're not allowed to edit this course, sorry.");
+        }
+    }
+} else {
+    // For GET requests (viewing the full form), only admins are allowed
+    // Partner admins use a separate simplified UI
+    if(!isAdmin()) {
+        die("You're not allowed to access this page, sorry.");
+    }
+}
+
+// Handle form submission
+if($_POST) {
+    // courseid already validated above
     
     // Get current course data to check existing status
     $currentCourse = getCourse($courseid);
@@ -323,7 +336,7 @@ $reportinglist = getReportingList();
                 <label for="Method" class="form-label">Delivery Method</label>
                 <select name="Method" id="Method" class="form-select" required>
                     <option value="" disabled>Select one</option>
-                    <?php $methods = ['Classroom','eLearning','Blended','Webinar'] ?>
+                    <?php $methods = ['eLearning','Webinar','Curated Pathway','Blended','Classroom'] ?>
                     <?php foreach($methods as $method): ?>
                         <option value="<?= $method ?>" <?= ($method == $deets[21]) ? 'selected' : '' ?>><?= $method ?></option>
                     <?php endforeach ?>

@@ -100,10 +100,11 @@ $reportinglist = getReportingList();
                 <label for="Method" class="form-label">Delivery Method</label>
                 <select name="Method" id="Method" class="form-select" required>
                     <option value="" disabled selected>Select one</option>
-                    <option value="Classroom">Classroom</option>
                     <option value="eLearning">eLearning</option>
-                    <option value="Blended">Blended</option>
                     <option value="Webinar">Webinar</option>
+                    <option value="Curated Pathway">Curated Pathway</option>
+                    <option value="Blended">Blended</option>
+                    <option value="Classroom">Classroom</option>
                 </select>
             </div>
         </div>

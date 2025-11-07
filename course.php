@@ -16,6 +16,7 @@ $levels = getLevels ();
 $reportinglist = getReportingList();
 $deets = getCourse($courseid);
 $audits = getCourseAudits($courseid);
+$devpartners = getDevPartnersByCourseID($courseid);
 
 $stewsdevs = getCoursePeople($courseid);
 
@@ -59,18 +60,6 @@ if (!empty($deets[52])) {
 // 10-CourseOwner,11-MinMax,12-CourseNotes,
 // 13-Requested, 14-RequestedBy,15-EffectiveDate,16-CourseDescription,17-CourseAbstract,18-Prerequisites,19-Keywords,
 // 20-Category,21-Method,22-elearning
-// Load categories from the JSON file
-$categoriesFile = 'course-change/guidance.json';
-$categories = [];
-
-if (file_exists($categoriesFile)) {
-    $categories = json_decode(file_get_contents($categoriesFile), true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        die("Error reading categories.json: " . json_last_error_msg());
-    }
-    // Reindex the array after unsetting
-    $categories = array_values($categories);
-}
 
 ?>
 <?php getHeader() ?>
@@ -114,13 +103,11 @@ if (file_exists($categoriesFile)) {
 				Requests
 			</button>
 			<ul class="dropdown-menu">
-				<?php foreach ($categories as $cat): ?>
 				<li class="dropdown-item">
-					<a href="course-change/create.php?cat=<?php echo htmlspecialchars(urlencode($cat['category'])); ?>&courseid=<?= $deets[0] ?>">
-						<?php echo htmlspecialchars($cat['category']); ?>
+					<a href="course-change/create.php?&courseid=<?= $deets[0] ?>">
+						Course Change
 					</a>
 				</li>
-                <?php endforeach; ?>
 				<li class="dropdown-item">
 					<a href="/lsapp/class-bulk-insert.php?courseid=<?= $deets[0] ?>">New Class Date</a>
 				</li>
@@ -264,7 +251,7 @@ if (file_exists($categoriesFile)) {
 <div class="row">
 <div class="col-12">PEOPLE</div>
 
-	<div class="col-md-4">
+	<div class="col-md-6">
 	<div class=""><strong>Steward:</strong></div>
 	<?php if(!empty($stewsdevs['stewards'][0][2])): ?>
 	<a href="/lsapp/person.php?idir=<?= $stewsdevs['stewards'][0][2] ?>"><?= $stewsdevs['stewards'][0][2] ?></a>
@@ -286,7 +273,7 @@ if (file_exists($categoriesFile)) {
 	
 
 </div>
-<div class="col-md-4">
+<div class="col-md-6">
 <?php //$dev = getPerson($deets[34]) ?>
 <div class=""><strong>Developer:</strong></div>
 	<?php if(!empty($stewsdevs['developers'][0][2])): ?>
@@ -305,8 +292,10 @@ if (file_exists($categoriesFile)) {
 		<div class="alert alert-danger">No developer set!</div>
 	<?php endif ?> 
 </div>
-<div class="col-md-4">
-<div class=""><strong>Corp. Partner:</strong><br> 
+</div>
+<div class="row my-3">
+<div class="col-md-6">
+<strong>Corp. Partner:</strong><br> 
 <?php if (!empty($partnerSlug)): ?>
     <a href="/lsapp/partners/view.php?slug=<?= $partnerSlug ?>"><?= sanitize($partnerName) ?></a>
 <?php elseif (!empty($partnerName)): ?>
@@ -315,9 +304,18 @@ if (file_exists($categoriesFile)) {
     <span class="text-muted">Not set</span>
 <?php endif ?>
 </div>
-</div>
+<div class="col-md-6">
+<strong>Development Partner(s):</strong><br> 
+<?php foreach($devpartners as $dp): ?>
+	<div>
+		<a href="<?= $dp[5] ?>" target="_blank">
+			<?= $dp[3] ?>
+		</a>
+	</div>
+<?php endforeach; ?>
 </div>
 
+</div>
 
 <?php if($deets[21] !== 'eLearning'): ?>
 <div class="row my-3">
@@ -700,22 +698,6 @@ $finalcount = $upcount - $inactive - $closed;
 
 <?php require('templates/javascript.php') ?>
 
-<script>
-$(document).ready(function(){
-	$('.guidance').addClass('d-none');
-	$('.RequestType').on('change', function(){
-		let type = $(this).val();
-		$('.guidance').addClass('d-none');
-		if(type == 'Close') {
-			$('.closecoursehelp').removeClass('d-none');
-		}
-		if(type == 'Moodle') {
-			$('.moodlehelp').removeClass('d-none');
-		}
-
-	});
-}); 
-</script>
 
 <script src="/lsapp/js/clipboard.min.js"></script>
 <script>
