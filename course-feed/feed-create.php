@@ -52,20 +52,19 @@ foreach ($datas as $course) {
 
     // If there are development partners, append them to the description
     if (!empty($devpartners)) {
-        $partnerText = "\n\n<p>This course has been developed in partnership with:\n<ul>";
+        $partnerText = "\n\nThis course has been developed in partnership with:\n";
         foreach ($devpartners as $partner) {
             $partnerName = $partner[3] ?? '';  // name is in column 3
             $partnerURL = $partner[5] ?? '';   // URL is in column 5
 
             if (!empty($partnerName)) {
                 if (!empty($partnerURL)) {
-                    $partnerText .= "\n<li><a href=\"" . htmlspecialchars($partnerURL, ENT_QUOTES, 'UTF-8') . "\" target=\"_blank\" rel=\"noopener noreferrer\">" . htmlspecialchars($partnerName, ENT_QUOTES, 'UTF-8') . "</a></li>";
+                    $partnerText .= "- [" . $partnerName . "](" . $partnerURL . ")\n";
                 } else {
-                    $partnerText .= "\n<li>" . htmlspecialchars($partnerName, ENT_QUOTES, 'UTF-8') . "</li>";
+                    $partnerText .= "- " . $partnerName . "\n";
                 }
             }
         }
-        $partnerText .= "\n</ul>";
         $desc .= $partnerText;
     }
 
