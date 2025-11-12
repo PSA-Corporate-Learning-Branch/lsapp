@@ -141,6 +141,7 @@ function mapPartnerCode($code) {
         'DWCS' => 'Digital Workplace and Collaboration Services Branch',
         'Procurement Strategy Gov' => 'Procurement Strategy and Governance Branch',
         'Service BC Web Services Branch' => 'Service BC - Web Services Branch',
+        'REDI' => 'PSA Reconciliation, Equity, Diversity, and Inclusion Branch (REDI)',
         // Add other mappings as needed
     ];
     return $partners[$code] ?? $code;
