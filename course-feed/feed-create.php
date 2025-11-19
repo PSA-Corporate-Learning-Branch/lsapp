@@ -48,25 +48,25 @@ foreach ($datas as $course) {
     $createdDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Requested'] ?? '')));
     $modifiedDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Modified'] ?? '')));
 
-    $devpartners = getDevPartnersByCourseID($course['CourseID']);
+    // $devpartners = getDevPartnersByCourseID($course['CourseID']);
 
     // If there are development partners, append them to the description
-    if (!empty($devpartners)) {
-        $partnerText = "\n\nThis course has been developed in partnership with:\n";
-        foreach ($devpartners as $partner) {
-            $partnerName = $partner[3] ?? '';  // name is in column 3
-            $partnerURL = $partner[5] ?? '';   // URL is in column 5
+    // if (!empty($devpartners)) {
+    //     $partnerText = "\n\nThis course has been developed in partnership with:\n";
+    //     foreach ($devpartners as $partner) {
+    //         $partnerName = $partner[3] ?? '';  // name is in column 3
+    //         $partnerURL = $partner[5] ?? '';   // URL is in column 5
 
-            if (!empty($partnerName)) {
-                if (!empty($partnerURL)) {
-                    $partnerText .= "- [" . $partnerName . "](" . $partnerURL . ")\n";
-                } else {
-                    $partnerText .= "- " . $partnerName . "\n";
-                }
-            }
-        }
-        $desc .= $partnerText;
-    }
+    //         if (!empty($partnerName)) {
+    //             if (!empty($partnerURL)) {
+    //                 $partnerText .= "- [" . $partnerName . "](" . $partnerURL . ")\n";
+    //             } else {
+    //                 $partnerText .= "- " . $partnerName . "\n";
+    //             }
+    //         }
+    //     }
+    //     $desc .= $partnerText;
+    // }
 
     if($course['Platform'] !== 'PSA Learning System' || $course['HubIncludeSync'] == 'no') {
         $registrationurl = $course['RegistrationLink'];
