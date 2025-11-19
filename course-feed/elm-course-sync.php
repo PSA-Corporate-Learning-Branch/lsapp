@@ -75,7 +75,7 @@ function updateCourse($existingCourse, $newCourseData, &$logEntries, &$hubInclud
 
     // If course is found in ELM feed, always set HUBInclude to 'Yes' regardless of current state
     $hubIncludePersist = isset($existingCourse[59]) ? $existingCourse[59] : 'no';
-    $currentHubInclude = trim($existingCourse[53]);
+    $currentHubInclude = trim($existingCourse[53]) ? $existingCourse[53] : 'no';
 
     // Always ensure HUBInclude is 'Yes' for courses in ELM feed
     if ($currentHubInclude !== 'Yes') {
