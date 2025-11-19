@@ -137,5 +137,51 @@ if (!copy($jsonFilename, $newfile)) {
 }
 
 
+
+/**
+ * 
+ * Export partners data with admin contact information stripped. Publishes to:
+ * https://learn.bcpublicservice.gov.bc.ca/learning-hub/bcps-corporate-learning-partners.json
+ * 
+ */
+
+$partnersSource = '../data/partners.json';
+$partnersContent = file_get_contents($partnersSource);
+if ($partnersContent !== false) {
+    $partners = json_decode($partnersContent, true);
+    if ($partners !== null) {
+        // Strip contact information from each partner, keeping employee_facing_contact
+        $strippedPartners = [];
+        foreach ($partners as $partner) {
+            $strippedPartner = [
+                'id' => $partner['id'] ?? null,
+                'name' => $partner['name'] ?? '',
+                'slug' => $partner['slug'] ?? '',
+                'description' => $partner['description'] ?? '',
+                'link' => $partner['link'] ?? '',
+                'employee_facing_contact' => $partner['employee_facing_contact'] ?? '',
+                'status' => $partner['status'] ?? ''
+            ];
+            $strippedPartners[] = $strippedPartner;
+        }
+
+        $partnersJson = json_encode($strippedPartners, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        $partnersFilename = 'data/bcps-corporate-learning-partners.json';
+        file_put_contents($partnersFilename, $partnersJson);
+
+        $partnersNewfile = 'E:/WebSites/lsapp-data/bcps-corporate-learning-partners.json';
+        if (!copy($partnersFilename, $partnersNewfile)) {
+            echo 'Failed to copy ' . $partnersFilename . '... contact Allan';
+            exit;
+        }
+    } else {
+        echo 'Failed to parse partners.json... contact Allan';
+        exit;
+    }
+} else {
+    echo 'Failed to read partners.json... contact Allan';
+    exit;
+}
+
 header('Location: index.php?message=Success');
 exit;
