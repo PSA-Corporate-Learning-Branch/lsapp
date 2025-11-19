@@ -26,159 +26,157 @@ getHeader();
 	</button>
 </div>
 <form name="" action="class-bulk-create.php" method="POST" enctype="multipart/form-data">
-<input type="hidden" id="CourseCode" name="CourseCode" value="<?= $course[0] ?>">
-<div id="datecontainer">
-<div class="row my-1 p-3 bg-dark-subtle rounded-3" id="classdate1">
-<div class="col-md-3">
-<label for="sd" class="sessionlabel">Start Date</label>
-<input class="form-control StartDate date" id="sd" type="date" name="StartDate[]" value="<?= date('Y-m-d') ?>">
-</div>
-<div class="col-md-2">
-<label for="st">Start time</label>
-<input class="form-control starttime" id="st" type="text" name="StartTime[]" value="<?= $course[30] ?>" >
-</div>
-<div class="col-md-2">
-<label for="et">End time</label>
-<input class="form-control endtime" id="et" type="text" name="EndTime[]" value="<?= $course[31] ?>" >
-</div>
-<div class="col-md-2">
-<label for="MinEnroll">Min</label>
-<input class="form-control" id="MinEnroll" type="text" name="MinEnroll[]" value="<?= $course[28] ?>" >
-</div>
-<div class="col-md-2">
-<label for="MaxEnroll">Max</label>
-<input class="form-control" id="MaxEnroll" type="text" name="MaxEnroll[]" value="<?= $course[29] ?>" >
-</div>
-<div class="col-md-6">
-<label for="WebinarLink">Webinar Link</label>
-<input class="form-control WebinarLink" id="WebinarLink" type="text" name="WebinarLink[]" value="" required>
-</div>
-<?php if($course[21] == 'Classroom'): ?>
-<div class="col-md-6">
-<label for="VenueCity">City</label>
-<select name="VenueCity[]" id="VenueCity" class="form-control mb-0" >
-	<option value="">Choose a City</option>
-	<!-- <option>Provided</option>-->
-	<option data-region="LM">TBD - Other (see notes)</option>
-	<option data-region="LM">TBD - Abbotsford</option>
-	<option data-region="LM">TBD - Burnaby</option>
-	<option data-region="LM">TBD - Burns Lake</option>
-	<option data-region="VI">TBD - Campbell River</option>
-	<option data-region="SBC">TBD - Castlegar</option>
-	<option data-region="SBC">TBD - Chilliwack</option>
-	<option data-region="SBC">TBD - Coquitlam</option>
-	<option data-region="SBC">TBD - Cranbrook</option>
-	<option data-region="NBC">TBD - Dawson Creek</option>
-	<option data-region="NBC">TBD - Fort St. John</option>
-	<option data-region="SBC">TBD - Kamloops</option>
-	<option data-region="SBC">TBD - Kelowna</option>
-	<option data-region="LM">TBD - Langley</option>
-	<option data-region="NBC">TBD - Mackenzie</option>
-	<option data-region="SBC">TBD - Merrit</option>
-	<option data-region="VI">TBD - Nanaimo</option>
-	<option data-region="SBC">TBD - Nelson</option>
-	<option data-region="LM">TBD - New Westminster</option>
-	<option data-region="LM">TBD - Penticton</option>
-	<option data-region="SBC">TBD - Powell River</option>
-	<option data-region="NBC">TBD - Prince George</option>
-	<option data-region="NBC">TBD - Quesnel</option>
-	<option data-region="NBC">TBD - Smithers</option>
-	<option data-region="SBC">TBD - Squamish</option>
-	<option data-region="LM">TBD - Surrey</option>
-	<option data-region="SBC">TBD - Terrace</option>
-	<option data-region="LM">TBD - Vancouver</option>
-	<option data-region="SBC">TBD - Vernon</option>
-	<option data-region="VI">TBD - Victoria</option>
-	<option data-region="NBC">TBD - Williams Lake</option>
-	<option data-region="NBC">TBD - Haida Gwaii</option>
-</select>
-</div>
-<?php endif ?>
-<div class="col-md-6">
-	<label for="RequestNotes">Notes</label>
-	<textarea class="form-control RequestNotes" id="RequestNotes" name="RequestNotes[]" value=""></textarea>
-</div>
-</div>
-</div>
-<input type="submit" name="submit" class="btn btn-block btn-lg btn-success text-uppercase my-3" value="Submit Service Requests">
+	<input type="hidden" id="CourseCode" name="CourseCode" value="<?= $course[0] ?>">
+	<div id="datecontainer">
+		<div class="row my-1 p-3 bg-dark-subtle rounded-3" id="classdate1">
+			<div class="col-md-3">
+				<label for="sd" class="sessionlabel">Start Date</label>
+				<input class="form-control StartDate date" id="sd" type="date" name="StartDate[]" value="<?= date('Y-m-d') ?>">
+			</div>
+			<div class="col-md-2">
+				<label for="st">Start time</label>
+				<input class="form-control starttime" id="st" type="text" name="StartTime[]" value="<?= $course[30] ?>" >
+			</div>
+			<div class="col-md-2">
+				<label for="et">End time</label>
+				<input class="form-control endtime" id="et" type="text" name="EndTime[]" value="<?= $course[31] ?>" >
+			</div>
+			<div class="col-md-2">
+				<label for="MinEnroll">Min</label>
+				<input class="form-control" id="MinEnroll" type="text" name="MinEnroll[]" value="<?= $course[28] ?>" >
+			</div>
+			<div class="col-md-2">
+				<label for="MaxEnroll">Max</label>
+				<input class="form-control" id="MaxEnroll" type="text" name="MaxEnroll[]" value="<?= $course[29] ?>" >
+			</div>
+			<div class="col-md-6">
+				<label for="WebinarLink">Webinar Link</label>
+				<input class="form-control WebinarLink" id="WebinarLink" type="text" name="WebinarLink[]" value="" required>
+			</div>
+			<?php if($course[21] == 'Classroom'): ?>
+				<div class="col-md-6">
+					<label for="VenueCity">City</label>
+					<select name="VenueCity[]" id="VenueCity" class="form-control mb-0" >
+						<option value="">Choose a City</option>
+						<!-- <option>Provided</option>-->
+						<option data-region="LM">TBD - Other (see notes)</option>
+						<option data-region="LM">TBD - Abbotsford</option>
+						<option data-region="LM">TBD - Burnaby</option>
+						<option data-region="LM">TBD - Burns Lake</option>
+						<option data-region="VI">TBD - Campbell River</option>
+						<option data-region="SBC">TBD - Castlegar</option>
+						<option data-region="SBC">TBD - Chilliwack</option>
+						<option data-region="SBC">TBD - Coquitlam</option>
+						<option data-region="SBC">TBD - Cranbrook</option>
+						<option data-region="NBC">TBD - Dawson Creek</option>
+						<option data-region="NBC">TBD - Fort St. John</option>
+						<option data-region="SBC">TBD - Kamloops</option>
+						<option data-region="SBC">TBD - Kelowna</option>
+						<option data-region="LM">TBD - Langley</option>
+						<option data-region="NBC">TBD - Mackenzie</option>
+						<option data-region="SBC">TBD - Merrit</option>
+						<option data-region="VI">TBD - Nanaimo</option>
+						<option data-region="SBC">TBD - Nelson</option>
+						<option data-region="LM">TBD - New Westminster</option>
+						<option data-region="LM">TBD - Penticton</option>
+						<option data-region="SBC">TBD - Powell River</option>
+						<option data-region="NBC">TBD - Prince George</option>
+						<option data-region="NBC">TBD - Quesnel</option>
+						<option data-region="NBC">TBD - Smithers</option>
+						<option data-region="SBC">TBD - Squamish</option>
+						<option data-region="LM">TBD - Surrey</option>
+						<option data-region="SBC">TBD - Terrace</option>
+						<option data-region="LM">TBD - Vancouver</option>
+						<option data-region="SBC">TBD - Vernon</option>
+						<option data-region="VI">TBD - Victoria</option>
+						<option data-region="NBC">TBD - Williams Lake</option>
+						<option data-region="NBC">TBD - Haida Gwaii</option>
+					</select>
+				</div>
+			<?php endif ?>
+			<div class="col-md-6">
+				<label for="RequestNotes">Notes</label>
+				<textarea class="form-control RequestNotes" id="RequestNotes" name="RequestNotes[]" value=""></textarea>
+			</div>
+		</div>
+	</div>
+	<input type="submit" name="submit" class="btn btn-block btn-lg btn-success text-uppercase my-3" value="Submit Service Requests">
 </form>
 <!-- <div><a href="https://gww.bcpublicservice.gov.bc.ca/lsapp/class-request.php?courseid=<?= $course[0] ?>">Feeling nostalgic? 1-at-a-time requests over here&hellip;</a></div> -->
 </div>
+
 <div class="col-md-4">
-<?php 
-$inactive = 0;
-$upcount = 0;
-$classes = getCourseClasses($course[0]);
-foreach($classes as $class):
-$today = date('Y-m-d');
-if($class[9] < $today) continue;
-if($class[1] == 'Inactive') $inactive++;
-$upcount++;
-endforeach;
-?>
-<div id="upcoming-classes">
-<h3><span class="classcount"><?= ($upcount - $inactive) ?></span>  Upcoming Classes</h3>
+	<?php 
+	$inactive = 0;
+	$upcount = 0;
+	$classes = getCourseClasses($course[0]);
+	foreach($classes as $class):
+		$today = date('Y-m-d');
+		if($class[9] < $today) continue;
+		if($class[1] == 'Inactive') $inactive++;
+		$upcount++;
+	endforeach;
+	?>
 
+	<div id="upcoming-classes">
+		<h3><span class="classcount"><?= ($upcount - $inactive) ?></span>  Upcoming Classes</h3>
 
-<?php foreach($classes as $class): ?>
-<?php
-// We only wish to see classes which have an end date greater than today
-$today = date('Y-m-d');
-if($class[9] < $today) continue;
-?>
+		<?php foreach($classes as $class): ?>
+			<?php
+			// We only wish to see classes which have an end date greater than today
+			$today = date('Y-m-d');
+			if($class[9] < $today) continue;
+			?>
 
-<div class="my-1 p-2 bg-light-subtle rounded-3">
+			<div class="my-1 p-2 bg-light-subtle rounded-3">
+				<?php if($class[1] == 'Inactive'): ?>
+					<span class="badge text-bg-warning bg-warning ">CANCELLED</span>
+				<?php else: ?>
+					<span class="badge text-bg-light"><?= $class[1] ?></span>
+				<?php endif ?>
+				<a href="/lsapp/class.php?classid=<?= $class[0] ?>">
+				<?php echo goodDateShort($class[8],$class[9]) ?>
+				</a>
+				<span class="classdate" style="display:none"><?= $class[8] ?></span>
+				<?php if($class[4] == 'Dedicated'): ?>
+					<span class="badge text-bg-light">Dedicated</span>
+				<?php endif ?>
+				<span><small><?= $class[7] ?></small></span>
+			</div>
 
-	<?php if($class[1] == 'Inactive'): ?>
-	<span class="badge text-bg-warning bg-warning ">CANCELLED</span>
-	<?php else: ?>
-	<span class="badge text-bg-light"><?= $class[1] ?></span>
-	<?php endif ?>
-	<a href="/lsapp/class.php?classid=<?= $class[0] ?>">
-	<?php echo goodDateShort($class[8],$class[9]) ?>
-	</a>
-	<span class="classdate" style="display:none"><?= $class[8] ?></span>
-	<?php if($class[4] == 'Dedicated'): ?>
-	<span class="badge text-bg-light">Dedicated</span>
-	<?php endif ?>
-	<span><small><?= $class[7] ?></small></span>
+		<?php endforeach ?>
 
-		
-</div>
-<?php endforeach ?>
+	</div> <!-- /upcoming-classes -->
 
-</div>
-
-</div>
+</div> <!-- /col -->
 </div>
 
 
 <?php require('templates/javascript.php') ?>
 
 <script>
-const button = document.getElementById('clone');
+	const button = document.getElementById('clone');
 
-button.addEventListener('click', (event) => {
-	
-	let count = button.getAttribute('data-count');
-	let existingid = button.getAttribute('data-cloneid');
-	let newcount = parseInt(count);
-	newcount++;
-	let newid = 'classdate' + newcount;	
-	let myDiv = document.getElementById(existingid);
-	let datecontainer = document.getElementById('datecontainer');
-	let divClone = myDiv.cloneNode(true); // the true is for deep cloning
-	divClone.id = newid;
-	datecontainer.appendChild(divClone);
-	button.setAttribute('data-cloneid',newid);
-	button.setAttribute('data-count',newcount);
+	button.addEventListener('click', (event) => {
+		
+		let count = button.getAttribute('data-count');
+		let existingid = button.getAttribute('data-cloneid');
+		let newcount = parseInt(count);
+		newcount++;
+		let newid = 'classdate' + newcount;	
+		let myDiv = document.getElementById(existingid);
+		let datecontainer = document.getElementById('datecontainer');
+		let divClone = myDiv.cloneNode(true); // the true is for deep cloning
+		divClone.id = newid;
+		datecontainer.appendChild(divClone);
+		button.setAttribute('data-cloneid',newid);
+		button.setAttribute('data-count',newcount);
 
-});
+	});
 </script>
 
 <?php else: ?>
-<?php include('templates/noaccess.php') ?>
+	<?php include('templates/noaccess.php') ?>
 <?php endif ?>
-
 
 <?php require('templates/footer.php') ?>
