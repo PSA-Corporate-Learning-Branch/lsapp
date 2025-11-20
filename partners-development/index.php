@@ -31,6 +31,8 @@ usort($partners, function($a, $b) {
     return strcasecmp($a['name'], $b['name']);
 });
 
+getScripts();
+
 echo getHeader('Development Partners');
 echo getNavigation();
 ?>
@@ -42,6 +44,7 @@ echo getNavigation();
                 <h1>Development Partners</h1>
                 <a href="create.php" class="btn btn-primary">Add New Partner</a>
             </div>
+            <p>A course can have one or more development partners associated with it.</p>
 
             <?php if ($message): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -167,6 +170,7 @@ function confirmDelete(id, name) {
 </script>
 
 <?php
-echo getScripts();
+
+include('../templates/javascript.php');
 include('../templates/footer.php');
 ?>

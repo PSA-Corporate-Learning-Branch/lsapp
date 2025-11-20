@@ -65,7 +65,7 @@ if (!empty($deets[52])) {
 <?php getHeader() ?>
 
 <title><?= $deets[2] ?></title>
-<!-- <link href="/lsapp/css/summernote-bs4.css" rel="stylesheet"> -->
+
 <style>
 .abstract {
 	height: 100px;

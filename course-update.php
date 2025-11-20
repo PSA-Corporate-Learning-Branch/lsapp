@@ -219,43 +219,56 @@ if($_POST) {
     $devPartnerFile = 'data/courses-devpartners.csv';
     $devPartnerTempFile = 'data/courses-devpartners-temp.csv';
 
+    // Read existing file and remove relationships for this course
+    $maxId = 0;
+    $existingRows = [];
+
     if (file_exists($devPartnerFile)) {
-        // Read existing file and remove relationships for this course
         $input = fopen($devPartnerFile, 'r');
-        $output = fopen($devPartnerTempFile, 'w');
-
-        if ($input !== false && $output !== false) {
-            // Copy header
-            $headers = fgetcsv($input);
-            fputcsv($output, $headers);
-
-            // Find max ID and copy rows that don't match this course
-            $maxId = 0;
+        if ($input !== false) {
+            fgetcsv($input); // Skip header
             while (($row = fgetcsv($input)) !== false) {
                 if (!empty($row[0]) && is_numeric($row[0])) {
                     $maxId = max($maxId, (int)$row[0]);
                 }
                 // Keep rows that don't belong to this course
                 if ($row[1] != $courseid) {
-                    fputcsv($output, $row);
+                    $existingRows[] = $row;
                 }
             }
-
-            // Add new relationships
-            if (!empty($_POST['DevelopmentPartners']) && is_array($_POST['DevelopmentPartners'])) {
-                foreach ($_POST['DevelopmentPartners'] as $partnerId) {
-                    $maxId++;
-                    $relationship = [$maxId, $courseid, sanitize($partnerId)];
-                    fputcsv($output, $relationship);
-                }
-            }
-
             fclose($input);
-            fclose($output);
-
-            // Replace original file
-            rename($devPartnerTempFile, $devPartnerFile);
         }
+    }
+
+    // Write updated file
+    $output = fopen($devPartnerTempFile, 'w');
+    if ($output !== false) {
+        // Write header
+        fputcsv($output, ['id', 'course_id', 'development_partner_id']);
+
+        // Write existing rows (excluding this course)
+        foreach ($existingRows as $row) {
+            fputcsv($output, $row);
+        }
+
+        // Add new relationships for this course
+        if (!empty($_POST['DevelopmentPartners']) && is_array($_POST['DevelopmentPartners'])) {
+            error_log("DEBUG: DevelopmentPartners POST data: " . print_r($_POST['DevelopmentPartners'], true));
+            error_log("DEBUG: Course ID: " . $courseid);
+            foreach ($_POST['DevelopmentPartners'] as $partnerId) {
+                $maxId++;
+                $relationship = [$maxId, $courseid, sanitize($partnerId)];
+                error_log("DEBUG: Writing relationship: " . print_r($relationship, true));
+                fputcsv($output, $relationship);
+            }
+        } else {
+            error_log("DEBUG: No DevelopmentPartners in POST or not an array. POST keys: " . print_r(array_keys($_POST), true));
+        }
+
+        fclose($output);
+
+        // Replace original file
+        rename($devPartnerTempFile, $devPartnerFile);
     }
 
     // Check if this is from partner portal
@@ -317,7 +330,10 @@ if (file_exists($devPartnersFile)) {
 
 // Get current development partners for this course
 $currentDevPartners = getDevPartnersByCourseID($courseid);
-$currentDevPartnerIds = array_map(function($dp) { return $dp[0]; }, $currentDevPartners);
+$currentDevPartnerIds = array_map(function($dp) { return (string)$dp[0]; }, $currentDevPartners);
+error_log("DEBUG DISPLAY: Course ID: " . $courseid);
+error_log("DEBUG DISPLAY: Current dev partners raw: " . print_r($currentDevPartners, true));
+error_log("DEBUG DISPLAY: Current dev partner IDs: " . print_r($currentDevPartnerIds, true));
 
 ?>
 <?php getHeader() ?>
@@ -580,7 +596,7 @@ $currentDevPartnerIds = array_map(function($dp) { return $dp[0]; }, $currentDevP
                         <?php foreach($devPartners as $dp): ?>
                         <div class="col-12">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="DevelopmentPartners[]" value="<?= htmlspecialchars($dp['id']) ?>" id="devPartner<?= htmlspecialchars($dp['id']) ?>" <?= in_array($dp['id'], $currentDevPartnerIds) ? 'checked' : '' ?>>
+                                <input class="form-check-input" type="checkbox" name="DevelopmentPartners[]" value="<?= htmlspecialchars($dp['id']) ?>" id="devPartner<?= htmlspecialchars($dp['id']) ?>" <?= in_array((string)$dp['id'], $currentDevPartnerIds, true) ? 'checked' : '' ?>>
                                 <label class="form-check-label" for="devPartner<?= htmlspecialchars($dp['id']) ?>">
                                     <?= htmlspecialchars($dp['name']) ?>
                                 </label>

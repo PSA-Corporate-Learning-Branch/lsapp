@@ -74,7 +74,7 @@ if (!empty($courseIds)) {
         return strcasecmp($a['name'], $b['name']);
     });
 }
-
+getScripts();
 echo getHeader('Development Partner: ' . $partner['name']);
 echo getNavigation();
 ?>
@@ -195,6 +195,7 @@ echo getNavigation();
 </div>
 
 <?php
-echo getScripts();
+
+include('../templates/javascript.php');
 include('../templates/footer.php');
 ?>

@@ -35,7 +35,7 @@ if (!$partner) {
     header('Location: index.php?error=Partner not found');
     exit;
 }
-
+getScripts();
 echo getHeader('Edit Development Partner');
 echo getNavigation();
 ?>
@@ -125,6 +125,6 @@ echo getNavigation();
 </div>
 
 <?php
-echo getScripts();
+include('../templates/javascript.php');
 include('../templates/footer.php');
 ?>
