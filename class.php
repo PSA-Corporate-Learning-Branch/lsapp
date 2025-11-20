@@ -260,16 +260,18 @@ else:
 
 
 
-
-<div class="row text-center bg-light-subtle border border-secondary-subtle mb-3 rounded-3">
-<div class="col-3 ">
-Min <span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[11]) ?></span>
-</div>
-<div class="col-3 ">
-Max <span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[12]) ?></span>
-</div>
-</div>
-
+<!-- Min / Max -->
+<!-- Only show delivery methods where we're enforcing / care about min and max -->
+<?php if($deets[45] !== 'eLearning' && $deets[45] !== 'Curated Pathway'): ?>
+	<div class="row text-center bg-light-subtle border border-secondary-subtle mb-3 rounded-3">
+		<div class="col-3 ">
+			Min <span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[11]) ?></span>
+		</div>
+		<div class="col-3 ">
+			Max <span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[12]) ?></span>
+		</div>
+	</div>
+<?php endif; ?>
 
 <?php if($deets[45] == 'eLearning'): ?>
 	<div class="mb-2 p-3 bg-light-subtle rounded-3">
