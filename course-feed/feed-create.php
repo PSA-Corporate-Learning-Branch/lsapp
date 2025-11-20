@@ -186,8 +186,12 @@ if ($partnersContent !== false) {
     $partners = json_decode($partnersContent, true);
     if ($partners !== null) {
         // Strip contact information from each partner, keeping employee_facing_contact
+        // Only include partners with active status
         $strippedPartners = [];
         foreach ($partners as $partner) {
+            if (($partner['status'] ?? '') !== 'active') {
+                continue;
+            }
             $strippedPartner = [
                 'id' => $partner['id'] ?? null,
                 'name' => $partner['name'] ?? '',
