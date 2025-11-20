@@ -168,14 +168,42 @@ if(!empty($_POST['CourseOwner']) || !empty($_POST['Developer'])) {
             $stew = [$courseid, 'steward', sanitize($_POST['CourseOwner']), $now];
             fputcsv($peoplefp, $stew);
         }
-        
+
         // Add developer relationship
         if(!empty($_POST['Developer'])) {
             $dev = [$courseid, 'dev', sanitize($_POST['Developer']), $now];
             fputcsv($peoplefp, $dev);
         }
-        
+
         fclose($peoplefp);
+    }
+}
+
+// Add development partner relationships if specified
+if(!empty($_POST['DevelopmentPartners']) && is_array($_POST['DevelopmentPartners'])) {
+    $devPartnerFile = 'data/courses-devpartners.csv';
+    $devfp = fopen($devPartnerFile, 'a+');
+    if($devfp === false) {
+        error_log("Warning: Could not open courses-devpartners.csv for course ID: {$courseid}");
+    } else {
+        // Get max ID from existing file
+        $maxId = 0;
+        rewind($devfp);
+        fgetcsv($devfp); // Skip header
+        while (($row = fgetcsv($devfp)) !== false) {
+            if (!empty($row[0]) && is_numeric($row[0])) {
+                $maxId = max($maxId, (int)$row[0]);
+            }
+        }
+
+        // Add new relationships
+        foreach($_POST['DevelopmentPartners'] as $partnerId) {
+            $maxId++;
+            $relationship = [$maxId, $courseid, sanitize($partnerId)];
+            fputcsv($devfp, $relationship);
+        }
+
+        fclose($devfp);
     }
 }
 

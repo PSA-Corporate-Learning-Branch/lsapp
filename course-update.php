@@ -214,7 +214,50 @@ if($_POST) {
     }
     
     fclose($peoplefp);
-    
+
+    // Update development partner relationships
+    $devPartnerFile = 'data/courses-devpartners.csv';
+    $devPartnerTempFile = 'data/courses-devpartners-temp.csv';
+
+    if (file_exists($devPartnerFile)) {
+        // Read existing file and remove relationships for this course
+        $input = fopen($devPartnerFile, 'r');
+        $output = fopen($devPartnerTempFile, 'w');
+
+        if ($input !== false && $output !== false) {
+            // Copy header
+            $headers = fgetcsv($input);
+            fputcsv($output, $headers);
+
+            // Find max ID and copy rows that don't match this course
+            $maxId = 0;
+            while (($row = fgetcsv($input)) !== false) {
+                if (!empty($row[0]) && is_numeric($row[0])) {
+                    $maxId = max($maxId, (int)$row[0]);
+                }
+                // Keep rows that don't belong to this course
+                if ($row[1] != $courseid) {
+                    fputcsv($output, $row);
+                }
+            }
+
+            // Add new relationships
+            if (!empty($_POST['DevelopmentPartners']) && is_array($_POST['DevelopmentPartners'])) {
+                foreach ($_POST['DevelopmentPartners'] as $partnerId) {
+                    $maxId++;
+                    $relationship = [$maxId, $courseid, sanitize($partnerId)];
+                    fputcsv($output, $relationship);
+                }
+            }
+
+            fclose($input);
+            fclose($output);
+
+            // Replace original file
+            rename($devPartnerTempFile, $devPartnerFile);
+        }
+    }
+
     // Check if this is from partner portal
     if (!empty($_POST['partner_redirect'])) {
         // Redirect back to partner portal dashboard
@@ -251,6 +294,30 @@ $audience = getAllAudiences();
 $deliverymethods = getDeliveryMethods();
 $levels = getLevels();
 $reportinglist = getReportingList();
+
+// Load development partners
+$devPartnersFile = 'data/development-partners.csv';
+$devPartners = [];
+if (file_exists($devPartnersFile)) {
+    $data = array_map('str_getcsv', file($devPartnersFile));
+    array_shift($data); // Remove header
+    foreach ($data as $row) {
+        if (!empty($row[0]) && ($row[1] ?? '') === 'active') {
+            $devPartners[] = [
+                'id' => $row[0],
+                'name' => $row[3] ?? ''
+            ];
+        }
+    }
+    // Sort by name
+    usort($devPartners, function($a, $b) {
+        return strcasecmp($a['name'], $b['name']);
+    });
+}
+
+// Get current development partners for this course
+$currentDevPartners = getDevPartnersByCourseID($courseid);
+$currentDevPartnerIds = array_map(function($dp) { return $dp[0]; }, $currentDevPartners);
 
 ?>
 <?php getHeader() ?>
@@ -496,17 +563,39 @@ $reportinglist = getReportingList();
                 <small class="d-block text-muted">Responsible for materials creation/revisions</small>
                 <select name="Developer" id="Developer" class="form-select">
                     <option value="">Select one</option>
-                    <?php 
+                    <?php
                     $currentDeveloper = (!empty($stewsdevs['developers'][0][2])) ? $stewsdevs['developers'][0][2] : $deets[34];
-                    getPeople($currentDeveloper); 
+                    getPeople($currentDeveloper);
                     ?>
                 </select>
             </div>
         </div>
-        <div class="mb-3">
-            <label for="EffectiveDate" class="form-label">Effective Date</label>
-            <small class="d-block text-muted">Date the course should be visible to learners</small>
-            <input type="date" name="EffectiveDate" id="EffectiveDate" class="form-control" value="<?= sanitize($deets[15]) ?>">
+        <div class="row">
+            <?php if (!empty($devPartners)): ?>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Development Partner(s)</label>
+                <small class="d-block text-muted mb-2">External organizations that helped develop this course</small>
+                <div class="border rounded p-3 bg-body-tertiary" style="max-height: 200px; overflow-y: auto;">
+                    <div class="row g-2">
+                        <?php foreach($devPartners as $dp): ?>
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="DevelopmentPartners[]" value="<?= htmlspecialchars($dp['id']) ?>" id="devPartner<?= htmlspecialchars($dp['id']) ?>" <?= in_array($dp['id'], $currentDevPartnerIds) ? 'checked' : '' ?>>
+                                <label class="form-check-label" for="devPartner<?= htmlspecialchars($dp['id']) ?>">
+                                    <?= htmlspecialchars($dp['name']) ?>
+                                </label>
+                            </div>
+                        </div>
+                        <?php endforeach ?>
+                    </div>
+                </div>
+            </div>
+            <?php endif ?>
+            <div class="col-md-6 mb-3">
+                <label for="EffectiveDate" class="form-label">Effective Date</label>
+                <small class="d-block text-muted">Date the course should be visible to learners</small>
+                <input type="date" name="EffectiveDate" id="EffectiveDate" class="form-control" value="<?= sanitize($deets[15]) ?>">
+            </div>
         </div>
     </div>
     

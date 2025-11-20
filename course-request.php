@@ -23,6 +23,26 @@ $deliverymethods = getDeliveryMethods();
 $levels = getLevels();
 $reportinglist = getReportingList();
 
+// Load development partners
+$devPartnersFile = 'data/development-partners.csv';
+$devPartners = [];
+if (file_exists($devPartnersFile)) {
+    $data = array_map('str_getcsv', file($devPartnersFile));
+    array_shift($data); // Remove header
+    foreach ($data as $row) {
+        if (!empty($row[0]) && ($row[1] ?? '') === 'active') {
+            $devPartners[] = [
+                'id' => $row[0],
+                'name' => $row[3] ?? ''
+            ];
+        }
+    }
+    // Sort by name
+    usort($devPartners, function($a, $b) {
+        return strcasecmp($a['name'], $b['name']);
+    });
+}
+
 ?>
 <?php getHeader() ?>
 
@@ -242,10 +262,32 @@ $reportinglist = getReportingList();
                 </select>
             </div>
         </div>
-        <div class="mb-3">
-            <label for="EffectiveDate" class="form-label">Effective Date</label>
-            <small class="d-block text-muted">Date the course should be visible to learners</small>
-            <input type="date" name="EffectiveDate" id="EffectiveDate" class="form-control" required>
+        <div class="row">
+            <?php if (!empty($devPartners)): ?>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Development Partner(s)</label>
+                <small class="d-block text-muted mb-2">External organizations that helped develop this course</small>
+                <div class="border rounded p-3 bg-body-tertiary" style="max-height: 200px; overflow-y: auto;">
+                    <div class="row g-2">
+                        <?php foreach($devPartners as $dp): ?>
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="DevelopmentPartners[]" value="<?= htmlspecialchars($dp['id']) ?>" id="devPartner<?= htmlspecialchars($dp['id']) ?>">
+                                <label class="form-check-label" for="devPartner<?= htmlspecialchars($dp['id']) ?>">
+                                    <?= htmlspecialchars($dp['name']) ?>
+                                </label>
+                            </div>
+                        </div>
+                        <?php endforeach ?>
+                    </div>
+                </div>
+            </div>
+            <?php endif ?>
+            <div class="col-md-6 mb-3">
+                <label for="EffectiveDate" class="form-label">Effective Date</label>
+                <small class="d-block text-muted">Date the course should be visible to learners</small>
+                <input type="date" name="EffectiveDate" id="EffectiveDate" class="form-control" required>
+            </div>
         </div>
     </div>
     
