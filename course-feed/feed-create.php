@@ -31,6 +31,39 @@ if (($handle = fopen("../data/courses.csv", "r")) !== false) {
     exit;
 }
 
+// Load development partner relationships
+$devPartnerRelations = [];
+$devPartnerRelFile = '../data/courses-devpartners.csv';
+if (file_exists($devPartnerRelFile)) {
+    $relData = array_map('str_getcsv', file($devPartnerRelFile));
+    array_shift($relData); // Remove header
+    foreach ($relData as $row) {
+        if (!empty($row[1]) && !empty($row[2])) {
+            if (!isset($devPartnerRelations[$row[1]])) {
+                $devPartnerRelations[$row[1]] = [];
+            }
+            $devPartnerRelations[$row[1]][] = $row[2]; // course_id => [partner_ids]
+        }
+    }
+}
+
+// Load development partners lookup
+$devPartnersLookup = [];
+$devPartnersFile = '../data/development-partners.csv';
+if (file_exists($devPartnersFile)) {
+    $dpData = array_map('str_getcsv', file($devPartnersFile));
+    array_shift($dpData); // Remove header
+    foreach ($dpData as $row) {
+        if (!empty($row[0])) {
+            $devPartnersLookup[$row[0]] = [
+                'id' => (int)$row[0],
+                'name' => $row[3] ?? '',
+                'url' => $row[5] ?? ''
+            ];
+        }
+    }
+}
+
 $json = [
     "version" => "https://jsonfeed.org/version/1",
     "title" => "BC Gov Corporate Learning Courses",
@@ -47,26 +80,6 @@ foreach ($datas as $course) {
     $desc = iconv(mb_detect_encoding($description, mb_detect_order(), true), "UTF-8", $description);
     $createdDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Requested'] ?? '')));
     $modifiedDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Modified'] ?? '')));
-
-    // $devpartners = getDevPartnersByCourseID($course['CourseID']);
-
-    // If there are development partners, append them to the description
-    // if (!empty($devpartners)) {
-    //     $partnerText = "\n\nThis course has been developed in partnership with:\n";
-    //     foreach ($devpartners as $partner) {
-    //         $partnerName = $partner[3] ?? '';  // name is in column 3
-    //         $partnerURL = $partner[5] ?? '';   // URL is in column 5
-
-    //         if (!empty($partnerName)) {
-    //             if (!empty($partnerURL)) {
-    //                 $partnerText .= "- [" . $partnerName . "](" . $partnerURL . ")\n";
-    //             } else {
-    //                 $partnerText .= "- " . $partnerName . "\n";
-    //             }
-    //         }
-    //     }
-    //     $desc .= $partnerText;
-    // }
 
     if($course['Platform'] !== 'PSA Learning System' || $course['HubIncludeSync'] == 'no') {
         $registrationurl = $course['RegistrationLink'];
@@ -114,7 +127,21 @@ foreach ($datas as $course) {
         if ($persistent === 'yes' && isset($course['HubIncludePersistState'])) {
             $courseItem['_persist_state'] = $course['HubIncludePersistState'];
         }
-        
+
+        // Add development partners if any
+        $courseId = $course['CourseID'] ?? '';
+        if (!empty($courseId) && isset($devPartnerRelations[$courseId])) {
+            $devPartners = [];
+            foreach ($devPartnerRelations[$courseId] as $partnerId) {
+                if (isset($devPartnersLookup[$partnerId])) {
+                    $devPartners[] = $devPartnersLookup[$partnerId];
+                }
+            }
+            if (!empty($devPartners)) {
+                $courseItem['_development_partners'] = $devPartners;
+            }
+        }
+
         $json['items'][] = $courseItem;
     }
 }
