@@ -55,10 +55,18 @@ if (file_exists($devPartnersFile)) {
     array_shift($dpData); // Remove header
     foreach ($dpData as $row) {
         if (!empty($row[0])) {
+            $name = $row[3] ?? '';
+            $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name), '-'));
             $devPartnersLookup[$row[0]] = [
                 'id' => (int)$row[0],
-                'name' => $row[3] ?? '',
-                'url' => $row[5] ?? ''
+                'status' => $row[1] ?? '',
+                'type' => $row[2] ?? '',
+                'name' => $name,
+                'slug' => $slug,
+                'description' => $row[4] ?? '',
+                'url' => $row[5] ?? '',
+                'contact_name' => $row[6] ?? '',
+                'contact_email' => $row[7] ?? ''
             ];
         }
     }
