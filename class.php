@@ -273,57 +273,56 @@ else:
 	</div>
 <?php endif; ?>
 
-<?php if($deets[45] == 'eLearning'): ?>
+<?php if($deets[45] == 'eLearning' || $deets[45] == 'Curated Pathway'): ?>
 	<div class="mb-2 p-3 bg-light-subtle rounded-3">
-		eLearning classes do not synchronize attendance numbers with ELM
+		Asynchronous offerings do not synchronize enrolment numbers with ELM
 	</div>
 <?php else: ?>
-
-
-<?php if($deets[4] == 'Dedicated'): ?>
-<a href="docs/dedicated-class-ADHOC-attendance-form.xlsx" class="btn btn-light mt-2">Ad Hoc Attendance form</a>
-<?php else: ?>
-<div class="row text-center">
-<div class="col">
-Enrolled <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[18]) ?></span> 
-</div>
-<div class="col">
-Reserved <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[19]) ?></span> 
-</div>
-<div class="col">
-Pending <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[20]) ?></span> 
-</div>
-<div class="col">
-Waitlisted <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[21]) ?></span> 
-</div>
-<div class="col">
-Dropped <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[22]) ?></span> 
-</div>
-</div>
-<?php if($deets[11] && $deets[12]): ?>
-<?php $percentfull = floor(($deets[18] + $deets[19]) / $deets[12] * 100) ?>
-<?php $percentmin = floor($deets[11] / $deets[12] * 100) ?>
-<?php 
-$percentstatus = 'bg-warning';
-if($percentfull > $percentmin) $percentstatus = 'bg-success';
-?>
-<div class="progress progress-bar-striped mt-2">
-	<div class="progress-bar progress-bar-striped  <?= $percentstatus ?>" 
-		role="progressbar" 
-		style="width: <?= $percentfull ?>%" 
-		aria-valuenow="<?= $percentfull ?>" 
-		aria-valuemin="0" 
-		aria-valuemax="100">
-			<?= $percentfull ?>% full
-	</div>
-</div>
-<?php else: ?>
-<div class="alert alert-danger my-3">There is an issue with the min/max values for this course. Please edit and review; values cannot be blank or zero.</div>
-<?php endif; // end of min/max check ?>
+	<?php if($deets[4] == 'Dedicated'): ?>
+		<a href="docs/dedicated-class-ADHOC-attendance-form.xlsx" class="btn btn-light mt-2">Ad Hoc Attendance form</a>
+	<?php else: ?>
+		<div class="row text-center">
+			<div class="col">
+				Enrolled <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[18]) ?></span> 
+			</div>
+			<div class="col">
+				Reserved <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[19]) ?></span> 
+			</div>
+			<div class="col">
+				Pending <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[20]) ?></span> 
+			</div>
+			<div class="col">
+				Waitlisted <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[21]) ?></span> 
+			</div>
+			<div class="col">
+				Dropped <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[22]) ?></span> 
+			</div>
+		</div>
+	<?php if($deets[11] && $deets[12]): ?>
+		<?php $percentfull = floor(($deets[18] + $deets[19]) / $deets[12] * 100) ?>
+		<?php $percentmin = floor($deets[11] / $deets[12] * 100) ?>
+		<?php 
+		$percentstatus = 'bg-warning';
+		if($percentfull > $percentmin) $percentstatus = 'bg-success';
+		?>
+		<div class="progress progress-bar-striped mt-2">
+			<div class="progress-bar progress-bar-striped  <?= $percentstatus ?>" 
+			role="progressbar" 
+			style="width: <?= $percentfull ?>%" 
+			aria-valuenow="<?= $percentfull ?>" 
+			aria-valuemin="0" 
+			aria-valuemax="100">
+				<?= $percentfull ?>% full
+			</div>
+		</div>
+	<?php else: ?>
+		<div class="alert alert-danger my-3">There is an issue with the min/max values for this course. Please edit and review; values cannot be blank or zero.</div>
+	<?php endif; // end of min/max check ?>
 <?php if($deets[18] < $deets[11] && $deets[1] != 'Requested' && $deets[4] != 'Dedicated' && $deets[1] != 'Inactive'): ?>
-<?php $byhowmuch = $deets[11] - $deets[18] ?>
-<div class="alert alert-warning my-2">Class enrollment is below the minimum by <?= h($byhowmuch) ?></div>
+	<?php $byhowmuch = $deets[11] - $deets[18] ?>
+	<div class="alert alert-warning my-2">Class enrollment is below the minimum by <?= h($byhowmuch) ?></div>
 <?php endif ?>
+
 <?php endif ?>
 <?php endif ?>
 <?= $lastsyncmessage ?>
