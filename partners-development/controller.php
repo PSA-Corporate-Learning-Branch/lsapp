@@ -1,5 +1,6 @@
 <?php
 require('../inc/lsapp.php');
+require('../inc/ches_client.php');
 
 // Verify CSRF token
 if (!validateCsrfToken()) {
@@ -70,6 +71,72 @@ function createPartner() {
 
     fputcsv($fp, $newPartner);
     fclose($fp);
+
+    // Send email notification for new development partner
+    try {
+        $ches = new CHESClient();
+
+        $subject = "New Development Partner Added: " . $name;
+
+        $bodyHtml = "<h2>New Development Partner Created</h2>";
+        $bodyHtml .= "<p>A new development partner has been added to the system:</p>";
+        $bodyHtml .= "<table border='1' cellpadding='8' cellspacing='0' style='border-collapse: collapse; font-family: Arial, sans-serif;'>";
+        $bodyHtml .= "<tr><td><strong>ID:</strong></td><td>" . htmlspecialchars($newId) . "</td></tr>";
+        $bodyHtml .= "<tr><td><strong>Name:</strong></td><td>" . htmlspecialchars($name) . "</td></tr>";
+        $bodyHtml .= "<tr><td><strong>Status:</strong></td><td>" . htmlspecialchars(trim($_POST['status'] ?? 'active')) . "</td></tr>";
+        $bodyHtml .= "<tr><td><strong>Type:</strong></td><td>" . htmlspecialchars(trim($_POST['type'] ?? 'development')) . "</td></tr>";
+        if (!empty($_POST['url'])) {
+            $bodyHtml .= "<tr><td><strong>URL:</strong></td><td><a href='" . htmlspecialchars(trim($_POST['url'])) . "'>" . htmlspecialchars(trim($_POST['url'])) . "</a></td></tr>";
+        }
+        if (!empty($_POST['description'])) {
+            $bodyHtml .= "<tr><td><strong>Description:</strong></td><td>" . htmlspecialchars(trim($_POST['description'])) . "</td></tr>";
+        }
+        if (!empty($_POST['contact_name'])) {
+            $bodyHtml .= "<tr><td><strong>Contact Name:</strong></td><td>" . htmlspecialchars(trim($_POST['contact_name'])) . "</td></tr>";
+        }
+        if (!empty($_POST['contact_email'])) {
+            $bodyHtml .= "<tr><td><strong>Contact Email:</strong></td><td><a href='mailto:" . htmlspecialchars(trim($_POST['contact_email'])) . "'>" . htmlspecialchars(trim($_POST['contact_email'])) . "</a></td></tr>";
+        }
+        $bodyHtml .= "<tr><td><strong>Created By:</strong></td><td>" . htmlspecialchars(LOGGED_IN_IDIR) . "</td></tr>";
+        $bodyHtml .= "<tr><td><strong>Date Created:</strong></td><td>" . date('Y-m-d H:i:s') . "</td></tr>";
+        $bodyHtml .= "</table>";
+        $bodyHtml .= "<p><a href='https://gww.bcpublicservice.gov.bc.ca/lsapp/partners-development/view.php?id=" . $newId . "'>View Development Partner</a></p>";
+
+        $bodyText = "New Development Partner Created\n\n";
+        $bodyText .= "ID: " . $newId . "\n";
+        $bodyText .= "Name: " . $name . "\n";
+        $bodyText .= "Status: " . trim($_POST['status'] ?? 'active') . "\n";
+        $bodyText .= "Type: " . trim($_POST['type'] ?? 'development') . "\n";
+        if (!empty($_POST['url'])) {
+            $bodyText .= "URL: " . trim($_POST['url']) . "\n";
+        }
+        if (!empty($_POST['description'])) {
+            $bodyText .= "Description: " . trim($_POST['description']) . "\n";
+        }
+        if (!empty($_POST['contact_name'])) {
+            $bodyText .= "Contact Name: " . trim($_POST['contact_name']) . "\n";
+        }
+        if (!empty($_POST['contact_email'])) {
+            $bodyText .= "Contact Email: " . trim($_POST['contact_email']) . "\n";
+        }
+        $bodyText .= "Created By: " . LOGGED_IN_IDIR . "\n";
+        $bodyText .= "Date Created: " . date('Y-m-d H:i:s') . "\n\n";
+        $bodyText .= "View Development Partner: https://gww.bcpublicservice.gov.bc.ca/lsapp/partners-development/view.php?id=" . $newId . "\n";
+
+        $ches->sendEmail(
+            ['allan.haggett@gov.bc.ca', 'clip@gov.bc.ca'],
+            $subject,
+            $bodyText,
+            $bodyHtml,
+            'learninghub_noreply@gov.bc.ca'
+        );
+
+        error_log("Sent new development partner notification for: " . $name);
+
+    } catch (Exception $e) {
+        error_log("ERROR: Failed to send development partner notification email: " . $e->getMessage());
+        // Don't fail the whole operation if email fails
+    }
 
     header('Location: index.php?message=Partner "' . urlencode($name) . '" created successfully');
     exit;
