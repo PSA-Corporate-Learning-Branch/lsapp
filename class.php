@@ -65,6 +65,13 @@ else:
 
 <?php getNavigation() ?>
 
+<?php
+$asynchronous = false;
+if($deets[45] === 'eLearning' || $deets[45] === 'Curated Pathway') {
+	$asynchronous = true;
+}
+?>
+
 <div class="container">
 <div class="row mb-3">
 <div class="col-md-8">
@@ -262,7 +269,7 @@ else:
 
 <!-- Min / Max -->
 <!-- Only show delivery methods where we're enforcing / care about min and max -->
-<?php if($deets[45] !== 'eLearning' && $deets[45] !== 'Curated Pathway'): ?>
+<?php if(!$asynchronous): ?>
 	<div class="row text-center bg-light-subtle border border-secondary-subtle mb-3 rounded-3">
 		<div class="col-3 ">
 			Min <span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[11]) ?></span>
@@ -273,7 +280,7 @@ else:
 	</div>
 <?php endif; ?>
 
-<?php if($deets[45] == 'eLearning' || $deets[45] == 'Curated Pathway'): ?>
+<?php if($asynchronous): ?>
 	<div class="mb-2 p-3 bg-light-subtle rounded-3">
 		Asynchronous offerings do not synchronize enrolment numbers with ELM
 	</div>
