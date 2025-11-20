@@ -65,7 +65,7 @@ if (!empty($deets[52])) {
 <?php getHeader() ?>
 
 <title><?= $deets[2] ?></title>
-<!-- <link href="/lsapp/css/summernote-bs4.css" rel="stylesheet"> -->
+
 <style>
 .abstract {
 	height: 100px;
@@ -305,10 +305,10 @@ if (!empty($deets[52])) {
 <?php endif ?>
 </div>
 <div class="col-md-6">
-<strong>Development Partner(s):</strong><br> 
+<strong>Development Partner(s):</strong><br>
 <?php foreach($devpartners as $dp): ?>
 	<div>
-		<a href="<?= $dp[5] ?>" target="_blank">
+		<a href="/lsapp/partners-development/view.php?id=<?= $dp[0] ?>">
 			<?= $dp[3] ?>
 		</a>
 	</div>

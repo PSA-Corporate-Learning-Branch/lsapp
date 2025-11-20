@@ -183,5 +183,47 @@ if ($partnersContent !== false) {
     exit;
 }
 
+/**
+ *
+ * Export development partners data with contact information. Publishes to:
+ * https://learn.bcpublicservice.gov.bc.ca/learning-hub/bcps-development-partners.json
+ *
+ */
+
+$devPartnersSource = '../data/development-partners.csv';
+if (file_exists($devPartnersSource)) {
+    $devPartnersData = array_map('str_getcsv', file($devPartnersSource));
+    $headers = array_shift($devPartnersData); // Remove header row
+
+    $devPartners = [];
+    foreach ($devPartnersData as $row) {
+        if (!empty($row[0])) {
+            $devPartners[] = [
+                'id' => (int)$row[0],
+                'status' => $row[1] ?? '',
+                'type' => $row[2] ?? '',
+                'name' => $row[3] ?? '',
+                'description' => $row[4] ?? '',
+                'url' => $row[5] ?? '',
+                'contact_name' => $row[6] ?? '',
+                'contact_email' => $row[7] ?? ''
+            ];
+        }
+    }
+
+    $devPartnersJson = json_encode($devPartners, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    $devPartnersFilename = 'data/bcps-development-partners.json';
+    file_put_contents($devPartnersFilename, $devPartnersJson);
+
+    $devPartnersNewfile = 'E:/WebSites/lsapp-data/bcps-development-partners.json';
+    if (!copy($devPartnersFilename, $devPartnersNewfile)) {
+        echo 'Failed to copy ' . $devPartnersFilename . '... contact Allan';
+        exit;
+    }
+} else {
+    echo 'Failed to read development-partners.csv... contact Allan';
+    exit;
+}
+
 header('Location: index.php?message=Success');
 exit;

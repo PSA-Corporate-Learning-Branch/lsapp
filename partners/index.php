@@ -38,7 +38,7 @@ usort($partners, function($a, $b) {
 <body>
 <?php getNavigation() ?>
 
-<div class="container-lg p-lg-5 p-4 bg-light-subtle">
+<div class="container">
         <h1>Corporate Learning Partners</h1>
 
         <ul class="nav nav-tabs mb-4">
