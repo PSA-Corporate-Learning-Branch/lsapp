@@ -102,7 +102,7 @@ try {
     $adminBodyText .= "View Partner Dashboard: https://gww.bcpublicservice.gov.bc.ca/lsapp/partners/dashboard.php\n";
 
     $adminResult = $ches->sendEmail(
-        ['allan.haggett@gov.bc.ca'],
+        ['allan.haggett@gov.bc.ca','clip@gov.bc.ca'],
         $adminSubject,
         $adminBodyText,
         $adminBodyHtml,
