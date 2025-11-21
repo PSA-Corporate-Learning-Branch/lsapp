@@ -20,41 +20,41 @@ getHeader();
 <form name="" action="class-bulk-create.php" method="POST" enctype="multipart/form-data">
 	<input type="hidden" id="CourseCode" name="CourseCode" value="<?= $course[0] ?>">
 	<div id="datecontainer">
-		<div class="row my-3 p-3 bg-light-subtle border rounded-3 shadow-sm" id="classdate1">
+		<div class="row my-3 p-3 bg-light-subtle border rounded-3 shadow-sm" id="classdate-1">
 			<div class="col-md-3">
 				<div class="form-check">
-					<label for="Dedicated" class="form-check-label">Dedicated</label>
-					<input class="form-check-input" id="Dedicated" type="checkbox" name="Dedicated[]" value="Dedicated">
+					<label for="Dedicated-1" class="form-check-label">Dedicated</label>
+					<input class="form-check-input" id="Dedicated-1" type="checkbox" name="Dedicated[]" value="Dedicated">
 				</div>
 			</div>
 			<div class="col-md-3">
-				<label for="sd" class="sessionlabel">Start Date</label>
-				<input class="form-control" id="sd" type="date" name="StartDate[]" value="<?= date('Y-m-d') ?>">
+				<label for="sd-1" class="sessionlabel">Start Date</label>
+				<input class="form-control" id="sd-1" type="date" name="StartDate[]" value="<?= date('Y-m-d') ?>">
 			</div>
 			<div class="col-md-3">
-				<label for="st">Start time</label>
-				<input class="form-control" id="st" type="time" name="StartTime[]" value="<?= $course[30] ?>" step="900">
+				<label for="st-1">Start time</label>
+				<input class="form-control" id="st-1" type="time" name="StartTime[]" value="<?= $course[30] ?>" step="900">
 			</div>
 			<div class="col-md-3">
-				<label for="et">End time</label>
-				<input class="form-control" id="et" type="time" name="EndTime[]" value="<?= $course[31] ?>" step="900">
+				<label for="et-1">End time</label>
+				<input class="form-control" id="et-1" type="time" name="EndTime[]" value="<?= $course[31] ?>" step="900">
 			</div>
 			<div class="col-md-2">
-				<label for="MinEnroll">Min</label>
-				<input class="form-control" id="MinEnroll" type="number" name="MinEnroll[]" value="<?= $course[28] ?>" >
+				<label for="MinEnroll-1">Min</label>
+				<input class="form-control" id="MinEnroll-1" type="number" name="MinEnroll[]" value="<?= $course[28] ?>" >
 			</div>
 			<div class="col-md-2">
-				<label for="MaxEnroll">Max</label>
-				<input class="form-control" id="MaxEnroll" type="number" name="MaxEnroll[]" value="<?= $course[29] ?>" >
+				<label for="MaxEnroll-1">Max</label>
+				<input class="form-control" id="MaxEnroll-1" type="number" name="MaxEnroll[]" value="<?= $course[29] ?>" >
 			</div>
 			<div class="col-md-6">
-				<label for="WebinarLink">Webinar Link</label>
-				<input class="form-control WebinarLink" id="WebinarLink" type="text" name="WebinarLink[]" value="" required>
+				<label for="WebinarLink-1">Webinar Link</label>
+				<input class="form-control WebinarLink" id="WebinarLink-1" type="text" name="WebinarLink[]" value="" required>
 			</div>
 			<?php if($course[21] == 'Classroom'): ?>
 				<div class="col-md-6">
-					<label for="VenueCity">City</label>
-					<select name="VenueCity[]" id="VenueCity" class="form-control mb-0" >
+					<label for="VenueCity-1">City</label>
+					<select name="VenueCity[]" id="VenueCity-1" class="form-control mb-0" >
 						<option value="">Choose a City</option>
 						<!-- <option>Provided</option>-->
 						<option data-region="LM">TBD - Other (see notes)</option>
@@ -93,17 +93,17 @@ getHeader();
 				</div>
 			<?php endif ?>
 			<div class="col-md-6">
-				<label for="Facilitating">Facilitating</label>
-				<input class="form-control" type="text" id="Facilitating" name="Facilitating[]" value=""></textarea>
+				<label for="Facilitating-1">Facilitating</label>
+				<input class="form-control" type="text" id="Facilitating-1" name="Facilitating[]" value="">
 			</div>
 			<div class="col-md-6">
-				<label for="RequestNotes">Notes</label>
-				<textarea class="form-control RequestNotes" id="RequestNotes" name="RequestNotes[]" value=""></textarea>
+				<label for="RequestNotes-1">Notes</label>
+				<textarea class="form-control RequestNotes" id="RequestNotes-1" name="RequestNotes[]" value=""></textarea>
 			</div>
 		</div>
 	</div>
 	<div class="my-3 d-flex justify-content-center">
-		<button id="clone" class="btn btn-primary" type="button" data-count="1" data-cloneid="classdate1">
+		<button id="clone" class="btn btn-primary" type="button" data-count="1" data-cloneid="classdate-1">
 			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
 				<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
 				<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
@@ -176,11 +176,25 @@ getHeader();
 		let existingid = button.getAttribute('data-cloneid');
 		let newcount = parseInt(count);
 		newcount++;
-		let newid = 'classdate' + newcount;	
+		let newid = 'classdate-' + newcount;	
 		let myDiv = document.getElementById(existingid);
 		let datecontainer = document.getElementById('datecontainer');
 		let divClone = myDiv.cloneNode(true); // the true is for deep cloning
 		divClone.id = newid;
+		
+		// Update our form element ids
+		divClone.querySelectorAll('[id]').forEach(element => {
+			// split on the hyphen so we can isolate the base of the id, 
+			// then add the hypen and our new id on the end
+			element.id = element.id.split('-')[0] + '-' + newcount;
+		})
+
+		// Update our form labels using the same approach
+		divClone.querySelectorAll('label').forEach(element => {
+			console.log(element);
+			element.htmlFor = element.htmlFor.split('-')[0] + '-' + newcount;
+		})		
+
 		datecontainer.appendChild(divClone);
 		button.setAttribute('data-cloneid',newid);
 		button.setAttribute('data-count',newcount);
