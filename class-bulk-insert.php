@@ -28,26 +28,32 @@ getHeader();
 <form name="" action="class-bulk-create.php" method="POST" enctype="multipart/form-data">
 	<input type="hidden" id="CourseCode" name="CourseCode" value="<?= $course[0] ?>">
 	<div id="datecontainer">
-		<div class="row my-1 p-3 bg-dark-subtle rounded-3" id="classdate1">
+		<div class="row my-1 p-3 bg-light-subtle border rounded-3 shadow-sm" id="classdate1">
+			<div class="col-md-3">
+				<div class="form-check">
+					<label for="Dedicated" class="form-check-label">Dedicated</label>
+					<input class="form-check-input" id="Dedicated" type="checkbox" name="Dedicated[]" value="Dedicated">
+				</div>
+			</div>
 			<div class="col-md-3">
 				<label for="sd" class="sessionlabel">Start Date</label>
-				<input class="form-control StartDate date" id="sd" type="date" name="StartDate[]" value="<?= date('Y-m-d') ?>">
+				<input class="form-control" id="sd" type="date" name="StartDate[]" value="<?= date('Y-m-d') ?>">
 			</div>
-			<div class="col-md-2">
+			<div class="col-md-3">
 				<label for="st">Start time</label>
-				<input class="form-control starttime" id="st" type="text" name="StartTime[]" value="<?= $course[30] ?>" >
+				<input class="form-control" id="st" type="time" name="StartTime[]" value="<?= $course[30] ?>" step="900">
 			</div>
-			<div class="col-md-2">
+			<div class="col-md-3">
 				<label for="et">End time</label>
-				<input class="form-control endtime" id="et" type="text" name="EndTime[]" value="<?= $course[31] ?>" >
+				<input class="form-control" id="et" type="time" name="EndTime[]" value="<?= $course[31] ?>" step="900">
 			</div>
 			<div class="col-md-2">
 				<label for="MinEnroll">Min</label>
-				<input class="form-control" id="MinEnroll" type="text" name="MinEnroll[]" value="<?= $course[28] ?>" >
+				<input class="form-control" id="MinEnroll" type="number" name="MinEnroll[]" value="<?= $course[28] ?>" >
 			</div>
 			<div class="col-md-2">
 				<label for="MaxEnroll">Max</label>
-				<input class="form-control" id="MaxEnroll" type="text" name="MaxEnroll[]" value="<?= $course[29] ?>" >
+				<input class="form-control" id="MaxEnroll" type="number" name="MaxEnroll[]" value="<?= $course[29] ?>" >
 			</div>
 			<div class="col-md-6">
 				<label for="WebinarLink">Webinar Link</label>
@@ -95,6 +101,10 @@ getHeader();
 				</div>
 			<?php endif ?>
 			<div class="col-md-6">
+				<label for="Facilitating">Facilitating</label>
+				<input class="form-control" type="text" id="Facilitating" name="Facilitating[]" value=""></textarea>
+			</div>
+			<div class="col-md-6">
 				<label for="RequestNotes">Notes</label>
 				<textarea class="form-control RequestNotes" id="RequestNotes" name="RequestNotes[]" value=""></textarea>
 			</div>
@@ -102,7 +112,6 @@ getHeader();
 	</div>
 	<input type="submit" name="submit" class="btn btn-block btn-lg btn-success text-uppercase my-3" value="Submit Service Requests">
 </form>
-<!-- <div><a href="https://gww.bcpublicservice.gov.bc.ca/lsapp/class-request.php?courseid=<?= $course[0] ?>">Feeling nostalgic? 1-at-a-time requests over here&hellip;</a></div> -->
 </div>
 
 <div class="col-md-4">
