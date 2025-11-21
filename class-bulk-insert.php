@@ -16,19 +16,11 @@ getHeader();
 <h1 class="card-title">Request New Class Dates</h1>
 <h2><a href="/lsapp/course.php?courseid=<?= $course[0] ?>"><?= $course[2] ?></a></h2>
 <div>Delivery method: <?= $course[21] ?></div>
-<div class="my-3">
-	<button id="clone" class="btn btn-primary" data-count="1" data-cloneid="classdate1">
-		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
-			<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-			<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-		</svg>
-		Add new class
-	</button>
-</div>
+
 <form name="" action="class-bulk-create.php" method="POST" enctype="multipart/form-data">
 	<input type="hidden" id="CourseCode" name="CourseCode" value="<?= $course[0] ?>">
 	<div id="datecontainer">
-		<div class="row my-1 p-3 bg-light-subtle border rounded-3 shadow-sm" id="classdate1">
+		<div class="row my-3 p-3 bg-light-subtle border rounded-3 shadow-sm" id="classdate1">
 			<div class="col-md-3">
 				<div class="form-check">
 					<label for="Dedicated" class="form-check-label">Dedicated</label>
@@ -110,7 +102,19 @@ getHeader();
 			</div>
 		</div>
 	</div>
-	<input type="submit" name="submit" class="btn btn-block btn-lg btn-success text-uppercase my-3" value="Submit Service Requests">
+	<div class="my-3 d-flex justify-content-center">
+		<button id="clone" class="btn btn-primary" type="button" data-count="1" data-cloneid="classdate1">
+			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+				<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+				<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+			</svg>
+			Add new class
+		</button>
+	</div>
+	<hr class="border">
+	<div class="my-3 d-flex justify-content-center">
+		<input type="submit" name="submit" class="btn btn-block btn-lg btn-success text-uppercase" value="Submit Service Requests">
+	</div>
 </form>
 </div>
 
@@ -137,7 +141,7 @@ getHeader();
 			if($class[9] < $today) continue;
 			?>
 
-			<div class="my-1 p-2 bg-light-subtle rounded-3">
+			<div class="my-1 p-2 bg-light-subtle border rounded-3">
 				<?php if($class[1] == 'Inactive'): ?>
 					<span class="badge text-bg-warning bg-warning ">CANCELLED</span>
 				<?php else: ?>
