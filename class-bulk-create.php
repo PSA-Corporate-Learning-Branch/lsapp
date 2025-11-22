@@ -34,7 +34,7 @@ foreach($dates as $date) {
 	}
 
 	$facilitatorsclean = '';
-	$fac = $_POST['Facilitating'] ?? '';
+	$fac = $_POST['Facilitating'][$count] ?? '';
 	if(!empty($fac)) { 
 		$fa = strip_tags(trim($fac));
 		$facilitators = str_replace('@','',$fa);
@@ -45,7 +45,7 @@ foreach($dates as $date) {
 				$status,
 				$now,
 				$currentuser,
-				'ELM',
+				$_POST['Dedicated'][$count] ?? 'ELM', // Dedicated ( ELM || Dedicated )
 				$course[0],
 				$course[2],
 				'', // ITEM code
