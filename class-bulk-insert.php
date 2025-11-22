@@ -4,6 +4,11 @@ opcache_reset();
 $courseid = (isset($_GET['courseid'])) ? $_GET['courseid'] : 0;
 $course = getCourse($courseid);
 getHeader();
+
+$allpeople = getPeopleAll($filteractive = true);
+
+
+
 ?>
 <title>Bulk Insert Class Service Requests | LSApp</title>
 <?php getScripts() ?>
@@ -28,33 +33,33 @@ getHeader();
 				</div>
 			</div>
 			<div class="col-md-3">
-				<label for="sd-1" class="sessionlabel">Start Date</label>
+				<label for="sd-1" class="form-label sessionlabel">Start Date</label>
 				<input class="form-control" id="sd-1" type="date" name="StartDate[]" value="<?= date('Y-m-d') ?>">
 			</div>
 			<div class="col-md-3">
-				<label for="st-1">Start time</label>
+				<label for="st-1" class="form-label">Start time</label>
 				<input class="form-control" id="st-1" type="time" name="StartTime[]" value="<?= $course[30] ?>" step="900">
 			</div>
 			<div class="col-md-3">
-				<label for="et-1">End time</label>
+				<label for="et-1" class="form-label">End time</label>
 				<input class="form-control" id="et-1" type="time" name="EndTime[]" value="<?= $course[31] ?>" step="900">
 			</div>
 			<div class="col-md-2">
-				<label for="MinEnroll-1">Min</label>
+				<label for="MinEnroll-1" class="form-label">Min</label>
 				<input class="form-control" id="MinEnroll-1" type="number" name="MinEnroll[]" value="<?= $course[28] ?>" >
 			</div>
 			<div class="col-md-2">
-				<label for="MaxEnroll-1">Max</label>
+				<label for="MaxEnroll-1" class="form-label">Max</label>
 				<input class="form-control" id="MaxEnroll-1" type="number" name="MaxEnroll[]" value="<?= $course[29] ?>" >
 			</div>
 			<div class="col-md-6">
-				<label for="WebinarLink-1">Webinar Link</label>
+				<label for="WebinarLink-1" class="form-label">Webinar Link</label>
 				<input class="form-control WebinarLink" id="WebinarLink-1" type="text" name="WebinarLink[]" value="" required>
 			</div>
 			<?php if($course[21] == 'Classroom'): ?>
 				<div class="col-md-6">
-					<label for="VenueCity-1">City</label>
-					<select name="VenueCity[]" id="VenueCity-1" class="form-control mb-0" >
+					<label for="VenueCity-1" class="form-label">City</label>
+					<select name="VenueCity[]" id="VenueCity-1" class="form-select mb-0" >
 						<option value="">Choose a City</option>
 						<!-- <option>Provided</option>-->
 						<option data-region="LM">TBD - Other (see notes)</option>
@@ -93,11 +98,21 @@ getHeader();
 				</div>
 			<?php endif ?>
 			<div class="col-md-6">
-				<label for="Facilitating-1">Facilitating</label>
-				<input class="form-control" type="text" id="Facilitating-1" name="Facilitating[]" value="">
+				<label for="AddFacilitating-1" class="form-label">Facilitating</label>
+				<div class="input-group">
+					<input class="form-control" list="people-list" id="AddFacilitating-1" name="AddFacilitating" value="">
+					<button id="AddButton-1" type="button" class="btn btn-secondary">Add</button>
+				</div>
+				<datalist id="people-list">
+					<?php foreach($allpeople as $people): ?>
+						<option value="<?= $people[0] ?>"><?= $people[2] ?></option>
+					<?php endforeach; ?>
+				</datalist>
+				<input type="hidden" id="Facilitating-1" name="Facilitating[]" value="">
+				<div id="BadgeContainer-1"></div>
 			</div>
 			<div class="col-md-6">
-				<label for="RequestNotes-1">Notes</label>
+				<label for="RequestNotes-1" class="form-label">Notes</label>
 				<textarea class="form-control RequestNotes" id="RequestNotes-1" name="RequestNotes[]" value=""></textarea>
 			</div>
 		</div>
@@ -168,6 +183,7 @@ getHeader();
 <?php require('templates/javascript.php') ?>
 
 <script>
+	// Add Class
 	const button = document.getElementById('clone');
 
 	button.addEventListener('click', (event) => {
@@ -199,7 +215,50 @@ getHeader();
 		button.setAttribute('data-cloneid',newid);
 		button.setAttribute('data-count',newcount);
 
+		AddFacilitation(newcount);
 	});
+
+	// Add Facilitator
+	function AddFacilitation(count) {
+		const addFacilitatorButton = document.getElementById('AddButton-' + count);
+		const addFacilitatorInput = document.getElementById('AddFacilitating-' + count);
+		const facilitating = document.getElementById('Facilitating-' + count);
+		const facilitatingBadges = document.getElementById('BadgeContainer-' + count);
+
+		let selectedValues = [];
+
+		addFacilitatorButton.addEventListener('click', () => {
+			const value = addFacilitatorInput.value.trim();
+			if (value && !selectedValues.includes(value)) {
+				selectedValues.push(value);
+				facilitating.value = selectedValues.join(',');
+
+				const badge = document.createElement('span');
+				badge.className = 'badge text-bg-secondary';
+				badge.textContent = value;
+
+				const removeBtn = document.createElement('button');
+				removeBtn.type = 'button';
+				removeBtn.className = 'btn-close btn-close-white ms-2';
+				removeBtn.style.fontSize = '0.6rem';
+
+				removeBtn.addEventListener('click', () => {
+					selectedValues = selectedValues.filter(item => item !== value);
+					facilitating.value = selectedValues.join(',');
+					badge.remove();
+				})
+
+				badge.appendChild(removeBtn);
+				facilitatingBadges.appendChild(badge);
+
+				addFacilitatorInput.value = '';
+			}
+		});
+
+	}
+	
+	AddFacilitation(1);
+
 </script>
 
 <?php else: ?>
