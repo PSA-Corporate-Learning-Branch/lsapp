@@ -37,8 +37,7 @@ foreach($dates as $date) {
 	$fac = $_POST['Facilitating'][$count] ?? '';
 	if(!empty($fac)) { 
 		$fa = strip_tags(trim($fac));
-		$facilitators = str_replace('@','',$fa);
-		$facilitatorsclean = str_replace(',','',$facilitators);
+		$facilitatorsclean = str_replace(',',' ',$fa);
 	}
 
 	$newclass = Array($classid,
