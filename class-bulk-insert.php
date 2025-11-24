@@ -211,6 +211,9 @@ $allpeople = getPeopleAll($filteractive = true);
 			element.htmlFor = element.htmlFor.split('-')[0] + '-' + newcount;
 		})		
 
+		// Clear any copied badges
+		divClone.querySelector(`#BadgeContainer-${newcount}`).innerHTML = '';
+
 		datecontainer.appendChild(divClone);
 		button.setAttribute('data-cloneid',newid);
 		button.setAttribute('data-count',newcount);
