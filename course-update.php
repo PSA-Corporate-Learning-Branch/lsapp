@@ -1,7 +1,8 @@
-<?php 
+<?php
 ob_start();
 require('inc/lsapp.php');
 require('inc/Parsedown.php');
+require('inc/ches_client.php');
 $Parsedown = new Parsedown();
 opcache_reset();
 
@@ -199,7 +200,137 @@ if($_POST) {
     fclose($temp_table);
     
     rename('data/courses-temp.csv', 'data/courses.csv');
-    
+
+    // Send email notification for course update
+    try {
+        $chesClient = new CHESClient();
+
+        // Field names mapping for better readability in email
+        $fieldNames = [
+            0 => 'CourseID',
+            1 => 'Status',
+            2 => 'CourseName',
+            3 => 'CourseShort',
+            4 => 'ItemCode',
+            5 => 'ClassTimes',
+            6 => 'ClassDays',
+            7 => 'ELM Link',
+            8 => 'PreWork',
+            9 => 'PostWork',
+            10 => 'CourseOwner',
+            11 => 'MinMax (legacy)',
+            12 => 'CourseNotes',
+            13 => 'Requested',
+            14 => 'RequestedBy',
+            15 => 'EffectiveDate',
+            16 => 'CourseDescription',
+            17 => 'CourseAbstract',
+            18 => 'Prerequisites',
+            19 => 'Keywords',
+            20 => 'Category (legacy)',
+            21 => 'Method',
+            22 => 'eLearning URL',
+            23 => 'WeShip',
+            24 => 'ProjectNumber',
+            25 => 'Responsibility',
+            26 => 'ServiceLine',
+            27 => 'STOB',
+            28 => 'MinEnroll',
+            29 => 'MaxEnroll',
+            30 => 'StartTime',
+            31 => 'EndTime',
+            32 => 'CourseColor',
+            33 => 'Featured',
+            34 => 'Developer',
+            35 => 'EvaluationsLink',
+            36 => 'LearningHubPartner',
+            37 => 'Alchemer',
+            38 => 'Topics',
+            39 => 'Audience',
+            40 => 'Levels',
+            41 => 'Reporting',
+            42 => 'PathLAN',
+            43 => 'PathStaging',
+            44 => 'PathLive',
+            45 => 'PathNIK',
+            46 => 'CHEFSFormID',
+            47 => 'isMoodle',
+            48 => 'TaxonomyProcessed',
+            49 => 'TaxonomyProcessedBy',
+            50 => 'ELMCourseID',
+            51 => 'LastModified',
+            52 => 'Platform',
+            53 => 'HUBInclude',
+            54 => 'RegistrationLink',
+            55 => 'Slug',
+            56 => 'HubExpirationDate',
+            57 => 'OpenAccessOptin',
+            58 => 'HubIncludeSync',
+            59 => 'HubIncludePersist',
+            60 => 'HubPersistMessage',
+            61 => 'HubIncludePersistState'
+        ];
+
+        // Build diff of changes
+        $changes = [];
+        $maxFields = max(count($currentCourse), count($course));
+
+        for ($i = 0; $i < $maxFields; $i++) {
+            // Skip LastModified field as it always changes
+            if ($i === 51) continue;
+
+            $oldValue = isset($currentCourse[$i]) ? $currentCourse[$i] : '';
+            $newValue = isset($course[$i]) ? $course[$i] : '';
+
+            // Only include if values are different
+            if ($oldValue !== $newValue) {
+                $fieldName = isset($fieldNames[$i]) ? $fieldNames[$i] : "Field $i";
+                $changes[] = [
+                    'field' => $fieldName,
+                    'old' => $oldValue,
+                    'new' => $newValue
+                ];
+            }
+        }
+
+        // Only send email if there are actual changes
+        if (!empty($changes)) {
+            $emailBody = "Course Updated: " . sanitize($course[2]) . "\n";
+            $emailBody .= "Course ID: {$courseid}\n\n";
+
+            // Get the base URL for linking to the course
+            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+            $host = $_SERVER['HTTP_HOST'];
+            $courseLink = $protocol . $host . "/lsapp/course.php?courseid={$courseid}";
+
+            $emailBody .= "View Course: {$courseLink}\n\n";
+            $emailBody .= "Changes Made:\n";
+            $emailBody .= str_repeat("=", 80) . "\n\n";
+
+            foreach ($changes as $change) {
+                $emailBody .= "{$change['field']}:\n";
+                $emailBody .= "  OLD: " . (empty($change['old']) ? '(empty)' : $change['old']) . "\n";
+                $emailBody .= "  NEW: " . (empty($change['new']) ? '(empty)' : $change['new']) . "\n";
+                $emailBody .= "\n";
+            }
+
+            $emailBody .= str_repeat("=", 80) . "\n";
+            $emailBody .= "Updated by: " . ($_SESSION['IDIR'] ?? 'Unknown') . "\n";
+            $emailBody .= "Updated at: {$now}\n";
+
+            // Send the email
+            $emailResult = $chesClient->sendEmail(
+                ['allan.haggett@gov.bc.ca'],
+                "Course Updated: " . sanitize($course[2]),
+                $emailBody
+            );
+
+            error_log("Course update notification sent successfully for course ID: {$courseid}");
+        }
+    } catch (Exception $e) {
+        error_log("CHES Email Exception on course update: " . $e->getMessage());
+    }
+
     // Update course-people.csv if steward or developer changed
     $peoplefp = fopen('data/course-people.csv', 'a+');
     

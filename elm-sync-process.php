@@ -1,11 +1,12 @@
 <?php
 //
 // This runs through the output of the GBC_CURRENT_COURSE_INFO ELM query,
-// matches the ITEM Code with one in LSApp, and then updates LSApp with the 
+// matches the ITEM Code with one in LSApp, and then updates LSApp with the
 // current ELM status and attendance numbers for that class.
 //
 //
 require('inc/lsapp.php');
+require('inc/ches_client.php');
 
 $elm = fopen('data/elm.csv', 'r');
 // Pop the headers row off
@@ -32,8 +33,11 @@ $lsappclasses = array();
 while ($row = fgetcsv($lsapp)) {
 	array_push($lsappclasses,$row);
 }
-fclose($lsapp); 
+fclose($lsapp);
 $updatedcount = 0;
+$logEntries = [];
+$updatedClasses = [];
+$timestamp = date('Y-m-d H:i:s');
 ?>
 
 <?php getHeader() ?>
@@ -74,13 +78,53 @@ while ($elmrow = fgetcsv($elm)) {
 			// update LSApp accordingly and output the updated class 
 			// to the screen. If there's no difference, we just move on
 			$newEnrolled = intval($elmrow[8]) + intval($elmrow[16]);
-			if($newEnrolled != $lsappclass[18] || 
-				$elmrow[9] != $lsappclass[19] || 
-				$elmrow[10] != $lsappclass[20] || 
-				$elmrow[11] != $lsappclass[21] || 
+			if($newEnrolled != $lsappclass[18] ||
+				$elmrow[9] != $lsappclass[19] ||
+				$elmrow[10] != $lsappclass[20] ||
+				$elmrow[11] != $lsappclass[21] ||
 				$elmrow[12] != $lsappclass[22]) {
-					
+
 				$updatedcount++;
+
+				// Collect changes for logging
+				$changes = [];
+				if($newEnrolled != $lsappclass[18]) {
+					$changes[] = "Enrolled: {$lsappclass[18]} → {$newEnrolled}";
+				}
+				if($elmrow[9] != $lsappclass[19]) {
+					$changes[] = "Reserved: {$lsappclass[19]} → {$elmrow[9]}";
+				}
+				if($elmrow[10] != $lsappclass[20]) {
+					$changes[] = "Pending: {$lsappclass[20]} → {$elmrow[10]}";
+				}
+				if($elmrow[11] != $lsappclass[21]) {
+					$changes[] = "Waitlist: {$lsappclass[21]} → {$elmrow[11]}";
+				}
+				if($elmrow[12] != $lsappclass[22]) {
+					$changes[] = "Dropped: {$lsappclass[22]} → {$elmrow[12]}";
+				}
+
+				// Store update details for email
+				$updatedClasses[] = [
+					'class_id' => $lsappclass[0],
+					'course_name' => $lsappclass[6],
+					'date' => goodDateLong($lsappclass[8], $lsappclass[9]),
+					'item_code' => $lsappclass[7],
+					'changes' => $changes,
+					'elm_enrolled' => $newEnrolled,
+					'lsapp_enrolled' => $lsappclass[18],
+					'elm_reserved' => $elmrow[9],
+					'lsapp_reserved' => $lsappclass[19],
+					'elm_pending' => $elmrow[10],
+					'lsapp_pending' => $lsappclass[20],
+					'elm_waitlist' => $elmrow[11],
+					'lsapp_waitlist' => $lsappclass[21],
+					'elm_dropped' => $elmrow[12],
+					'lsapp_dropped' => $lsappclass[22]
+				];
+
+				$logEntries[] = "Updated {$lsappclass[6]} ({$lsappclass[7]}) - " . goodDateLong($lsappclass[8], $lsappclass[9]) . ": " . implode(', ', $changes);
+
 				echo '<li class="list-group-item">';
 				//echo '<div class="upcount float-left">' . $updatedcount . '</div>';
 				echo '<a href="class.php?classid=' . $lsappclass[0] . '">';
@@ -121,14 +165,14 @@ while ($elmrow = fgetcsv($elm)) {
 				}
 				echo '</div>';
 				echo '</li>';
-				
+
 				$lsappclasses[$lsappcount][1] = $elmrow[5]; // status
 				$lsappclasses[$lsappcount][18] = intval($elmrow[8]) + intval($elmrow[16]); // enrolled + in-progress
 				$lsappclasses[$lsappcount][19] = $elmrow[9]; // Reserved
 				$lsappclasses[$lsappcount][20] = $elmrow[10]; // Pending
 				$lsappclasses[$lsappcount][21] = $elmrow[11]; // Waitlist
 				$lsappclasses[$lsappcount][22] = $elmrow[12]; // Dropped
-				
+
 			}
 		} 
 		$lsappcount++;
@@ -150,6 +194,136 @@ foreach ($lsappclasses as $fields) {
 }
 // Close the file
 fclose($newclasses);
+
+// Send comprehensive email with sync results
+try {
+	$chesClient = new CHESClient();
+
+	// Determine subject based on activity
+	if ($updatedcount > 0) {
+		$subject = "ELM Enrolment Sync - $updatedcount Class" . ($updatedcount > 1 ? 'es' : '') . " Updated";
+	} else {
+		$subject = "ELM Enrolment Sync - No Changes";
+	}
+
+	// Build HTML email body
+	$bodyHtml = "<h2>ELM Enrolment Number Synchronization Report</h2>";
+	$bodyHtml .= "<p><strong>Sync completed:</strong> $timestamp</p>";
+
+	// Summary section
+	$bodyHtml .= "<div style='background-color: #f0f0f0; padding: 15px; margin: 15px 0; border-radius: 5px;'>";
+	$bodyHtml .= "<h3>Summary</h3>";
+	$bodyHtml .= "<p><strong>Total classes updated:</strong> $updatedcount</p>";
+	$bodyHtml .= "</div>";
+
+	// Updated classes section (if any)
+	if ($updatedcount > 0) {
+		$bodyHtml .= "<h3>📊 Updated Classes</h3>";
+		$bodyHtml .= "<table border='1' cellpadding='8' cellspacing='0' style='border-collapse: collapse; font-family: Arial, sans-serif; width: 100%;'>";
+		$bodyHtml .= "<tr style='background-color: #f2f2f2;'>";
+		$bodyHtml .= "<th>Course Name</th><th>Date</th><th>Item Code</th><th>Changes</th><th>View Class</th>";
+		$bodyHtml .= "</tr>";
+
+		foreach ($updatedClasses as $class) {
+			$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+			$host = $_SERVER['HTTP_HOST'];
+			$classUrl = $protocol . $host . "/lsapp/class.php?classid=" . urlencode($class['class_id']);
+
+			$bodyHtml .= "<tr>";
+			$bodyHtml .= "<td><strong>" . htmlspecialchars($class['course_name']) . "</strong></td>";
+			$bodyHtml .= "<td>" . htmlspecialchars($class['date']) . "</td>";
+			$bodyHtml .= "<td>" . htmlspecialchars($class['item_code']) . "</td>";
+			$bodyHtml .= "<td><ul style='margin: 0; padding-left: 20px;'>";
+			foreach ($class['changes'] as $change) {
+				$bodyHtml .= "<li>" . htmlspecialchars($change) . "</li>";
+			}
+			$bodyHtml .= "</ul></td>";
+			$bodyHtml .= "<td><a href='" . htmlspecialchars($classUrl) . "'>View</a></td>";
+			$bodyHtml .= "</tr>";
+
+			// Add detailed comparison row
+			$bodyHtml .= "<tr style='background-color: #f8f9fa;'>";
+			$bodyHtml .= "<td colspan='5' style='font-size: 12px; padding: 5px 8px;'>";
+			$bodyHtml .= "<strong>Details:</strong> ";
+			$bodyHtml .= "Enrolled: " . ($class['lsapp_enrolled'] != $class['elm_enrolled'] ? "<strong>{$class['lsapp_enrolled']} → {$class['elm_enrolled']}</strong>" : $class['elm_enrolled']) . " | ";
+			$bodyHtml .= "Reserved: " . ($class['lsapp_reserved'] != $class['elm_reserved'] ? "<strong>{$class['lsapp_reserved']} → {$class['elm_reserved']}</strong>" : $class['elm_reserved']) . " | ";
+			$bodyHtml .= "Pending: " . ($class['lsapp_pending'] != $class['elm_pending'] ? "<strong>{$class['lsapp_pending']} → {$class['elm_pending']}</strong>" : $class['elm_pending']) . " | ";
+			$bodyHtml .= "Waitlist: " . ($class['lsapp_waitlist'] != $class['elm_waitlist'] ? "<strong>{$class['lsapp_waitlist']} → {$class['elm_waitlist']}</strong>" : $class['elm_waitlist']) . " | ";
+			$bodyHtml .= "Dropped: " . ($class['lsapp_dropped'] != $class['elm_dropped'] ? "<strong>{$class['lsapp_dropped']} → {$class['elm_dropped']}</strong>" : $class['elm_dropped']);
+			$bodyHtml .= "</td>";
+			$bodyHtml .= "</tr>";
+		}
+
+		$bodyHtml .= "</table>";
+	} else {
+		$bodyHtml .= "<p><em>No class enrolment updates were needed during this sync.</em></p>";
+	}
+
+	// Full log section
+	$bodyHtml .= "<h3>📋 Complete Sync Log</h3>";
+	if (count($logEntries) > 0) {
+		$bodyHtml .= "<div style='background-color: #f8f9fa; padding: 15px; font-family: monospace; font-size: 12px; overflow-x: auto; border: 1px solid #dee2e6;'>";
+		foreach ($logEntries as $entry) {
+			$bodyHtml .= htmlspecialchars($entry) . "<br>";
+		}
+		$bodyHtml .= "</div>";
+	} else {
+		$bodyHtml .= "<p><em>No changes detected during this sync.</em></p>";
+	}
+
+	// Build plain text email body
+	$bodyText = "ELM ENROLMENT NUMBER SYNCHRONIZATION REPORT\n";
+	$bodyText .= str_repeat("=", 80) . "\n";
+	$bodyText .= "Sync completed: $timestamp\n\n";
+
+	$bodyText .= "SUMMARY\n";
+	$bodyText .= str_repeat("-", 80) . "\n";
+	$bodyText .= "Total classes updated: $updatedcount\n\n";
+
+	if ($updatedcount > 0) {
+		$bodyText .= "UPDATED CLASSES\n";
+		$bodyText .= str_repeat("=", 80) . "\n";
+		foreach ($updatedClasses as $class) {
+			$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+			$host = $_SERVER['HTTP_HOST'];
+			$classUrl = $protocol . $host . "/lsapp/class.php?classid=" . urlencode($class['class_id']);
+
+			$bodyText .= "\nCourse: {$class['course_name']}\n";
+			$bodyText .= "Date: {$class['date']}\n";
+			$bodyText .= "Item Code: {$class['item_code']}\n";
+			$bodyText .= "Changes:\n";
+			foreach ($class['changes'] as $change) {
+				$bodyText .= "  - $change\n";
+			}
+			$bodyText .= "View: $classUrl\n";
+			$bodyText .= str_repeat("-", 80) . "\n";
+		}
+	}
+
+	$bodyText .= "\nCOMPLETE SYNC LOG\n";
+	$bodyText .= str_repeat("=", 80) . "\n";
+	if (count($logEntries) > 0) {
+		foreach ($logEntries as $entry) {
+			$bodyText .= $entry . "\n";
+		}
+	} else {
+		$bodyText .= "No changes detected during this sync.\n";
+	}
+
+	// Send the email
+	$emailResult = $chesClient->sendEmail(
+		['allan.haggett@gov.bc.ca'],
+		$subject,
+		$bodyText,
+		$bodyHtml,
+		'lsapp_syncbot_noreply@gov.bc.ca'
+	);
+
+	error_log("ELM enrolment sync notification sent successfully (Transaction ID: {$emailResult['txId']})");
+
+} catch (Exception $e) {
+	error_log("CHES Email Exception on ELM enrolment sync: " . $e->getMessage());
+}
 
 endif; ?>
 </ul>
