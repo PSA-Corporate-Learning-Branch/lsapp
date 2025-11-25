@@ -5,8 +5,13 @@ $courseid = (isset($_GET['courseid'])) ? $_GET['courseid'] : 0;
 $course = getCourse($courseid);
 getHeader();
 
+// Get our active people for facilitators datalist
 $allpeople = getPeopleAll($filteractive = true);
 
+// Create an array of idirs
+$idirs = array_map(function($p) {
+	return $p[0];
+}, $allpeople);
 
 
 ?>
@@ -192,6 +197,9 @@ $allpeople = getPeopleAll($filteractive = true);
 	// Add Class
 	const button = document.getElementById('clone');
 
+	// Create an array of active user idirs
+	const userIDIRs = JSON.parse('<?= json_encode($idirs) ?>');
+
 	button.addEventListener('click', (event) => {
 		
 		let count = button.getAttribute('data-count');
@@ -243,7 +251,7 @@ $allpeople = getPeopleAll($filteractive = true);
 				facilitating.value = selectedValues.join(',');
 
 				const badge = document.createElement('span');
-				badge.className = 'badge text-bg-secondary';
+				badge.className = 'badge text-bg-secondary m-1';
 				badge.textContent = value;
 
 				const removeBtn = document.createElement('button');
@@ -263,6 +271,34 @@ $allpeople = getPeopleAll($filteractive = true);
 				addFacilitatorInput.value = '';
 			}
 		});
+
+		addFacilitatorInput.addEventListener('input', () => {
+			const value = addFacilitatorInput.value.trim();
+			if (value && !selectedValues.includes(value) && userIDIRs.includes(value)) {
+				selectedValues.push(value);
+				facilitating.value = selectedValues.join(',');
+
+				const badge = document.createElement('span');
+				badge.className = 'badge text-bg-secondary m-1';
+				badge.textContent = value;
+
+				const removeBtn = document.createElement('button');
+				removeBtn.type = 'button';
+				removeBtn.className = 'btn-close btn-close-white ms-2';
+				removeBtn.style.fontSize = '0.6rem';
+
+				removeBtn.addEventListener('click', () => {
+					selectedValues = selectedValues.filter(item => item !== value);
+					facilitating.value = selectedValues.join(',');
+					badge.remove();
+				})
+
+				badge.appendChild(removeBtn);
+				facilitatingBadges.appendChild(badge);
+
+				addFacilitatorInput.value = '';
+			}
+		})
 
 	}
 	
