@@ -34,10 +34,19 @@ foreach($dates as $date) {
 	}
 
 	$facilitatorsclean = '';
-	$fac = $_POST['Facilitating'][$count] ?? '';
-	if(!empty($fac)) { 
-		$fa = strip_tags(trim($fac));
-		$facilitatorsclean = str_replace(',',' ',$fa);
+	// Facilitators added by idir
+	$facilitatorsadded = $_POST['Facilitating'][$count] ?? '';
+	// Facilitators from the text input field
+	$facilitorsinput = $_POST['AddFacilitating'][$count] ?? '';
+	
+	if (!empty($facilitatorsadded)) { 
+		$fa = strip_tags(trim($facilitatorsadded));
+		$facilitatorsclean .= str_replace(',',' ',$fa);
+	} 
+	if (!empty($facilitorsinput)) {
+		$faci = strip_tags(trim($facilitorsinput));
+		$facil = $facilitatorsclean . ' ' . str_replace(',',' ',$faci);
+		$facilitatorsclean = trim($facil);
 	}
 
 	$newclass = Array($classid,
@@ -85,7 +94,7 @@ foreach($dates as $date) {
 				$now,
 				$currentuser,
 				'', // Assigned
-				$course[21],
+				$course[21], // Method / Delivery Method
 				$course[20], //h($_POST['CourseCategory']),
 				'', // Region
 				'', // CheckedBy

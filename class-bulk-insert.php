@@ -111,7 +111,7 @@ $idirs = array_map(function($p) {
 					</svg>
 				</a>
 				<div class="input-group">
-					<input class="form-control" list="people-list" id="AddFacilitating-1" name="AddFacilitating" value="">
+					<input class="form-control" list="people-list" id="AddFacilitating-1" name="AddFacilitating[]" value="">
 					<button id="AddButton-1" type="button" class="btn btn-secondary">Add</button>
 				</div>
 				<datalist id="people-list">
