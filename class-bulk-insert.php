@@ -31,36 +31,50 @@ $idirs = array_map(function($p) {
 	<input type="hidden" id="CourseCode" name="CourseCode" value="<?= $course[0] ?>">
 	<div id="datecontainer">
 		<div class="row my-3 p-3 bg-light-subtle border rounded-3 shadow-sm" id="classdate-1">
+			<!-- Dedicated -->
 			<div class="col-md-3">
 				<div class="form-check">
 					<label for="Dedicated-1" class="form-check-label">Dedicated</label>
 					<input class="form-check-input" id="Dedicated-1" type="checkbox" name="Dedicated[]" value="Dedicated">
 				</div>
 			</div>
-			<div class="col-md-3">
+			<!-- Start Date -->
+			<div class="col-lg-3">
 				<label for="sd-1" class="form-label sessionlabel">Start Date</label>
 				<input class="form-control" id="sd-1" type="date" name="StartDate[]" value="<?= date('Y-m-d') ?>">
 			</div>
-			<div class="col-md-3">
+			<!-- Start / End Times -->
+			<div class="col-lg-3">
 				<label for="st-1" class="form-label">Start time</label>
 				<input class="form-control" id="st-1" type="time" name="StartTime[]" value="<?= $course[30] ?>" step="900">
 			</div>
-			<div class="col-md-3">
+			<div class="col-lg-3">
 				<label for="et-1" class="form-label">End time</label>
 				<input class="form-control" id="et-1" type="time" name="EndTime[]" value="<?= $course[31] ?>" step="900">
 			</div>
-			<div class="col-md-2">
-				<label for="MinEnroll-1" class="form-label">Min</label>
-				<input class="form-control" id="MinEnroll-1" type="number" name="MinEnroll[]" value="<?= $course[28] ?>" >
-			</div>
-			<div class="col-md-2">
-				<label for="MaxEnroll-1" class="form-label">Max</label>
-				<input class="form-control" id="MaxEnroll-1" type="number" name="MaxEnroll[]" value="<?= $course[29] ?>" >
-			</div>
-			<div class="col-md-6">
-				<label for="WebinarLink-1" class="form-label">Webinar Link</label>
-				<input class="form-control WebinarLink" id="WebinarLink-1" type="text" name="WebinarLink[]" value="" required>
-			</div>
+			<!-- Min / Max -->
+			<?php if($course[21] !== 'eLearning' && $course[21] !== 'Curated Pathway'): ?>
+				<div class="col-md-2">
+					<label for="MinEnroll-1" class="form-label">Min</label>
+					<input class="form-control" id="MinEnroll-1" type="number" name="MinEnroll[]" value="<?= $course[28] ?>" >
+				</div>
+				<div class="col-md-2">
+					<label for="MaxEnroll-1" class="form-label">Max</label>
+					<input class="form-control" id="MaxEnroll-1" type="number" name="MaxEnroll[]" value="<?= $course[29] ?>" >
+				</div>
+			<?php endif ?>
+			<?php if($course[21] !== 'Classroom'): ?>
+				<div class="col-md-6">
+					<label for="WebinarLink-1" class="form-label"><?= $course[21] == 'Blended' ? 'Webinar' : $course[21] ?> Link</label>
+					<a href="#" class="link-secondary" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="<small>Please enter a valid url.<br>Alternatively, leave the field blank.</small>">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+							<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+							<path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+						</svg>
+					</a>
+					<input class="form-control WebinarLink" id="WebinarLink-1" type="url" name="WebinarLink[]" value="">
+				</div>
+			<?php endif ?>
 			<?php if($course[21] == 'Classroom'): ?>
 				<div class="col-md-6">
 					<label for="VenueCity-1" class="form-label">City</label>

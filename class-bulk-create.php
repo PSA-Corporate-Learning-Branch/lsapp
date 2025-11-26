@@ -60,11 +60,11 @@ foreach($dates as $date) {
 				$date, // StartDate
 				$enddate, // EndDate
 				$combinedtimes,
-				$_POST['MinEnroll'][$count], //$course[28], //MinEnroll
-				$_POST['MaxEnroll'][$count], //$course[29], //MaxEnroll
+				$_POST['MinEnroll'][$count] ?? 1, //$course[28], //MinEnroll
+				$_POST['MaxEnroll'][$count] ?? 1000, //$course[29], //MaxEnroll
 				$shipdate,
 				$facilitatorsclean,
-				h($_POST['WebinarLink'][$count]),
+				h($_POST['WebinarLink'][$count] ?? ''),
 				$date,
 				$coursedays,
 				'0', // Enrolled
