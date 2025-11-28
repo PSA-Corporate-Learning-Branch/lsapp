@@ -63,6 +63,7 @@ $idirs = array_map(function($p) {
 					<input class="form-control" id="MaxEnroll-1" type="number" name="MaxEnroll[]" value="<?= $course[29] ?>" >
 				</div>
 			<?php endif ?>
+			<!-- Webinar / eLearning Link -->
 			<?php if($course[21] !== 'Classroom'): ?>
 				<div class="col-md-6">
 					<label for="WebinarLink-1" class="form-label"><?= $course[21] == 'Blended' ? 'Webinar' : $course[21] ?> Link</label>
@@ -246,7 +247,10 @@ $idirs = array_map(function($p) {
 		button.setAttribute('data-cloneid',newid);
 		button.setAttribute('data-count',newcount);
 
+		// Add our additional functionality to the cloned node
 		AddFacilitation(newcount);
+		toggleDedicated(newcount);
+		enableTooltips();
 	});
 
 	// Add Facilitator
@@ -316,10 +320,28 @@ $idirs = array_map(function($p) {
 
 	}
 	
-	AddFacilitation(1);
+	// enables our tooltips
+	// gets called again on clone to enable on added tooltips
+	function enableTooltips() {
+		const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+		const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+	}
 
-	const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+	// adds a warning border on dedicated offerings
+	function toggleDedicated(count) {
+		const dedicatedCheckbox = document.getElementById('Dedicated-' + count);
+		const classDate = document.getElementById('classdate-' + count);
+
+		dedicatedCheckbox.addEventListener('change', () => {
+			classDate.classList.toggle('border-2');
+			classDate.classList.toggle('border-warning');
+		})
+	}
+
+	toggleDedicated(1);
+	AddFacilitation(1);
+	enableTooltips();
+	
 
 </script>
 
