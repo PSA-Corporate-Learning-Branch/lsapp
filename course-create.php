@@ -117,7 +117,8 @@ $newcourse = [
     'yes',                                          // 58: HubIncludeSync (default yes)
     'no',                                           // 59: HubIncludePersist (default no)
     'This course is no longer available for registration.', // 60: HubPersistMessage (default)
-    'active'                                        // 61: HubIncludePersistState (default active)
+    'active',                                       // 61: HubIncludePersistState (default active)
+    LOGGED_IN_IDIR                                  // 62: modifiedby  (default to current user)
 ];
 
 // Write course to CSV file

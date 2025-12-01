@@ -54,12 +54,14 @@ function updateCourse($existingCourse, $newCourseData, &$logEntries, &$hubInclud
                 $updatedCourse[$lsappIndex] = $newValue;
                 $changes[] = "Updated field index $lsappIndex to '{$newValue}'";
                 $updatedCourse[51] = date('Y-m-d\TH:i:s'); // Update modified timestamp only if there's a change
+                $updatedCourse[62] = 'SYNCBOT'; // Update modifiedby field
             }
         }
     }
 
     if (trim($existingCourse[1]) === 'Inactive') {
         $updatedCourse[1] = 'Active';
+        $updatedCourse[62] = 'SYNCBOT'; // Update modifiedby field
         $changes[] = "Updated status to 'Active'";
     } // we don't do the inverse action to make active courses inactive because of the flow
       // of operations here, where LSApp can be the first point of creation for a new course
@@ -67,9 +69,10 @@ function updateCourse($existingCourse, $newCourseData, &$logEntries, &$hubInclud
       // they are available for registration, so if we just make everything that's active 
       // but not included in the hub inactive, then we loose the ability 
 
-    
+
     if (trim($existingCourse[52]) !== 'PSA Learning System') {
         $updatedCourse[52] = 'PSA Learning System';
+        $updatedCourse[62] = 'SYNCBOT'; // Update modifiedby field
         $changes[] = "Updated Platform to 'PSA Learning System'";
     }
 
@@ -80,6 +83,7 @@ function updateCourse($existingCourse, $newCourseData, &$logEntries, &$hubInclud
     // Always ensure HUBInclude is 'Yes' for courses in ELM feed
     if ($currentHubInclude !== 'Yes') {
         $updatedCourse[53] = 'Yes';
+        $updatedCourse[62] = 'SYNCBOT'; // Update modifiedby field
         if ($currentHubInclude === 'No') {
             $changes[] = "Restored HUBInclude to 'Yes' - course found in ELM feed (was previously 'No')";
         } else {
@@ -100,6 +104,7 @@ function updateCourse($existingCourse, $newCourseData, &$logEntries, &$hubInclud
     // For persistent courses that are back in the feed, set state to 'active'
     if ($hubIncludePersist === 'yes' && isset($existingCourse[61]) && $existingCourse[61] === 'inactive') {
         $updatedCourse[61] = 'active';
+        $updatedCourse[62] = 'SYNCBOT'; // Update modifiedby field
         $changes[] = "Updated HubIncludePersistState to 'active' - course is back in ELM feed";
     }
 
@@ -207,7 +212,8 @@ foreach ($hubCourses as $hcCode => $hc) {
             'yes',                 // HubIncludeSync (default: yes)
             'no',                  // HubIncludePersist (default: no)
             'This course is no longer available for registration.', // HubPersistMessage
-            'active'               // HubIncludePersistState (default: active)
+            'active',              // HubIncludePersistState (default: active)
+            'SYNCBOT'              // modifiedby
         ];
         $itemCode = $newCourse[4];
         $updatedCourses[$itemCode] = $newCourse;
@@ -492,9 +498,9 @@ if ($fpTemp !== false) {
         'Color', 'Featured', 'Developer', 'EvaluationsLink', 'LearningHubPartner', 'Alchemer',
         'Topics', 'Audience', 'Levels', 'Reporting', 'PathLAN', 'PathStaging', 'PathLive',
         'PathNIK', 'CHEFSFormID', 'isMoodle', 'TaxProcessed', 'TaxProcessedBy', 'ELMCourseID',
-        'Modified', 'Platform', 'HUBInclude', 'RegistrationLink', 'CourseNameSlug', 
+        'Modified', 'Platform', 'HUBInclude', 'RegistrationLink', 'CourseNameSlug',
         'HubExpirationDate', 'OpenAccessOptin', 'HubIncludeSync', 'HubIncludePersist', 'HubPersistMessage',
-        'HubIncludePersistState'
+        'HubIncludePersistState', 'modifiedby'
     ]);
 
     if (($fpOriginal = fopen($coursesPath, 'r')) !== false) {
