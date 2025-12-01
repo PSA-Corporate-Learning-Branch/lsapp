@@ -162,7 +162,8 @@ if($_POST) {
         $openAccessOptin,
         $hubIncludeSync,
         $hubIncludePersist,
-        $hubPersistMessage
+        $hubPersistMessage,
+        LOGGED_IN_IDIR // ModifiedBy
     ];
     
     // Update courses.csv
@@ -268,7 +269,8 @@ if($_POST) {
             58 => 'HubIncludeSync',
             59 => 'HubIncludePersist',
             60 => 'HubPersistMessage',
-            61 => 'HubIncludePersistState'
+            61 => 'HubIncludePersistState',
+            62 => 'ModifiedBy'
         ];
 
         // Build diff of changes
