@@ -162,23 +162,22 @@ if($_POST) {
         $openAccessOptin,
         $hubIncludeSync,
         $hubIncludePersist,
-        $hubPersistMessage,
-        LOGGED_IN_IDIR // ModifiedBy
+        $hubPersistMessage
     ];
-    
+
     // Update courses.csv
     $f = fopen('data/courses.csv','r');
     $temp_table = fopen('data/courses-temp.csv','w');
-    
+
     // Copy headers
     $headers = fgetcsv($f);
     fputcsv($temp_table, $headers);
-    
+
     // Process rows
     $coursesteward = '';
     $coursedeveloper = '';
     $existingPersistState = 'active'; // default
-    
+
     while (($data = fgetcsv($f)) !== FALSE) {
         if($data[0] == $courseid) {
             $coursesteward = $data[10];
@@ -187,10 +186,11 @@ if($_POST) {
             if (isset($data[61])) {
                 $existingPersistState = $data[61];
             }
-            // Add persist state to course array if not already set
-            if (count($course) < 62) {
-                $course[] = $existingPersistState;
-            }
+            // Add persist state to course array (index 61)
+            $course[] = $existingPersistState;
+            // Add modifiedby to course array (index 62)
+            $course[] = LOGGED_IN_IDIR;
+
             fputcsv($temp_table, $course);
         } else {
             fputcsv($temp_table, $data);
