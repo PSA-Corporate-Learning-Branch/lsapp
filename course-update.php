@@ -115,8 +115,8 @@ if($_POST) {
         sanitize($_POST['CourseOwner'] ?? ''),
         '', // old minmax field
         sanitize($_POST['CourseNotes']),
-        sanitize($_POST['Requested']),
-        sanitize($_POST['RequestedBy']),
+        $currentCourse[13], // Requested date remains unchanged
+        $currentCourse[14], // RequestedBy remains unchanged
         sanitize($_POST['EffectiveDate']),
         sanitize($_POST['CourseDescription']),
         sanitize($_POST['CourseAbstract']),
@@ -508,8 +508,8 @@ error_log("DEBUG DISPLAY: Current dev partner IDs: " . print_r($currentDevPartne
     
     <!-- Hidden fields -->
     <input type="hidden" name="CourseID" value="<?= sanitize($deets[0]) ?>">
-    <input type="hidden" name="Requested" value="<?= sanitize($deets[13]) ?>">
-    <input type="hidden" name="RequestedBy" value="<?= sanitize($deets[14]) ?>">
+    <!-- <input type="hidden" name="Requested" value="<?= sanitize($deets[13]) ?>">
+    <input type="hidden" name="RequestedBy" value="<?= sanitize($deets[14]) ?>"> -->
     <input type="hidden" name="TaxonomyProcessed" value="<?= sanitize($deets[48]) ?>">
     <input type="hidden" name="TaxonomyProcessedBy" value="<?= sanitize($deets[49]) ?>">
     <input type="hidden" name="ProjectNumber" value="<?= sanitize($deets[24]) ?>">
