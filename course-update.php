@@ -162,7 +162,8 @@ if($_POST) {
         $openAccessOptin,
         $hubIncludeSync,
         $hubIncludePersist,
-        $hubPersistMessage
+        $hubPersistMessage,
+        LOGGED_IN_IDIR
     ];
 
     // Update courses.csv
@@ -317,7 +318,7 @@ if($_POST) {
             }
 
             $emailBody .= str_repeat("=", 80) . "\n";
-            $emailBody .= "Updated by: " . ($_SESSION['IDIR'] ?? 'Unknown') . "\n";
+            $emailBody .= "Updated by: " . LOGGED_IN_IDIR . "\n";
             $emailBody .= "Updated at: {$now}\n";
 
             // Send the email
