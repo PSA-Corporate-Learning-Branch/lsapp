@@ -236,9 +236,10 @@ $idirs = array_map(function($p) {
 		let newcount = parseInt(count);
 		newcount++;
 		let newid = 'classdate-' + newcount;	
-		let myDiv = document.getElementById(existingid);
+		// let myDiv = document.getElementById(existingid); // confirm we don't need this
 		let datecontainer = document.getElementById('datecontainer');
-		let divClone = myDiv.cloneNode(true); // the true is for deep cloning
+		let lastDiv = datecontainer.lastElementChild;
+		let divClone = lastDiv.cloneNode(true); // the true is for deep cloning
 		divClone.id = newid;
 		
 		// Update our form element ids
@@ -265,7 +266,6 @@ $idirs = array_map(function($p) {
 		toggleDedicated(newcount);
 		enableTooltips();
 		addCloseButton(newcount);
-		console.log(datecontainer.lastChild);
 	});
 
 	// Add Facilitator
@@ -335,17 +335,21 @@ $idirs = array_map(function($p) {
 
 	}
 
+	// Add close button (only for added classes)
 	function addCloseButton(count) {
 		const closeArea = document.getElementById('removeClass-' + count);
-		closeArea.innerHTML = '';
+		closeArea.innerHTML = ''; // remove cloned buttons
 		const classDate = document.getElementById('classdate-' + count);
 
 		const closeButton = document.createElement('button');
 			closeButton.className = 'btn-close position-absolute top-0 end-0';
+			closeButton.type = 'button'; // assign type attribute as button so it doesn't submit our form
 			closeButton.setAttribute('aria-label','Close');
 
 		closeButton.addEventListener('click', () => {
-			classDate.remove();
+			if (window.confirm('Are you sure you want to remove this offering?')) {
+				classDate.remove();
+			}
 		})
 
 		closeArea.appendChild(closeButton);
