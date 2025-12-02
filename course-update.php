@@ -163,6 +163,7 @@ if($_POST) {
         $hubIncludeSync,
         $hubIncludePersist,
         $hubPersistMessage,
+        sanitize($_POST['HubIncludePersistState'] ?? ''), // HubIncludePersistState
         LOGGED_IN_IDIR
     ];
 
