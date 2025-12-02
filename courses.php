@@ -113,7 +113,7 @@ foreach ($courses as $course) {
     if ($filters['delivery'] && $filters['delivery'] !== $course[21]) continue;
     if ($filters['platform'] && $filters['platform'] !== $course[52]) continue;
     if ($filters['processed'] && $course[48] == $filters['processed']) continue;
-    if ($filters['openaccess'] && !($course[57] === 'true' || $course[57] === 'on')) continue;
+    if ($filters['openaccess'] && !($course[57] === 'true' || $course[57] === 'on' || strtolower($course[57]) === 'yes')) continue;
     if ($filters['hubonly'] && strtolower($filters['hubonly']) === 'true' && strtolower($course[53]) !== 'yes') continue;
     if ($filters['moodle'] && strtolower($filters['moodle']) === 'true' && strtolower($course[47]) !== 'yes') continue;
     
