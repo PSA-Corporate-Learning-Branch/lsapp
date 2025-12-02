@@ -463,6 +463,9 @@ $currentDevPartnerIds = array_map(function($dp) { return (string)$dp[0]; }, $cur
 // error_log("DEBUG DISPLAY: Current dev partners raw: " . print_r($currentDevPartners, true));
 // error_log("DEBUG DISPLAY: Current dev partner IDs: " . print_r($currentDevPartnerIds, true));
 
+// Determine if ELM-synced fields should be locked (only for PSA Learning System courses)
+$lockELMFields = ($deets[52] === 'PSA Learning System');
+
 ?>
 <?php getHeader() ?>
 
@@ -484,6 +487,12 @@ $currentDevPartnerIds = array_map(function($dp) { return (string)$dp[0]; }, $cur
 .info-modal {
     font-size: 0.875rem;
 }
+.form-control:disabled,
+.form-select:disabled {
+    background-color: #f8f9fa;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
 </style>
 
 <?php getScripts() ?>
@@ -498,6 +507,14 @@ $currentDevPartnerIds = array_map(function($dp) { return (string)$dp[0]; }, $cur
     <h1>Update: <?= sanitize($deets[2]) ?></h1>
     <a href="course.php?courseid=<?= $courseid ?>" class="btn btn-light">Cancel</a>
 </div>
+
+<?php if ($lockELMFields): ?>
+<div class="alert alert-warning">
+    <div><strong>Active PSA Learning System course</strong></div>
+    Fields marked with <span class="text-danger fw-bold">*</span> are synchronized from PSA Learning System (ELM) and cannot be edited here.
+    Please use the <a href="/lsapp/course-change/create.php?&courseid=<?= sanitize($deets[0]) ?>" class="alert-link">course update request process</a> to update these fields in ELM.
+</div>
+<?php endif; ?>
 
 <form method="post" action="course-update.php" class="mb-3" id="courseupdateform">
     
@@ -521,9 +538,9 @@ $currentDevPartnerIds = array_map(function($dp) { return (string)$dp[0]; }, $cur
         <div class="row">
             <div class="col-md-4 mb-3">
                 <label for="LearningHubPartner" class="form-label">
-                    Learning Hub Partner
+                    Learning Hub Partner <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?>
                 </label>
-                <select name="LearningHubPartner" id="LearningHubPartner" class="form-select" required>
+                <select name="LearningHubPartner" id="LearningHubPartner" class="form-select" required <?= $lockELMFields ? 'disabled' : '' ?>>
                     <option value="" disabled <?= empty($deets[36]) ? 'selected' : '' ?>>Select one</option>
                     <?php foreach($partners as $partner): ?>
                         <option value="<?= sanitize($partner['id']) ?>" <?= ($partner['id'] == $deets[36]) ? 'selected' : '' ?>>
@@ -531,6 +548,9 @@ $currentDevPartnerIds = array_map(function($dp) { return (string)$dp[0]; }, $cur
                         </option>
                     <?php endforeach ?>
                 </select>
+                <?php if ($lockELMFields): ?>
+                <input type="hidden" name="LearningHubPartner" value="<?= sanitize($deets[36]) ?>">
+                <?php endif; ?>
             </div>
             <div class="col-md-4 mb-3">
                 <label for="Platform" class="form-label">Platform</label>
@@ -544,14 +564,17 @@ $currentDevPartnerIds = array_map(function($dp) { return (string)$dp[0]; }, $cur
                 </select>
             </div>
             <div class="col-md-4 mb-3">
-                <label for="Method" class="form-label">Delivery Method</label>
-                <select name="Method" id="Method" class="form-select" required>
+                <label for="Method" class="form-label">Delivery Method <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?></label>
+                <select name="Method" id="Method" class="form-select" required <?= $lockELMFields ? 'disabled' : '' ?>>
                     <option value="" disabled>Select one</option>
                     <?php $methods = ['eLearning','Webinar','Curated Pathway','Blended','Classroom'] ?>
                     <?php foreach($methods as $method): ?>
                         <option value="<?= $method ?>" <?= ($method == $deets[21]) ? 'selected' : '' ?>><?= $method ?></option>
                     <?php endforeach ?>
                 </select>
+                <?php if ($lockELMFields): ?>
+                <input type="hidden" name="Method" value="<?= sanitize($deets[21]) ?>">
+                <?php endif; ?>
             </div>
         </div>
         
@@ -575,8 +598,11 @@ $currentDevPartnerIds = array_map(function($dp) { return (string)$dp[0]; }, $cur
                 <input type="text" name="ItemCode" id="ItemCode" class="form-control" value="<?= sanitize($deets[4]) ?>">
             </div>
             <div class="col-md-3 mb-3">
-                <label for="ELMCourseID" class="form-label">ELM Course ID</label>
-                <input type="text" name="ELMCourseID" id="ELMCourseID" class="form-control" value="<?= sanitize($deets[50]) ?>">
+                <label for="ELMCourseID" class="form-label">ELM Course ID <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?></label>
+                <input type="text" name="ELMCourseID" id="ELMCourseID" class="form-control" value="<?= sanitize($deets[50]) ?>" <?= $lockELMFields ? 'disabled' : '' ?>>
+                <?php if ($lockELMFields): ?>
+                <input type="hidden" name="ELMCourseID" value="<?= sanitize($deets[50]) ?>">
+                <?php endif; ?>
             </div>
         </div>
         
@@ -597,9 +623,12 @@ $currentDevPartnerIds = array_map(function($dp) { return (string)$dp[0]; }, $cur
         <div class="form-section-title">Course Details</div>
         
         <div class="mb-3">
-            <label for="CourseName" class="form-label">Course Name (Long)</label>
+            <label for="CourseName" class="form-label">Course Name (Long) <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?></label>
             <small class="d-block text-muted">Max 200 characters - Full/Complete title of the course</small>
-            <input type="text" name="CourseName" id="CourseName" class="form-control" required value="<?= sanitize($deets[2]) ?>" maxlength="200">
+            <input type="text" name="CourseName" id="CourseName" class="form-control" required value="<?= sanitize($deets[2]) ?>" maxlength="200" <?= $lockELMFields ? 'disabled' : '' ?>>
+            <?php if ($lockELMFields): ?>
+            <input type="hidden" name="CourseName" value="<?= sanitize($deets[2]) ?>">
+            <?php endif; ?>
             <div class="form-text" id="cnameCharNum"></div>
         </div>
         
@@ -611,9 +640,12 @@ $currentDevPartnerIds = array_map(function($dp) { return (string)$dp[0]; }, $cur
         </div>
         
         <div class="mb-3">
-            <label for="CourseDescription" class="form-label">Course Description</label>
+            <label for="CourseDescription" class="form-label">Course Description <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?></label>
             <small class="d-block text-muted">Overall purpose in 2-3 sentences including: course duration, target learners, delivery method</small>
-            <textarea name="CourseDescription" id="CourseDescription" class="form-control" rows="5" required><?= sanitize($deets[16]) ?></textarea>
+            <textarea name="CourseDescription" id="CourseDescription" class="form-control" rows="5" required <?= $lockELMFields ? 'disabled' : '' ?>><?= sanitize($deets[16]) ?></textarea>
+            <?php if ($lockELMFields): ?>
+            <input type="hidden" name="CourseDescription" value="<?= sanitize($deets[16]) ?>">
+            <?php endif; ?>
         </div>
         
         <div class="mb-3">
@@ -630,9 +662,12 @@ $currentDevPartnerIds = array_map(function($dp) { return (string)$dp[0]; }, $cur
                 <input type="text" name="Prerequisites" id="Prerequisites" class="form-control" value="<?= sanitize($deets[18]) ?>">
             </div> -->
             <div class="col mb-3">
-                <label for="Keywords" class="form-label">Keywords</label>
+                <label for="Keywords" class="form-label">Keywords <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?></label>
                 <small class="d-block text-muted">Comma-separated search terms <span class="fw-bold">not in title/description</span></small>
-                <input type="text" name="Keywords" id="Keywords" class="form-control" value="<?= sanitize($deets[19]) ?>">
+                <input type="text" name="Keywords" id="Keywords" class="form-control" value="<?= sanitize($deets[19]) ?>" <?= $lockELMFields ? 'disabled' : '' ?>>
+                <?php if ($lockELMFields): ?>
+                <input type="hidden" name="Keywords" value="<?= sanitize($deets[19]) ?>">
+                <?php endif; ?>
             </div>
         </div>
         
@@ -647,33 +682,42 @@ $currentDevPartnerIds = array_map(function($dp) { return (string)$dp[0]; }, $cur
         <div class="form-section-title">Taxonomies</div>
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label for="Topics" class="form-label">Topic</label>
-                <select name="Topics" id="Topics" class="form-select" required>
+                <label for="Topics" class="form-label">Topic <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?></label>
+                <select name="Topics" id="Topics" class="form-select" required <?= $lockELMFields ? 'disabled' : '' ?>>
                     <option value="" disabled <?= empty($deets[38]) ? 'selected' : '' ?>>Select one</option>
                     <?php foreach($topics as $t): ?>
                         <option value="<?= $t ?>" <?= ($deets[38] == $t) ? 'selected' : '' ?>><?= $t ?></option>
                     <?php endforeach ?>
                 </select>
+                <?php if ($lockELMFields): ?>
+                <input type="hidden" name="Topics" value="<?= sanitize($deets[38]) ?>">
+                <?php endif; ?>
             </div>
             <div class="col-md-6 mb-3">
-                <label for="Audience" class="form-label">Audience</label>
-                <select name="Audience" id="Audience" class="form-select" required>
+                <label for="Audience" class="form-label">Audience <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?></label>
+                <select name="Audience" id="Audience" class="form-select" required <?= $lockELMFields ? 'disabled' : '' ?>>
                     <option value="" disabled <?= empty($deets[39]) ? 'selected' : '' ?>>Select one</option>
                     <?php foreach($audience as $a): ?>
                         <option value="<?= $a ?>" <?= ($deets[39] == $a) ? 'selected' : '' ?>><?= $a ?></option>
                     <?php endforeach ?>
                 </select>
+                <?php if ($lockELMFields): ?>
+                <input type="hidden" name="Audience" value="<?= sanitize($deets[39]) ?>">
+                <?php endif; ?>
             </div>
         </div>
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label for="Levels" class="form-label">Group</label>
-                <select name="Levels" id="Levels" class="form-select">
+                <label for="Levels" class="form-label">Group <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?></label>
+                <select name="Levels" id="Levels" class="form-select" <?= $lockELMFields ? 'disabled' : '' ?>>
                     <option value="" disabled <?= empty($deets[40]) ? 'selected' : '' ?>>Select one</option>
                     <?php foreach($levels as $l): ?>
                         <option value="<?= $l ?>" <?= ($deets[40] == $l) ? 'selected' : '' ?>><?= $l ?></option>
                     <?php endforeach ?>
                 </select>
+                <?php if ($lockELMFields): ?>
+                <input type="hidden" name="Levels" value="<?= sanitize($deets[40]) ?>">
+                <?php endif; ?>
             </div>
             <div class="col-md-6 mb-3">
                 <label for="Reporting" class="form-label">Evaluation</label>
