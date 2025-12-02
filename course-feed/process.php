@@ -192,6 +192,10 @@ function convertDeliveryMethod($method) {
     if (stripos($method, 'Webinar') !== false) {
         $method = 'Webinar';
     }
+    // Handle 'Blended Method' specifically
+    if (stripos($method, 'Blended Format') !== false) {
+        $method = 'Blended';
+    }
     return $method;
 }
 

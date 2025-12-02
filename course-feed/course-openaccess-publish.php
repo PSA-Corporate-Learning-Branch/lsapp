@@ -62,7 +62,7 @@ $expectedCode = $accessCodeData[0]['code'] ?? '';
 
 // Process each course from the preloaded array
 foreach ($allCourses as $courseid => $course) {
-    if (isset($course[57]) && (strtolower(trim($course[57])) === 'true' || strtolower(trim($course[57])) === 'on')) {
+    if (isset($course[57]) && (strtolower(trim($course[57])) === 'true' || strtolower(trim($course[57])) === 'on' || strtolower(trim($course[57])) === 'yes')) {
         // Course details are already in $course variable, no need to fetch again
 
         // Extract required course details
