@@ -163,6 +163,7 @@ if($_POST) {
         $hubIncludeSync,
         $hubIncludePersist,
         $hubPersistMessage,
+        sanitize($_POST['HubIncludePersistState'] ?? ''), // HubIncludePersistState
         LOGGED_IN_IDIR
     ];
 
@@ -328,7 +329,7 @@ if($_POST) {
                 $emailBody
             );
 
-            error_log("Course update notification sent successfully for course ID: {$courseid}");
+            //error_log("Course update notification sent successfully for course ID: {$courseid}");
         }
     } catch (Exception $e) {
         error_log("CHES Email Exception on course update: " . $e->getMessage());
@@ -387,16 +388,16 @@ if($_POST) {
 
         // Add new relationships for this course
         if (!empty($_POST['DevelopmentPartners']) && is_array($_POST['DevelopmentPartners'])) {
-            error_log("DEBUG: DevelopmentPartners POST data: " . print_r($_POST['DevelopmentPartners'], true));
-            error_log("DEBUG: Course ID: " . $courseid);
+            //error_log("DEBUG: DevelopmentPartners POST data: " . print_r($_POST['DevelopmentPartners'], true));
+            //error_log("DEBUG: Course ID: " . $courseid);
             foreach ($_POST['DevelopmentPartners'] as $partnerId) {
                 $maxId++;
                 $relationship = [$maxId, $courseid, sanitize($partnerId)];
-                error_log("DEBUG: Writing relationship: " . print_r($relationship, true));
+                //error_log("DEBUG: Writing relationship: " . print_r($relationship, true));
                 fputcsv($output, $relationship);
             }
         } else {
-            error_log("DEBUG: No DevelopmentPartners in POST or not an array. POST keys: " . print_r(array_keys($_POST), true));
+            //error_log("DEBUG: No DevelopmentPartners in POST or not an array. POST keys: " . print_r(array_keys($_POST), true));
         }
 
         fclose($output);
@@ -465,9 +466,9 @@ if (file_exists($devPartnersFile)) {
 // Get current development partners for this course
 $currentDevPartners = getDevPartnersByCourseID($courseid);
 $currentDevPartnerIds = array_map(function($dp) { return (string)$dp[0]; }, $currentDevPartners);
-error_log("DEBUG DISPLAY: Course ID: " . $courseid);
-error_log("DEBUG DISPLAY: Current dev partners raw: " . print_r($currentDevPartners, true));
-error_log("DEBUG DISPLAY: Current dev partner IDs: " . print_r($currentDevPartnerIds, true));
+// error_log("DEBUG DISPLAY: Course ID: " . $courseid);
+// error_log("DEBUG DISPLAY: Current dev partners raw: " . print_r($currentDevPartners, true));
+// error_log("DEBUG DISPLAY: Current dev partner IDs: " . print_r($currentDevPartnerIds, true));
 
 ?>
 <?php getHeader() ?>
