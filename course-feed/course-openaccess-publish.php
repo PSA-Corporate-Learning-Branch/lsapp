@@ -169,10 +169,15 @@ foreach ($allCourses as $courseid => $course) {
         } 
         ?>" . PHP_EOL;
 
+        $preWorkSection = '';
+        if (!empty($preWork)) {
+            $preWorkSection = "<div><a class=\"btn btn-lg btn-secondary\" href=\"$preWork\" target=\"_blank\" rel=\"noopener\">Pre-work Link</a></div>";
+        }
+
         $pageContent .= $headerContent . "
         <h1>$title</h1>
         <p>$description</p>
-        <div><a class=\"btn btn-lg btn-secondary\" href=\"$preWork\" target=\"_blank\" rel=\"noopener\">Pre-work Link</a></div>
+        $preWorkSection
         <p>$nextOffering</p>
         " . $footerContent;
 
