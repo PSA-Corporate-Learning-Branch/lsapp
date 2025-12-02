@@ -31,6 +31,8 @@ $idirs = array_map(function($p) {
 	<input type="hidden" id="CourseCode" name="CourseCode" value="<?= $course[0] ?>">
 	<div id="datecontainer">
 		<div class="row my-3 p-3 bg-light-subtle border rounded-3 shadow-sm" id="classdate-1">
+			<div class="row mb-1 position-relative">
+			<div id="removeClass-1" class="d-inline "></div>
 			<!-- Dedicated -->
 			<div class="col-lg-3">
 				<div class="form-check">
@@ -38,6 +40,8 @@ $idirs = array_map(function($p) {
 					<input class="form-check-input" id="Dedicated-1" type="checkbox" name="Dedicated[]" value="Dedicated">
 				</div>
 			</div>
+			
+			</div> <!-- /row-->
 			<div class="row mb-1">
 			<!-- Start Date -->
 			<div class="col-lg-3">
@@ -246,7 +250,6 @@ $idirs = array_map(function($p) {
 
 		// Update our form labels using the same approach
 		divClone.querySelectorAll('label').forEach(element => {
-			console.log(element);
 			element.htmlFor = element.htmlFor.split('-')[0] + '-' + newcount;
 		})		
 
@@ -261,6 +264,8 @@ $idirs = array_map(function($p) {
 		AddFacilitation(newcount);
 		toggleDedicated(newcount);
 		enableTooltips();
+		addCloseButton(newcount);
+		console.log(datecontainer.lastChild);
 	});
 
 	// Add Facilitator
@@ -328,6 +333,22 @@ $idirs = array_map(function($p) {
 			}
 		})
 
+	}
+
+	function addCloseButton(count) {
+		const closeArea = document.getElementById('removeClass-' + count);
+		closeArea.innerHTML = '';
+		const classDate = document.getElementById('classdate-' + count);
+
+		const closeButton = document.createElement('button');
+			closeButton.className = 'btn-close position-absolute top-0 end-0';
+			closeButton.setAttribute('aria-label','Close');
+
+		closeButton.addEventListener('click', () => {
+			classDate.remove();
+		})
+
+		closeArea.appendChild(closeButton);
 	}
 	
 	// enables our tooltips
