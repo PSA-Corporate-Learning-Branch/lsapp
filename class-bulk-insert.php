@@ -32,42 +32,47 @@ $idirs = array_map(function($p) {
 	<div id="datecontainer">
 		<div class="row my-3 p-3 bg-light-subtle border rounded-3 shadow-sm" id="classdate-1">
 			<!-- Dedicated -->
-			<div class="col-md-3">
+			<div class="col-lg-3">
 				<div class="form-check">
 					<label for="Dedicated-1" class="form-check-label">Dedicated</label>
 					<input class="form-check-input" id="Dedicated-1" type="checkbox" name="Dedicated[]" value="Dedicated">
 				</div>
 			</div>
+			<div class="row mb-1">
 			<!-- Start Date -->
 			<div class="col-lg-3">
-				<label for="sd-1" class="form-label sessionlabel">Start Date</label>
+				<label for="sd-1" class="form-label sessionlabel mb-0">Start Date</label>
 				<input class="form-control" id="sd-1" type="date" name="StartDate[]" value="<?= date('Y-m-d') ?>">
 			</div>
 			<!-- Start / End Times -->
+			<?php if($course[21] !== 'eLearning' && $course[21] !== 'Curated Pathway'): ?>
 			<div class="col-lg-3">
-				<label for="st-1" class="form-label">Start time</label>
+				<label for="st-1" class="form-label mb-0">Start time</label>
 				<input class="form-control" id="st-1" type="time" name="StartTime[]" value="<?= $course[30] ?>" step="900">
 			</div>
 			<div class="col-lg-3">
-				<label for="et-1" class="form-label">End time</label>
+				<label for="et-1" class="form-label mb-0">End time</label>
 				<input class="form-control" id="et-1" type="time" name="EndTime[]" value="<?= $course[31] ?>" step="900">
 			</div>
+			<?php endif; ?>
+			</div> <!-- row -->
+			<div class="row mb-1">
 			<!-- Min / Max -->
 			<?php if($course[21] !== 'eLearning' && $course[21] !== 'Curated Pathway'): ?>
-				<div class="col-md-2">
-					<label for="MinEnroll-1" class="form-label">Min</label>
+				<div class="col-lg-2">
+					<label for="MinEnroll-1" class="form-label mb-0">Min</label>
 					<input class="form-control" id="MinEnroll-1" type="number" name="MinEnroll[]" value="<?= $course[28] ?>" >
 				</div>
-				<div class="col-md-2">
-					<label for="MaxEnroll-1" class="form-label">Max</label>
+				<div class="col-lg-2">
+					<label for="MaxEnroll-1" class="form-label mb-0">Max</label>
 					<input class="form-control" id="MaxEnroll-1" type="number" name="MaxEnroll[]" value="<?= $course[29] ?>" >
 				</div>
-			<?php endif ?>
+			<?php endif; ?>
 			<!-- Webinar / eLearning Link -->
 			<?php if($course[21] !== 'Classroom'): ?>
 				<div class="col-md-6">
-					<label for="WebinarLink-1" class="form-label"><?= $course[21] == 'Blended' ? 'Webinar' : $course[21] ?> Link</label>
-					<a href="#" class="link-secondary" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="<small>Please enter a valid url.<br>Alternatively, leave the field blank.</small>">
+					<label for="WebinarLink-1" class="form-label mb-0"><?= str_starts_with($course[21], 'Blended') ? 'Webinar' : $course[21] ?> Link</label>
+					<a href="#" class="link-secondary" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="<small>Please enter a valid url.<br>Alternatively, you can leave the field blank.</small>">
 						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
 							<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
 							<path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
@@ -75,8 +80,8 @@ $idirs = array_map(function($p) {
 					</a>
 					<input class="form-control WebinarLink" id="WebinarLink-1" type="url" name="WebinarLink[]" value="">
 				</div>
-			<?php endif ?>
-			<?php if($course[21] == 'Classroom'): ?>
+			<?php endif; ?>
+			<?php if($course[21] == 'Classroom' || str_starts_with($course[21], 'Blended')): ?>
 				<div class="col-md-6">
 					<label for="VenueCity-1" class="form-label">City</label>
 					<select name="VenueCity[]" id="VenueCity-1" class="form-select mb-0" >
@@ -117,15 +122,18 @@ $idirs = array_map(function($p) {
 					</select>
 				</div>
 			<?php endif ?>
-			<div class="col-md-6">
-				<label for="AddFacilitating-1" class="form-label">Facilitating</label>
+			</div> <!-- /row --> 
+			<!-- Facilitating -->
+			<div class="row mx-0 mb-1">
+			<div class="col px-0">
+				<label for="AddFacilitating-1" class="form-label mb-0">Facilitating</label>
 				<a href="#" class="link-secondary" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="<small>Enter or search facilitator from the dropdown, then select Add.<br>Add facilitators one at a time.</small>">
 					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
   						<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
   						<path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
 					</svg>
 				</a>
-				<div class="input-group">
+				<div class="input-group mb-1">
 					<input class="form-control" list="people-list" id="AddFacilitating-1" name="AddFacilitating[]" value="">
 					<button id="AddButton-1" type="button" class="btn btn-secondary">Add</button>
 				</div>
@@ -137,10 +145,12 @@ $idirs = array_map(function($p) {
 				<input type="hidden" id="Facilitating-1" name="Facilitating[]" value="">
 				<div id="BadgeContainer-1"></div>
 			</div>
-			<div class="col-md-6">
-				<label for="RequestNotes-1" class="form-label">Notes</label>
+			<!-- Notes --> 
+			<div class="col">
+				<label for="RequestNotes-1" class="form-label mb-0">Notes</label>
 				<textarea class="form-control RequestNotes" id="RequestNotes-1" name="RequestNotes[]" value=""></textarea>
 			</div>
+			</div> <!-- /row -->
 		</div>
 	</div>
 	<div class="my-3 d-flex justify-content-center">
@@ -297,7 +307,7 @@ $idirs = array_map(function($p) {
 				facilitating.value = selectedValues.join(',');
 
 				const badge = document.createElement('span');
-				badge.className = 'badge text-bg-secondary m-1';
+				badge.className = 'badge text-bg-secondary me-1';
 				badge.textContent = value;
 
 				const removeBtn = document.createElement('button');
