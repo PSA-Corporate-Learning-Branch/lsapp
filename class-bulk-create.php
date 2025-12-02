@@ -15,7 +15,9 @@ $allclasses = [];
 foreach($dates as $date) {
 	
 	$classid = date('YmdHis') . '-' . $count;
-	$combinedtimes = h($_POST['StartTime'][$count]) . ' - ' . h($_POST['EndTime'][$count]);	
+	$starttime = h($_POST['StartTime'][$count] ?? '08:30');
+	$endtime = h($_POST['EndTime'][$count] ?? '16:30');
+	$combinedtimes = $starttime . ' - ' . $endtime;	
 	$status = 'Requested';
 	
 	// EndDate calculation
@@ -103,8 +105,8 @@ foreach($dates as $date) {
 				'', // avAssigned
 				0, // venueCost
 				'', // venueBEO
-				h($_POST['StartTime'][$count]), // StartTime
-				h($_POST['EndTime'][$count]), // EndTime
+				$starttime, // StartTime
+				$endtime, // EndTime
 				$course[32], // CourseColor,
 				'', // EvaluationsSent
 				'' // EvaluationsLink
