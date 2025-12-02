@@ -178,21 +178,14 @@ if($_POST) {
     // Process rows
     $coursesteward = '';
     $coursedeveloper = '';
-    $existingPersistState = 'active'; // default
 
     while (($data = fgetcsv($f)) !== FALSE) {
         if($data[0] == $courseid) {
             $coursesteward = $data[10];
             $coursedeveloper = $data[34];
-            // Preserve existing HubIncludePersistState if it exists
-            if (isset($data[61])) {
-                $existingPersistState = $data[61];
-            }
-            // Add persist state to course array (index 61)
-            $course[] = $existingPersistState;
-            // Add modifiedby to course array (index 62)
-            $course[] = LOGGED_IN_IDIR;
 
+            // Note: $course array already has all 63 fields (indices 0-62) including
+            // HubIncludePersistState and modifiedby, so we just write it directly
             fputcsv($temp_table, $course);
         } else {
             fputcsv($temp_table, $data);
