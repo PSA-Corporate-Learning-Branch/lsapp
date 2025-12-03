@@ -512,7 +512,7 @@ if($in > 0 && $per > 0) {
 <?php endif ?>
 
 
-<div class="p-3 bg-light-subtle rounded-3">
+<div class="p-3 my-3 bg-light-subtle rounded-3">
 	Created on <?= h($deets[2]) ?> by
 	<a href="/lsapp/person.php?idir=<?= h($deets[3]) ?>"><?= h($deets[3]) ?></a><br>
 	Last modified on <?= h($deets[42]) ?> by 
@@ -784,7 +784,7 @@ $completedreqs = [];
 <div class="col-md-6">
 	<h2>Class Not Found</h2>
 	<p>Must be playin' hooky ;)</p>
-	<p>Email the Learning Support Admin Team <<a href="mailto:learning.centre.admin@gov.bc.ca">learning.centre.admin@gov.bc.ca</a>> with any questions or concerns.</p>
+	<p>Email the Learning Support Admin Team <<a href="mailto:Corporatelearning.admin@gov.bc.ca">Corporatelearning.admin@gov.bc.ca</a>> with any questions or concerns.</p>
 	<p><img src="img/TrollFace.jpg" width="300px"></p>
 </div>	
 <?php endif ?>
