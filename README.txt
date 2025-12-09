@@ -109,7 +109,8 @@ Prerequisites,Keywords,Category,Method,elearning,WeShip,ProjectNumber,Responsibi
 //42-PathLAN,43-PathStaging,44-PathLive,45-PathNIK,46-CHEFSFormID
 // 47-isMoodle,48-TaxProcessed,49-TaxProcessedBy,50-ELMCourseID,51-Modified
 // 52-Platform, 53-HUBInclude, 54-RegistrationLink, 55-CourseNameSlug, 56-HubExpirationDate, 57-OpenAccessOptin
-// 58-HubIncludeSync, 59-HubIncludePersist, 60-HubPersistMessage
+// 58-HubIncludeSync, 59-HubIncludePersist, 60-HubPersistMessage, 61-HubIncludePersistState
+// 62-ModifiedBy
 
 
 

@@ -1,7 +1,8 @@
-<?php 
+<?php
 ob_start();
 require('inc/lsapp.php');
 require('inc/Parsedown.php');
+require('inc/ches_client.php');
 $Parsedown = new Parsedown();
 opcache_reset();
 
@@ -114,8 +115,8 @@ if($_POST) {
         sanitize($_POST['CourseOwner'] ?? ''),
         '', // old minmax field
         sanitize($_POST['CourseNotes']),
-        sanitize($_POST['Requested']),
-        sanitize($_POST['RequestedBy']),
+        $currentCourse[13], // Requested date remains unchanged
+        $currentCourse[14], // RequestedBy remains unchanged
         sanitize($_POST['EffectiveDate']),
         sanitize($_POST['CourseDescription']),
         sanitize($_POST['CourseAbstract']),
@@ -161,34 +162,30 @@ if($_POST) {
         $openAccessOptin,
         $hubIncludeSync,
         $hubIncludePersist,
-        $hubPersistMessage
+        $hubPersistMessage,
+        sanitize($_POST['HubIncludePersistState'] ?? ''), // HubIncludePersistState
+        LOGGED_IN_IDIR
     ];
-    
+
     // Update courses.csv
     $f = fopen('data/courses.csv','r');
     $temp_table = fopen('data/courses-temp.csv','w');
-    
+
     // Copy headers
     $headers = fgetcsv($f);
     fputcsv($temp_table, $headers);
-    
+
     // Process rows
     $coursesteward = '';
     $coursedeveloper = '';
-    $existingPersistState = 'active'; // default
-    
+
     while (($data = fgetcsv($f)) !== FALSE) {
         if($data[0] == $courseid) {
             $coursesteward = $data[10];
             $coursedeveloper = $data[34];
-            // Preserve existing HubIncludePersistState if it exists
-            if (isset($data[61])) {
-                $existingPersistState = $data[61];
-            }
-            // Add persist state to course array if not already set
-            if (count($course) < 62) {
-                $course[] = $existingPersistState;
-            }
+
+            // Note: $course array already has all 63 fields (indices 0-62) including
+            // HubIncludePersistState and modifiedby, so we just write it directly
             fputcsv($temp_table, $course);
         } else {
             fputcsv($temp_table, $data);
@@ -199,7 +196,138 @@ if($_POST) {
     fclose($temp_table);
     
     rename('data/courses-temp.csv', 'data/courses.csv');
-    
+
+    // Send email notification for course update
+    try {
+        $chesClient = new CHESClient();
+
+        // Field names mapping for better readability in email
+        $fieldNames = [
+            0 => 'CourseID',
+            1 => 'Status',
+            2 => 'CourseName',
+            3 => 'CourseShort',
+            4 => 'ItemCode',
+            5 => 'ClassTimes',
+            6 => 'ClassDays',
+            7 => 'ELM Link',
+            8 => 'PreWork',
+            9 => 'PostWork',
+            10 => 'CourseOwner',
+            11 => 'MinMax (legacy)',
+            12 => 'CourseNotes',
+            13 => 'Requested',
+            14 => 'RequestedBy',
+            15 => 'EffectiveDate',
+            16 => 'CourseDescription',
+            17 => 'CourseAbstract',
+            18 => 'Prerequisites',
+            19 => 'Keywords',
+            20 => 'Category (legacy)',
+            21 => 'Method',
+            22 => 'eLearning URL',
+            23 => 'WeShip',
+            24 => 'ProjectNumber',
+            25 => 'Responsibility',
+            26 => 'ServiceLine',
+            27 => 'STOB',
+            28 => 'MinEnroll',
+            29 => 'MaxEnroll',
+            30 => 'StartTime',
+            31 => 'EndTime',
+            32 => 'CourseColor',
+            33 => 'Featured',
+            34 => 'Developer',
+            35 => 'EvaluationsLink',
+            36 => 'LearningHubPartner',
+            37 => 'Alchemer',
+            38 => 'Topics',
+            39 => 'Audience',
+            40 => 'Levels',
+            41 => 'Reporting',
+            42 => 'PathLAN',
+            43 => 'PathStaging',
+            44 => 'PathLive',
+            45 => 'PathNIK',
+            46 => 'CHEFSFormID',
+            47 => 'isMoodle',
+            48 => 'TaxonomyProcessed',
+            49 => 'TaxonomyProcessedBy',
+            50 => 'ELMCourseID',
+            51 => 'LastModified',
+            52 => 'Platform',
+            53 => 'HUBInclude',
+            54 => 'RegistrationLink',
+            55 => 'Slug',
+            56 => 'HubExpirationDate',
+            57 => 'OpenAccessOptin',
+            58 => 'HubIncludeSync',
+            59 => 'HubIncludePersist',
+            60 => 'HubPersistMessage',
+            61 => 'HubIncludePersistState',
+            62 => 'ModifiedBy'
+        ];
+
+        // Build diff of changes
+        $changes = [];
+        $maxFields = max(count($currentCourse), count($course));
+
+        for ($i = 0; $i < $maxFields; $i++) {
+            // Skip LastModified field as it always changes
+            if ($i === 51) continue;
+
+            $oldValue = isset($currentCourse[$i]) ? $currentCourse[$i] : '';
+            $newValue = isset($course[$i]) ? $course[$i] : '';
+
+            // Only include if values are different
+            if ($oldValue !== $newValue) {
+                $fieldName = isset($fieldNames[$i]) ? $fieldNames[$i] : "Field $i";
+                $changes[] = [
+                    'field' => $fieldName,
+                    'old' => $oldValue,
+                    'new' => $newValue
+                ];
+            }
+        }
+
+        // Only send email if there are actual changes
+        if (!empty($changes)) {
+            $emailBody = "Course Updated: " . sanitize($course[2]) . "\n";
+            $emailBody .= "Course ID: {$courseid}\n\n";
+
+            // Get the base URL for linking to the course
+            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+            $host = $_SERVER['HTTP_HOST'];
+            $courseLink = $protocol . $host . "/lsapp/course.php?courseid={$courseid}";
+
+            $emailBody .= "View Course: {$courseLink}\n\n";
+            $emailBody .= "Changes Made:\n";
+            $emailBody .= str_repeat("=", 80) . "\n\n";
+
+            foreach ($changes as $change) {
+                $emailBody .= "{$change['field']}:\n";
+                $emailBody .= "  OLD: " . (empty($change['old']) ? '(empty)' : $change['old']) . "\n";
+                $emailBody .= "  NEW: " . (empty($change['new']) ? '(empty)' : $change['new']) . "\n";
+                $emailBody .= "\n";
+            }
+
+            $emailBody .= str_repeat("=", 80) . "\n";
+            $emailBody .= "Updated by: " . LOGGED_IN_IDIR . "\n";
+            $emailBody .= "Updated at: {$now}\n";
+
+            // Send the email
+            $emailResult = $chesClient->sendEmail(
+                ['allan.haggett@gov.bc.ca'],
+                "Course Updated: " . sanitize($course[2]),
+                $emailBody
+            );
+
+            //error_log("Course update notification sent successfully for course ID: {$courseid}");
+        }
+    } catch (Exception $e) {
+        error_log("CHES Email Exception on course update: " . $e->getMessage());
+    }
+
     // Update course-people.csv if steward or developer changed
     $peoplefp = fopen('data/course-people.csv', 'a+');
     
@@ -214,7 +342,63 @@ if($_POST) {
     }
     
     fclose($peoplefp);
-    
+
+    // Update development partner relationships
+    $devPartnerFile = 'data/courses-devpartners.csv';
+    $devPartnerTempFile = 'data/courses-devpartners-temp.csv';
+
+    // Read existing file and remove relationships for this course
+    $maxId = 0;
+    $existingRows = [];
+
+    if (file_exists($devPartnerFile)) {
+        $input = fopen($devPartnerFile, 'r');
+        if ($input !== false) {
+            fgetcsv($input); // Skip header
+            while (($row = fgetcsv($input)) !== false) {
+                if (!empty($row[0]) && is_numeric($row[0])) {
+                    $maxId = max($maxId, (int)$row[0]);
+                }
+                // Keep rows that don't belong to this course
+                if ($row[1] != $courseid) {
+                    $existingRows[] = $row;
+                }
+            }
+            fclose($input);
+        }
+    }
+
+    // Write updated file
+    $output = fopen($devPartnerTempFile, 'w');
+    if ($output !== false) {
+        // Write header
+        fputcsv($output, ['id', 'course_id', 'development_partner_id']);
+
+        // Write existing rows (excluding this course)
+        foreach ($existingRows as $row) {
+            fputcsv($output, $row);
+        }
+
+        // Add new relationships for this course
+        if (!empty($_POST['DevelopmentPartners']) && is_array($_POST['DevelopmentPartners'])) {
+            //error_log("DEBUG: DevelopmentPartners POST data: " . print_r($_POST['DevelopmentPartners'], true));
+            //error_log("DEBUG: Course ID: " . $courseid);
+            foreach ($_POST['DevelopmentPartners'] as $partnerId) {
+                $maxId++;
+                $relationship = [$maxId, $courseid, sanitize($partnerId)];
+                //error_log("DEBUG: Writing relationship: " . print_r($relationship, true));
+                fputcsv($output, $relationship);
+            }
+        } else {
+            //error_log("DEBUG: No DevelopmentPartners in POST or not an array. POST keys: " . print_r(array_keys($_POST), true));
+        }
+
+        fclose($output);
+
+        // Replace original file
+        rename($devPartnerTempFile, $devPartnerFile);
+    }
+
     // Check if this is from partner portal
     if (!empty($_POST['partner_redirect'])) {
         // Redirect back to partner portal dashboard
@@ -252,6 +436,36 @@ $deliverymethods = getDeliveryMethods();
 $levels = getLevels();
 $reportinglist = getReportingList();
 
+// Load development partners
+$devPartnersFile = 'data/development-partners.csv';
+$devPartners = [];
+if (file_exists($devPartnersFile)) {
+    $data = array_map('str_getcsv', file($devPartnersFile));
+    array_shift($data); // Remove header
+    foreach ($data as $row) {
+        if (!empty($row[0]) && ($row[1] ?? '') === 'active') {
+            $devPartners[] = [
+                'id' => $row[0],
+                'name' => $row[3] ?? ''
+            ];
+        }
+    }
+    // Sort by name
+    usort($devPartners, function($a, $b) {
+        return strcasecmp($a['name'], $b['name']);
+    });
+}
+
+// Get current development partners for this course
+$currentDevPartners = getDevPartnersByCourseID($courseid);
+$currentDevPartnerIds = array_map(function($dp) { return (string)$dp[0]; }, $currentDevPartners);
+// error_log("DEBUG DISPLAY: Course ID: " . $courseid);
+// error_log("DEBUG DISPLAY: Current dev partners raw: " . print_r($currentDevPartners, true));
+// error_log("DEBUG DISPLAY: Current dev partner IDs: " . print_r($currentDevPartnerIds, true));
+
+// Determine if ELM-synced fields should be locked (only for PSA Learning System courses)
+$lockELMFields = ($deets[52] === 'PSA Learning System');
+
 ?>
 <?php getHeader() ?>
 
@@ -273,6 +487,12 @@ $reportinglist = getReportingList();
 .info-modal {
     font-size: 0.875rem;
 }
+.form-control:disabled,
+.form-select:disabled {
+    background-color: #f8f9fa;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
 </style>
 
 <?php getScripts() ?>
@@ -288,12 +508,20 @@ $reportinglist = getReportingList();
     <a href="course.php?courseid=<?= $courseid ?>" class="btn btn-light">Cancel</a>
 </div>
 
+<?php if ($lockELMFields): ?>
+<div class="alert alert-warning">
+    <div><strong>Active PSA Learning System course</strong></div>
+    Fields marked with <span class="text-danger fw-bold">*</span> are synchronized from PSA Learning System (ELM) and cannot be edited here.
+    Please use the <a href="/lsapp/course-change/create.php?&courseid=<?= sanitize($deets[0]) ?>" class="alert-link">course update request process</a> to update these fields in ELM.
+</div>
+<?php endif; ?>
+
 <form method="post" action="course-update.php" class="mb-3" id="courseupdateform">
     
     <!-- Hidden fields -->
     <input type="hidden" name="CourseID" value="<?= sanitize($deets[0]) ?>">
-    <input type="hidden" name="Requested" value="<?= sanitize($deets[13]) ?>">
-    <input type="hidden" name="RequestedBy" value="<?= sanitize($deets[14]) ?>">
+    <!-- <input type="hidden" name="Requested" value="<?= sanitize($deets[13]) ?>">
+    <input type="hidden" name="RequestedBy" value="<?= sanitize($deets[14]) ?>"> -->
     <input type="hidden" name="TaxonomyProcessed" value="<?= sanitize($deets[48]) ?>">
     <input type="hidden" name="TaxonomyProcessedBy" value="<?= sanitize($deets[49]) ?>">
     <input type="hidden" name="ProjectNumber" value="<?= sanitize($deets[24]) ?>">
@@ -310,9 +538,9 @@ $reportinglist = getReportingList();
         <div class="row">
             <div class="col-md-4 mb-3">
                 <label for="LearningHubPartner" class="form-label">
-                    Learning Hub Partner
+                    Learning Hub Partner <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?>
                 </label>
-                <select name="LearningHubPartner" id="LearningHubPartner" class="form-select" required>
+                <select name="LearningHubPartner" id="LearningHubPartner" class="form-select" required <?= $lockELMFields ? 'disabled' : '' ?>>
                     <option value="" disabled <?= empty($deets[36]) ? 'selected' : '' ?>>Select one</option>
                     <?php foreach($partners as $partner): ?>
                         <option value="<?= sanitize($partner['id']) ?>" <?= ($partner['id'] == $deets[36]) ? 'selected' : '' ?>>
@@ -320,6 +548,9 @@ $reportinglist = getReportingList();
                         </option>
                     <?php endforeach ?>
                 </select>
+                <?php if ($lockELMFields): ?>
+                <input type="hidden" name="LearningHubPartner" value="<?= sanitize($deets[36]) ?>">
+                <?php endif; ?>
             </div>
             <div class="col-md-4 mb-3">
                 <label for="Platform" class="form-label">Platform</label>
@@ -333,14 +564,17 @@ $reportinglist = getReportingList();
                 </select>
             </div>
             <div class="col-md-4 mb-3">
-                <label for="Method" class="form-label">Delivery Method</label>
-                <select name="Method" id="Method" class="form-select" required>
+                <label for="Method" class="form-label">Delivery Method <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?></label>
+                <select name="Method" id="Method" class="form-select" required <?= $lockELMFields ? 'disabled' : '' ?>>
                     <option value="" disabled>Select one</option>
                     <?php $methods = ['eLearning','Webinar','Curated Pathway','Blended','Classroom'] ?>
                     <?php foreach($methods as $method): ?>
                         <option value="<?= $method ?>" <?= ($method == $deets[21]) ? 'selected' : '' ?>><?= $method ?></option>
                     <?php endforeach ?>
                 </select>
+                <?php if ($lockELMFields): ?>
+                <input type="hidden" name="Method" value="<?= sanitize($deets[21]) ?>">
+                <?php endif; ?>
             </div>
         </div>
         
@@ -364,8 +598,11 @@ $reportinglist = getReportingList();
                 <input type="text" name="ItemCode" id="ItemCode" class="form-control" value="<?= sanitize($deets[4]) ?>">
             </div>
             <div class="col-md-3 mb-3">
-                <label for="ELMCourseID" class="form-label">ELM Course ID</label>
-                <input type="text" name="ELMCourseID" id="ELMCourseID" class="form-control" value="<?= sanitize($deets[50]) ?>">
+                <label for="ELMCourseID" class="form-label">ELM Course ID <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?></label>
+                <input type="text" name="ELMCourseID" id="ELMCourseID" class="form-control" value="<?= sanitize($deets[50]) ?>" <?= $lockELMFields ? 'disabled' : '' ?>>
+                <?php if ($lockELMFields): ?>
+                <input type="hidden" name="ELMCourseID" value="<?= sanitize($deets[50]) ?>">
+                <?php endif; ?>
             </div>
         </div>
         
@@ -386,9 +623,12 @@ $reportinglist = getReportingList();
         <div class="form-section-title">Course Details</div>
         
         <div class="mb-3">
-            <label for="CourseName" class="form-label">Course Name (Long)</label>
+            <label for="CourseName" class="form-label">Course Name (Long) <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?></label>
             <small class="d-block text-muted">Max 200 characters - Full/Complete title of the course</small>
-            <input type="text" name="CourseName" id="CourseName" class="form-control" required value="<?= sanitize($deets[2]) ?>" maxlength="200">
+            <input type="text" name="CourseName" id="CourseName" class="form-control" required value="<?= sanitize($deets[2]) ?>" maxlength="200" <?= $lockELMFields ? 'disabled' : '' ?>>
+            <?php if ($lockELMFields): ?>
+            <input type="hidden" name="CourseName" value="<?= sanitize($deets[2]) ?>">
+            <?php endif; ?>
             <div class="form-text" id="cnameCharNum"></div>
         </div>
         
@@ -400,9 +640,12 @@ $reportinglist = getReportingList();
         </div>
         
         <div class="mb-3">
-            <label for="CourseDescription" class="form-label">Course Description</label>
+            <label for="CourseDescription" class="form-label">Course Description <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?></label>
             <small class="d-block text-muted">Overall purpose in 2-3 sentences including: course duration, target learners, delivery method</small>
-            <textarea name="CourseDescription" id="CourseDescription" class="form-control" rows="5" required><?= sanitize($deets[16]) ?></textarea>
+            <textarea name="CourseDescription" id="CourseDescription" class="form-control" rows="5" required <?= $lockELMFields ? 'disabled' : '' ?>><?= sanitize($deets[16]) ?></textarea>
+            <?php if ($lockELMFields): ?>
+            <input type="hidden" name="CourseDescription" value="<?= sanitize($deets[16]) ?>">
+            <?php endif; ?>
         </div>
         
         <div class="mb-3">
@@ -419,9 +662,12 @@ $reportinglist = getReportingList();
                 <input type="text" name="Prerequisites" id="Prerequisites" class="form-control" value="<?= sanitize($deets[18]) ?>">
             </div> -->
             <div class="col mb-3">
-                <label for="Keywords" class="form-label">Keywords</label>
+                <label for="Keywords" class="form-label">Keywords <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?></label>
                 <small class="d-block text-muted">Comma-separated search terms <span class="fw-bold">not in title/description</span></small>
-                <input type="text" name="Keywords" id="Keywords" class="form-control" value="<?= sanitize($deets[19]) ?>">
+                <input type="text" name="Keywords" id="Keywords" class="form-control" value="<?= sanitize($deets[19]) ?>" <?= $lockELMFields ? 'disabled' : '' ?>>
+                <?php if ($lockELMFields): ?>
+                <input type="hidden" name="Keywords" value="<?= sanitize($deets[19]) ?>">
+                <?php endif; ?>
             </div>
         </div>
         
@@ -436,33 +682,42 @@ $reportinglist = getReportingList();
         <div class="form-section-title">Taxonomies</div>
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label for="Topics" class="form-label">Topic</label>
-                <select name="Topics" id="Topics" class="form-select" required>
+                <label for="Topics" class="form-label">Topic <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?></label>
+                <select name="Topics" id="Topics" class="form-select" required <?= $lockELMFields ? 'disabled' : '' ?>>
                     <option value="" disabled <?= empty($deets[38]) ? 'selected' : '' ?>>Select one</option>
                     <?php foreach($topics as $t): ?>
                         <option value="<?= $t ?>" <?= ($deets[38] == $t) ? 'selected' : '' ?>><?= $t ?></option>
                     <?php endforeach ?>
                 </select>
+                <?php if ($lockELMFields): ?>
+                <input type="hidden" name="Topics" value="<?= sanitize($deets[38]) ?>">
+                <?php endif; ?>
             </div>
             <div class="col-md-6 mb-3">
-                <label for="Audience" class="form-label">Audience</label>
-                <select name="Audience" id="Audience" class="form-select" required>
+                <label for="Audience" class="form-label">Audience <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?></label>
+                <select name="Audience" id="Audience" class="form-select" required <?= $lockELMFields ? 'disabled' : '' ?>>
                     <option value="" disabled <?= empty($deets[39]) ? 'selected' : '' ?>>Select one</option>
                     <?php foreach($audience as $a): ?>
                         <option value="<?= $a ?>" <?= ($deets[39] == $a) ? 'selected' : '' ?>><?= $a ?></option>
                     <?php endforeach ?>
                 </select>
+                <?php if ($lockELMFields): ?>
+                <input type="hidden" name="Audience" value="<?= sanitize($deets[39]) ?>">
+                <?php endif; ?>
             </div>
         </div>
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label for="Levels" class="form-label">Group</label>
-                <select name="Levels" id="Levels" class="form-select">
+                <label for="Levels" class="form-label">Group <?php if ($lockELMFields): ?><span class="text-danger fw-bold">*</span><?php endif; ?></label>
+                <select name="Levels" id="Levels" class="form-select" <?= $lockELMFields ? 'disabled' : '' ?>>
                     <option value="" disabled <?= empty($deets[40]) ? 'selected' : '' ?>>Select one</option>
                     <?php foreach($levels as $l): ?>
                         <option value="<?= $l ?>" <?= ($deets[40] == $l) ? 'selected' : '' ?>><?= $l ?></option>
                     <?php endforeach ?>
                 </select>
+                <?php if ($lockELMFields): ?>
+                <input type="hidden" name="Levels" value="<?= sanitize($deets[40]) ?>">
+                <?php endif; ?>
             </div>
             <div class="col-md-6 mb-3">
                 <label for="Reporting" class="form-label">Evaluation</label>
@@ -496,17 +751,39 @@ $reportinglist = getReportingList();
                 <small class="d-block text-muted">Responsible for materials creation/revisions</small>
                 <select name="Developer" id="Developer" class="form-select">
                     <option value="">Select one</option>
-                    <?php 
+                    <?php
                     $currentDeveloper = (!empty($stewsdevs['developers'][0][2])) ? $stewsdevs['developers'][0][2] : $deets[34];
-                    getPeople($currentDeveloper); 
+                    getPeople($currentDeveloper);
                     ?>
                 </select>
             </div>
         </div>
-        <div class="mb-3">
-            <label for="EffectiveDate" class="form-label">Effective Date</label>
-            <small class="d-block text-muted">Date the course should be visible to learners</small>
-            <input type="date" name="EffectiveDate" id="EffectiveDate" class="form-control" value="<?= sanitize($deets[15]) ?>">
+        <div class="row">
+            <?php if (!empty($devPartners)): ?>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Development Partner(s)</label>
+                <small class="d-block text-muted mb-2">External organizations that helped develop this course</small>
+                <div class="border rounded p-3 bg-body-tertiary" style="max-height: 200px; overflow-y: auto;">
+                    <div class="row g-2">
+                        <?php foreach($devPartners as $dp): ?>
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="DevelopmentPartners[]" value="<?= htmlspecialchars($dp['id']) ?>" id="devPartner<?= htmlspecialchars($dp['id']) ?>" <?= in_array((string)$dp['id'], $currentDevPartnerIds, true) ? 'checked' : '' ?>>
+                                <label class="form-check-label" for="devPartner<?= htmlspecialchars($dp['id']) ?>">
+                                    <?= htmlspecialchars($dp['name']) ?>
+                                </label>
+                            </div>
+                        </div>
+                        <?php endforeach ?>
+                    </div>
+                </div>
+            </div>
+            <?php endif ?>
+            <div class="col-md-6 mb-3">
+                <label for="EffectiveDate" class="form-label">Effective Date</label>
+                <small class="d-block text-muted">Date the course should be visible to learners</small>
+                <input type="date" name="EffectiveDate" id="EffectiveDate" class="form-control" value="<?= sanitize($deets[15]) ?>">
+            </div>
         </div>
     </div>
     
