@@ -212,7 +212,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             // Send email
             $result = $ches->sendEmail(
-                ['allan.haggett@gov.bc.ca'],
+                ['allan.haggett@gov.bc.ca','clip@gov.bc.ca'],
                 $subject,
                 $bodyText,
                 $bodyHtml,

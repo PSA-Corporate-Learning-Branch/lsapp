@@ -254,6 +254,7 @@ $teams = getTeams();
 				More 
 			</a>
 			<div class="dropdown-menu" aria-labelledby="teamsdrop">
+				<a class="dropdown-item" href="/lsapp/partners-development/">Development Partners</a>
 				<a class="dropdown-item" href="/lsapp/platforms.php">Platforms</a>
 				<a class="dropdown-item" href="https://bcgov.sharepoint.com/teams/00440" target="_blank">Corporate Learning SharePoint</a>
 				<a class="dropdown-item" href="/lsapp/course-changes.php">All Course Changes</a>

@@ -117,7 +117,8 @@ $newcourse = [
     'yes',                                          // 58: HubIncludeSync (default yes)
     'no',                                           // 59: HubIncludePersist (default no)
     'This course is no longer available for registration.', // 60: HubPersistMessage (default)
-    'active'                                        // 61: HubIncludePersistState (default active)
+    'active',                                       // 61: HubIncludePersistState (default active)
+    LOGGED_IN_IDIR                                  // 62: modifiedby  (default to current user)
 ];
 
 // Write course to CSV file
@@ -133,28 +134,74 @@ if(fputcsv($fp, $newcourse) === false) {
 fclose($fp);
 
 // Send email notification for new course
-// try {
-//     $chesClient = new CHESClient();
-//     $courseNotificationData = [
-//         'id' => $courseid,
-//         'name' => $_POST['CourseName'],
-//         'description' => $_POST['CourseDescription'],
-//         'owner' => $_POST['CourseOwner'],
-//         'partner' => $_POST['LearningHubPartner'],
-//         'platform' => $_POST['Platform'],
-//         'method' => $_POST['Method'],
-//         'effectiveDate' => $_POST['EffectiveDate'],
-//         'created' => $now
-//     ];
-    
-//     $emailResult = $chesClient->sendCourseCreationNotification($courseNotificationData);
-    
-//     if (!$emailResult) {
-//         error_log("Warning: Failed to send course creation notification for course ID: {$courseid}");
-//     }
-// } catch (Exception $e) {
-//     error_log("CHES Email Exception: " . $e->getMessage());
-// }
+try {
+    $chesClient = new CHESClient();
+
+    // Build email body with course details
+    $emailBody = "A new course has been created:\n\n";
+    $emailBody .= "Course ID: {$courseid}\n";
+    $emailBody .= "Course Name: " . $_POST['CourseName'] . "\n";
+    $emailBody .= "Course Description: " . $_POST['CourseDescription'] . "\n";
+    $emailBody .= "Status: " . ($_POST['Status'] ?? 'N/A') . "\n";
+    $emailBody .= "Course Owner: " . $_POST['CourseOwner'] . "\n";
+    $emailBody .= "Learning Hub Partner: " . $_POST['LearningHubPartner'] . "\n";
+    $emailBody .= "Platform: " . $_POST['Platform'] . "\n";
+    $emailBody .= "Method: " . $_POST['Method'] . "\n";
+    $emailBody .= "Effective Date: " . $_POST['EffectiveDate'] . "\n";
+    $emailBody .= "Requested By: " . $_POST['RequestedBy'] . "\n";
+    $emailBody .= "Requested Date: " . $_POST['Requested'] . "\n";
+    $emailBody .= "Created: {$now}\n\n";
+
+    // Add optional fields if provided
+    if (!empty($_POST['CourseShort'])) {
+        $emailBody .= "Course Short Name: " . $_POST['CourseShort'] . "\n";
+    }
+    if (!empty($_POST['Developer'])) {
+        $emailBody .= "Developer: " . $_POST['Developer'] . "\n";
+    }
+    if (!empty($_POST['MinEnroll']) || !empty($_POST['MaxEnroll'])) {
+        $emailBody .= "Enrollment: " . ($_POST['MinEnroll'] ?? 'N/A') . " - " . ($_POST['MaxEnroll'] ?? 'N/A') . "\n";
+    }
+    if (!empty($combinedtimes)) {
+        $emailBody .= "Class Times: {$combinedtimes}\n";
+    }
+    if (!empty($_POST['ClassDays'])) {
+        $emailBody .= "Class Days: " . $_POST['ClassDays'] . "\n";
+    }
+    if (!empty($_POST['Keywords'])) {
+        $emailBody .= "Keywords: " . $_POST['Keywords'] . "\n";
+    }
+    if (!empty($_POST['Topics'])) {
+        $emailBody .= "Topics: " . $_POST['Topics'] . "\n";
+    }
+    if (!empty($_POST['Audience'])) {
+        $emailBody .= "Audience: " . $_POST['Audience'] . "\n";
+    }
+    if (!empty($_POST['Levels'])) {
+        $emailBody .= "Levels: " . $_POST['Levels'] . "\n";
+    }
+    if (!empty($_POST['elearning'])) {
+        $emailBody .= "E-Learning URL: " . $_POST['elearning'] . "\n";
+    }
+    if (!empty($_POST['RegistrationLink'])) {
+        $emailBody .= "Registration Link: " . $_POST['RegistrationLink'] . "\n";
+    }
+
+    $emailBody .= "\nHUB Include: {$hubInclude}\n";
+    $emailBody .= "We Ship: {$weship}\n";
+    $emailBody .= "Alchemer: {$alchemer}\n";
+
+    // Send the email
+    $emailResult = $chesClient->sendEmail(
+        ['allan.haggett@gov.bc.ca'],
+        "New Course Created: " . $_POST['CourseName'],
+        $emailBody
+    );
+
+    error_log("Course creation notification sent successfully for course ID: {$courseid}");
+} catch (Exception $e) {
+    error_log("CHES Email Exception: " . $e->getMessage());
+}
 
 // Add course people relationships if specified
 if(!empty($_POST['CourseOwner']) || !empty($_POST['Developer'])) {
@@ -168,14 +215,42 @@ if(!empty($_POST['CourseOwner']) || !empty($_POST['Developer'])) {
             $stew = [$courseid, 'steward', sanitize($_POST['CourseOwner']), $now];
             fputcsv($peoplefp, $stew);
         }
-        
+
         // Add developer relationship
         if(!empty($_POST['Developer'])) {
             $dev = [$courseid, 'dev', sanitize($_POST['Developer']), $now];
             fputcsv($peoplefp, $dev);
         }
-        
+
         fclose($peoplefp);
+    }
+}
+
+// Add development partner relationships if specified
+if(!empty($_POST['DevelopmentPartners']) && is_array($_POST['DevelopmentPartners'])) {
+    $devPartnerFile = 'data/courses-devpartners.csv';
+    $devfp = fopen($devPartnerFile, 'a+');
+    if($devfp === false) {
+        error_log("Warning: Could not open courses-devpartners.csv for course ID: {$courseid}");
+    } else {
+        // Get max ID from existing file
+        $maxId = 0;
+        rewind($devfp);
+        fgetcsv($devfp); // Skip header
+        while (($row = fgetcsv($devfp)) !== false) {
+            if (!empty($row[0]) && is_numeric($row[0])) {
+                $maxId = max($maxId, (int)$row[0]);
+            }
+        }
+
+        // Add new relationships
+        foreach($_POST['DevelopmentPartners'] as $partnerId) {
+            $maxId++;
+            $relationship = [$maxId, $courseid, sanitize($partnerId)];
+            fputcsv($devfp, $relationship);
+        }
+
+        fclose($devfp);
     }
 }
 

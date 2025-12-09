@@ -908,32 +908,40 @@ function getCoursesByPartnerName($partnerIdentifier) {
 // Return all development partners for a given course ID
 //
 function getDevPartnersByCourseID($courseid) {
-	
+
+	// Get all relationship rows for this course
 	$joinpath = build_path(BASE_DIR, 'data', 'courses-devpartners.csv');
 	$f = fopen($joinpath, 'r');
-	
+
 	$devpartners = array();
 	while ($row = fgetcsv($f)) {
 		if($row[1] == $courseid) {
-			array_push($devpartners,$row);
+			array_push($devpartners, $row);
 		}
 	}
 	fclose($f);
 
+	// Load all development partners into memory for lookup
 	$partnerpath = build_path(BASE_DIR, 'data', 'development-partners.csv');
 	$f = fopen($partnerpath, 'r');
-	
-	$dpartners = array();
-	foreach($devpartners as $index => $dp) {
-		while ($row = fgetcsv($f)) {			
-			if($row[0] == $dp[2]) {
-				$dpartners[] = $row; // Append partner name to the devpartner entry
-				break;
-			}
+
+	$allPartners = array();
+	while ($row = fgetcsv($f)) {
+		if (!empty($row[0])) {
+			$allPartners[$row[0]] = $row;
 		}
 	}
 	fclose($f);
-	
+
+	// Look up each partner from memory
+	$dpartners = array();
+	foreach($devpartners as $dp) {
+		$partnerId = $dp[2];
+		if (isset($allPartners[$partnerId])) {
+			$dpartners[] = $allPartners[$partnerId];
+		}
+	}
+
 	return $dpartners;
 }
 
