@@ -429,13 +429,6 @@ if($deets[45] === 'eLearning' || $deets[45] === 'Curated Pathway') {
 			<?php endif ?>
 	</div>
 	
-<?php //else: ?>
-<!--
-<div class="my-3 p-3 bg-light-subtle rounded-3">
-	The Learning Centre is not responsible for shipping 
-	or otherwise managing the class materials for this course.
-</div>
--->
 <?php endif ?>	
 
 
@@ -498,17 +491,6 @@ if($in > 0 && $per > 0) {
 <?php endforeach ?>
 </table>
 </div>
-<?php //else: ?>
-	<!--
-	<div class="mt-3 mb-5 p-3 bg-light-subtle rounded-3">
-		There are no materials currently assigned to this course. 
-		<div>
-			<a href="https://gww.bcpublicservice.gov.bc.ca/lsapp/material-create.php?courseid=<?= $deets[5] ?>" class="btn btn-block bg-dark-subtle mt-2">
-				Add New Material
-			</a>
-		</div>
-	</div>
-	-->
 <?php endif ?>
 
 
