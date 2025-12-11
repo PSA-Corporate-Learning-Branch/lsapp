@@ -65,6 +65,13 @@ else:
 
 <?php getNavigation() ?>
 
+<?php
+$asynchronous = false;
+if($deets[45] === 'eLearning' || $deets[45] === 'Curated Pathway') {
+	$asynchronous = true;
+}
+?>
+
 <div class="container">
 <div class="row mb-3">
 <div class="col-md-8">
@@ -260,68 +267,69 @@ else:
 
 
 
+<!-- Min / Max -->
+<!-- Only show delivery methods where we're enforcing / care about min and max -->
+<?php if(!$asynchronous): ?>
+	<div class="row text-center bg-light-subtle border border-secondary-subtle mb-3 rounded-3">
+		<div class="col-3 ">
+			Min <span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[11]) ?></span>
+		</div>
+		<div class="col-3 ">
+			Max <span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[12]) ?></span>
+		</div>
+	</div>
+<?php endif; ?>
 
-<div class="row text-center bg-light-subtle border border-secondary-subtle mb-3 rounded-3">
-<div class="col-3 ">
-Min <span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[11]) ?></span>
-</div>
-<div class="col-3 ">
-Max <span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[12]) ?></span>
-</div>
-</div>
-
-
-<?php if($deets[45] == 'eLearning'): ?>
+<?php if($asynchronous): ?>
 	<div class="mb-2 p-3 bg-light-subtle rounded-3">
-		eLearning classes do not synchronize attendance numbers with ELM
+		Asynchronous offerings do not synchronize enrolment numbers with ELM
 	</div>
 <?php else: ?>
-
-
-<?php if($deets[4] == 'Dedicated'): ?>
-<a href="docs/dedicated-class-ADHOC-attendance-form.xlsx" class="btn btn-light mt-2">Ad Hoc Attendance form</a>
-<?php else: ?>
-<div class="row text-center">
-<div class="col">
-Enrolled <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[18]) ?></span> 
-</div>
-<div class="col">
-Reserved <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[19]) ?></span> 
-</div>
-<div class="col">
-Pending <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[20]) ?></span> 
-</div>
-<div class="col">
-Waitlisted <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[21]) ?></span> 
-</div>
-<div class="col">
-Dropped <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[22]) ?></span> 
-</div>
-</div>
-<?php if($deets[11] && $deets[12]): ?>
-<?php $percentfull = floor(($deets[18] + $deets[19]) / $deets[12] * 100) ?>
-<?php $percentmin = floor($deets[11] / $deets[12] * 100) ?>
-<?php 
-$percentstatus = 'bg-warning';
-if($percentfull > $percentmin) $percentstatus = 'bg-success';
-?>
-<div class="progress progress-bar-striped mt-2">
-	<div class="progress-bar progress-bar-striped  <?= $percentstatus ?>" 
-		role="progressbar" 
-		style="width: <?= $percentfull ?>%" 
-		aria-valuenow="<?= $percentfull ?>" 
-		aria-valuemin="0" 
-		aria-valuemax="100">
-			<?= $percentfull ?>% full
-	</div>
-</div>
-<?php else: ?>
-<div class="alert alert-danger my-3">There is an issue with the min/max values for this course. Please edit and review; values cannot be blank or zero.</div>
-<?php endif; // end of min/max check ?>
+	<?php if($deets[4] == 'Dedicated'): ?>
+		<a href="docs/dedicated-class-ADHOC-attendance-form.xlsx" class="btn btn-light mt-2">Ad Hoc Attendance form</a>
+	<?php else: ?>
+		<div class="row text-center">
+			<div class="col">
+				Enrolled <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[18]) ?></span> 
+			</div>
+			<div class="col">
+				Reserved <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[19]) ?></span> 
+			</div>
+			<div class="col">
+				Pending <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[20]) ?></span> 
+			</div>
+			<div class="col">
+				Waitlisted <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[21]) ?></span> 
+			</div>
+			<div class="col">
+				Dropped <br><span class="badge bg-light-subtle text-primary-emphasis"><?= h($deets[22]) ?></span> 
+			</div>
+		</div>
+	<?php if($deets[11] && $deets[12]): ?>
+		<?php $percentfull = floor(($deets[18] + $deets[19]) / $deets[12] * 100) ?>
+		<?php $percentmin = floor($deets[11] / $deets[12] * 100) ?>
+		<?php 
+		$percentstatus = 'bg-warning';
+		if($percentfull > $percentmin) $percentstatus = 'bg-success';
+		?>
+		<div class="progress progress-bar-striped mt-2">
+			<div class="progress-bar progress-bar-striped  <?= $percentstatus ?>" 
+			role="progressbar" 
+			style="width: <?= $percentfull ?>%" 
+			aria-valuenow="<?= $percentfull ?>" 
+			aria-valuemin="0" 
+			aria-valuemax="100">
+				<?= $percentfull ?>% full
+			</div>
+		</div>
+	<?php else: ?>
+		<div class="alert alert-danger my-3">There is an issue with the min/max values for this course. Please edit and review; values cannot be blank or zero.</div>
+	<?php endif; // end of min/max check ?>
 <?php if($deets[18] < $deets[11] && $deets[1] != 'Requested' && $deets[4] != 'Dedicated' && $deets[1] != 'Inactive'): ?>
-<?php $byhowmuch = $deets[11] - $deets[18] ?>
-<div class="alert alert-warning my-2">Class enrollment is below the minimum by <?= h($byhowmuch) ?></div>
+	<?php $byhowmuch = $deets[11] - $deets[18] ?>
+	<div class="alert alert-warning my-2">Class enrollment is below the minimum by <?= h($byhowmuch) ?></div>
 <?php endif ?>
+
 <?php endif ?>
 <?php endif ?>
 <?= $lastsyncmessage ?>
@@ -332,104 +340,95 @@ if($percentfull > $percentmin) $percentstatus = 'bg-success';
 <?php if($deets[49] != 'No Ship'): ?>
 	
 	<div class="mt-3">
+		<?php if($deets[13] < $today && $deets[49] == 'To Ship'): ?>
+			<div class="alert alert-danger">SHIPPING DATE PASSED</div>
+		<?php endif ?>
+		<h3 class="m-0">Shipping on <?php print goodDateLong($deets[13]) ?></h3>
+		<div class="mb-2">Courtesy of <a href="person.php?idir=<?= h($deets[33]) ?>"><?= h($deets[33]) ?></a></div>
+			<a class="btn btn-light" href="/lsapp/class-checklist.php?classid=<?= h($deets[0]) ?>">Checklist</a>
+			<a class="btn btn-light" href="/lsapp/class-labels.php?classid=<?= h($deets[0]) ?>">Labels</a>
+			<?php if($deets[49] == 'Shipped'): ?>
+				<?php if($deets[23] != 186 && $deets[23] != 188 && $deets[23] != 239 ): ?>
+					<?php if(!$deets[41] || $deets[41] == 'Not'): ?>
+						<a class="btn btn-light" href="/lsapp/class-venue-notify.php?classid=<?= h($deets[0]) ?>">Notify Venue</a>
+						<div class="alert alert-warning mt-3">The venue has not been notified.</div>
+					<?php else: ?>
+						Venue notified.
+					<?php endif ?>
+				<?php endif ?>
+			<?php endif ?>
+			<?php
+			$stat = 'alert-secondary';
+			if($deets[49] == 'Shipped') {
+				$stat = 'alert-warning';
+			} elseif($deets[49] == 'Arrived') {
+				$stat = 'alert-success';
+			} elseif($deets[49] == 'Returned') {
+				$stat = 'alert-success';
+			} 
+			?>
+			<div class="alert <?= h($stat) ?> mt-2 mb-2">
+				<span style="font-weight: bold; text-transform: uppercase"><?= h($deets[49]) ?></span>
+				<?php if($deets[1] == 'Shipped'): ?>
+					<?php $ago = daysAgo($deets[13]) ?>
+					<?= h($ago) ?> days ago  
+				<?php endif ?>
+			</div>
 	
-	<?php if($deets[13] < $today && $deets[49] == 'To Ship'): ?>
-	<div class="alert alert-danger">SHIPPING DATE PASSED</div>
-	<?php endif ?>
-	<h3 class="m-0">Shipping on <?php print goodDateLong($deets[13]) ?></h3>
-	<div class="mb-2">Courtesy of <a href="person.php?idir=<?= h($deets[33]) ?>"><?= h($deets[33]) ?></a></div>
-	<a class="btn btn-light" href="/lsapp/class-checklist.php?classid=<?= h($deets[0]) ?>">Checklist</a>
-	<a class="btn btn-light" href="/lsapp/class-labels.php?classid=<?= h($deets[0]) ?>">Labels</a>
-	<?php if($deets[49] == 'Shipped'): ?>
-	<?php if($deets[23] != 186 && $deets[23] != 188 && $deets[23] != 239 ): ?>
-	<?php if(!$deets[41] || $deets[41] == 'Not'): ?>
-	<a class="btn btn-light" href="/lsapp/class-venue-notify.php?classid=<?= h($deets[0]) ?>">Notify Venue</a>
-	<div class="alert alert-warning mt-3">The venue has not been notified.</div>
-	<?php else: ?>
-	Venue notified.
-	<?php endif ?>
-	<?php endif ?>
-	<?php endif ?>
-	<?php
-	$stat = 'alert-secondary';
-	if($deets[49] == 'Shipped') {
-		$stat = 'alert-warning';
-	} elseif($deets[49] == 'Arrived') {
-		$stat = 'alert-success';
-	}  elseif($deets[49] == 'Returned') {
-		$stat = 'alert-success';
-	} 
-	?>
-	<div class="alert <?= h($stat) ?> mt-2 mb-2">
-	<span style="font-weight: bold; text-transform: uppercase"><?= h($deets[49]) ?></span>
-	<?php if($deets[1] == 'Shipped'): ?>
-	<?php $ago = daysAgo($deets[13]) ?>
-	<?= h($ago) ?> days ago  
-	<?php endif ?>
-	</div>
+			<?php if($deets[49] == 'Returned' && $deets[39] == 'Not'): ?>
+				<div class="alert alert-warning">Attendance NOT returned</div>
+			<?php endif ?>
+			<?php if($deets[49] == 'Returned' && $deets[40] == 'Not'): ?>
+				<div class="alert alert-warning">Evaluations NOT returned</div>
+			<?php endif ?>
 	
-	<?php if($deets[49] == 'Returned' && $deets[39] == 'Not'): ?>
-	<div class="alert alert-warning">Attendance NOT returned</div>
-	<?php endif ?>
-	<?php if($deets[49] == 'Returned' && $deets[40] == 'Not'): ?>
-	<div class="alert alert-warning">Evaluations NOT returned</div>
-	<?php endif ?>
-	
-	<?php if($deets[23] != 186 && $deets[23] != 188 && $deets[23] != 239 ): ?>
-	<div class="row">
-		<div class="col-6">
-		Tracking Outgoing: <?= h($deets[37]) ?><br>
-		Tracking Incoming: <?= h($deets[38]) ?>
-		</div>
-	<?php $couriers = getCouriers($deets[36]) ?>
-	<?php foreach($couriers as $courier): ?>
-	<?php if($courier[1] == $deets[36]): ?>
-	<?php $web = $courier[2] ?>
-	<?php $phone = $courier[3] ?>
-	<?php $courieruser = $courier[4] ?>
-	<?php $pass = $courier[5] ?>
-	<?php endif ?>
-	<?php endforeach ?>
-	<?php if(isset($web)): ?>
-		<div class="col-6">
-		<a href="<?= $web ?>" target="_blank"><?= $deets[36] ?></a><br>
-		<a href="tel:<?= $phone ?>"><?= $phone ?></a><br>
-		User: <?= $courieruser ?><br>
-		Password: <?= $pass ?>
-		</div>
-	<?php endif ?>
+			<?php if($deets[23] != 186 && $deets[23] != 188 && $deets[23] != 239 ): ?>
+				<div class="row">
+					<div class="col-6">
+						Tracking Outgoing: <?= h($deets[37]) ?><br>
+						Tracking Incoming: <?= h($deets[38]) ?>
+					</div>
+					<?php $couriers = getCouriers($deets[36]) ?>
+					<?php foreach($couriers as $courier): ?>
+						<?php if($courier[1] == $deets[36]): ?>
+							<?php $web = $courier[2] ?>
+							<?php $phone = $courier[3] ?>
+							<?php $courieruser = $courier[4] ?>
+							<?php $pass = $courier[5] ?>
+						<?php endif ?>
+					<?php endforeach ?>
+					<?php if(isset($web)): ?>
+						<div class="col-6">
+							<a href="<?= $web ?>" target="_blank"><?= $deets[36] ?></a><br>
+							<a href="tel:<?= $phone ?>"><?= $phone ?></a><br>
+							User: <?= $courieruser ?><br>
+							Password: <?= $pass ?>
+						</div>
+					<?php endif ?>
 
 
-	<div class="dropdown float-end">
-		<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-		Available Audio/Visual
-		</button>
-		<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-		<?php $avavailable = getAVunassigned() ?>
-		<?php foreach($avavailable as $av): ?>
-		<a class="dropdown-item" href="/lsapp/class-process-av-assign.php?classid=<?= $deets[0] ?>&avid=<?= $av[0] ?>" title="<?= $av[4] ?>"><?= $av[3] ?></a>
-		<?php endforeach ?>
-		
-		</div>
-	</div>
-	<h5>Assigned A/V</h5>
-	<?php $avassigned = getAVassigned($deets[0]) ?>
-	<?php foreach($avassigned as $av): ?>
-	<a href="/lsapp/av.php?classid=<?= $deets[0] ?>&avid=<?= $av[0] ?>"
-		title=""><?= $av[3] ?></a>
-		<?= $av[4] ?>
-	<?php endforeach ?>
-	
-	<?php endif ?>
-	</div>
+					<div class="dropdown float-end">
+						<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							Available Audio/Visual
+						</button>
+						<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+							<?php $avavailable = getAVunassigned() ?>
+							<?php foreach($avavailable as $av): ?>
+								<a class="dropdown-item" href="/lsapp/class-process-av-assign.php?classid=<?= $deets[0] ?>&avid=<?= $av[0] ?>" title="<?= $av[4] ?>"><?= $av[3] ?></a>
+							<?php endforeach ?>
+						</div>
+					</div>
+					<h5>Assigned A/V</h5>
+					<?php $avassigned = getAVassigned($deets[0]) ?>
+					<?php foreach($avassigned as $av): ?>
+						<a href="/lsapp/av.php?classid=<?= $deets[0] ?>&avid=<?= $av[0] ?>"
+							title=""><?= $av[3] ?></a>
+							<?= $av[4] ?>
+					<?php endforeach ?>
+				</div>
+			<?php endif ?>
 	</div>
 	
-<?php else: ?>
-<div class="my-3 p-3 bg-light-subtle rounded-3">
-	The Learning Centre is not responsible for shipping 
-	or otherwise managing the class materials for this course.
-</div>
-
 <?php endif ?>	
 
 
@@ -492,19 +491,10 @@ if($in > 0 && $per > 0) {
 <?php endforeach ?>
 </table>
 </div>
-<?php else: ?>
-<div class="mt-3 mb-5 p-3 bg-light-subtle rounded-3">
-	There are no materials currently assigned to this course. 
-	<div>
-	<a href="https://gww.bcpublicservice.gov.bc.ca/lsapp/material-create.php?courseid=<?= $deets[5] ?>" class="btn btn-block bg-dark-subtle mt-2">
-		Add New Material
-	</a>
-	</div>
-</div>
 <?php endif ?>
 
 
-<div class="p-3 bg-light-subtle rounded-3">
+<div class="p-3 my-3 bg-light-subtle rounded-3">
 	Created on <?= h($deets[2]) ?> by
 	<a href="/lsapp/person.php?idir=<?= h($deets[3]) ?>"><?= h($deets[3]) ?></a><br>
 	Last modified on <?= h($deets[42]) ?> by 
@@ -776,7 +766,7 @@ $completedreqs = [];
 <div class="col-md-6">
 	<h2>Class Not Found</h2>
 	<p>Must be playin' hooky ;)</p>
-	<p>Email the Learning Support Admin Team <<a href="mailto:learning.centre.admin@gov.bc.ca">learning.centre.admin@gov.bc.ca</a>> with any questions or concerns.</p>
+	<p>Email the Learning Support Admin Team <<a href="mailto:Corporatelearning.admin@gov.bc.ca">Corporatelearning.admin@gov.bc.ca</a>> with any questions or concerns.</p>
 	<p><img src="img/TrollFace.jpg" width="300px"></p>
 </div>	
 <?php endif ?>
