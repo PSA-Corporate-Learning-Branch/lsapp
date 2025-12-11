@@ -37,11 +37,15 @@ echo getHeader('Development Partners');
 echo getNavigation();
 ?>
 
-<div class="container mt-4">
+<div class="container">
+    
+    <h1>Corporate Learning Partners</h1>
+
+    <?php include('../templates/partner-nav.php'); ?>
+
     <div class="row">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1>Development Partners</h1>
+            <div class="float-end">
                 <a href="create.php" class="btn btn-primary">Add New Partner</a>
             </div>
             <p>A course can have one or more development partners associated with it.</p>
@@ -65,7 +69,7 @@ echo getNavigation();
                     No development partners found. <a href="create.php">Add your first partner</a>.
                 </div>
             <?php else: ?>
-                <div class="table-responsive">
+                <div class="table-responsive mt-4">
                     <table class="table table-striped table-hover">
                         <thead class="table-dark">
                             <tr>
