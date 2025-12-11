@@ -147,8 +147,7 @@ array_multisort($tmp, $sortdir, $classchanges);
 
 <div class="mb-2 p-2 rounded-3 fs-5"><a href="/lsapp/courses.php?sort=dateadded"><strong><?= $totalcourses ?></strong> Active Courses</a></div>
 
-
-
+<?php if (count($requestedcourses) > 0): ?>
 <details class="p-2 my-2 rounded-3 bg-dark-subtle border border-secondary-subtle">
     <summary><strong><?php echo count($requestedcourses) ?></strong> courses requested</summary>
     <?php foreach($requestedcourses as $course): ?>
@@ -158,7 +157,7 @@ array_multisort($tmp, $sortdir, $classchanges);
         </div>
     <?php endforeach ?>
 </details>
-
+<?php endif; ?>
 
 
 </div>
