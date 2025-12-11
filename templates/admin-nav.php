@@ -1,9 +1,5 @@
 <?php 
 $sections = array('Admin Home' => 'admin.php',
-					'Venues' => 'venues-dashboard.php',
-					'Materials' => 'materials.php',
-					'Shipping' => 'shipping-outgoing.php',
-					'Audio Visual' => 'av-dashboard.php',
 					'ELM Audit' => 'elm-audit.php',
 					'ELM Sync' => 'elm-sync-upload.php');
 					
