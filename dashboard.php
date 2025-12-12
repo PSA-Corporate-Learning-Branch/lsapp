@@ -173,6 +173,7 @@ array_multisort($tmp, $sortdir, $classchanges);
     <span title="The number of learners currently enrolled in a class in ELM"><strong><?= number_format($totalenrol) ?></strong> Learners Enrolled </span>
 </div>
 
+<?php if (count($requestedclasses) > 0): ?>
 <details class="p-2 my-2 bg-dark-subtle border border-secondary-subtle rounded-3">
     <summary><strong><?= count($requestedclasses) ?></strong> classes requested</summary>
 <table class="table table-sm table-striped">
@@ -205,6 +206,9 @@ array_multisort($tmp, $sortdir, $classchanges);
 </tbody>
 </table>
 </details>
+<?php endif; ?>
+
+<?php if (count($classchanges) > 0): ?>
 <details class="my-2 p-2 bg-dark-subtle border border-secondary-subtle rounded-3">
 <summary>    
     <strong><?php echo count($classchanges) ?></strong>
@@ -244,6 +248,7 @@ array_multisort($tmp, $sortdir, $classchanges);
 </details>
 <?php endforeach ?>
 </details>
+<?php endif; ?>
 
 <?php 
 
