@@ -1,3 +1,4 @@
+<?php require('inc/lsapp.php') ?>
 <?php 
 
 if($_POST):
@@ -6,7 +7,7 @@ if($_POST):
 
 else: ?>
 
-<?php require('inc/lsapp.php') ?>
+
 
 <?php getHeader() ?>
 
