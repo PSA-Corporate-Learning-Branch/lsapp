@@ -72,14 +72,14 @@ usort($partners, function($a, $b) {
                                 <?php 
                                 $status = $partner["status"] ?? 'Unknown';
                                 $badgeClass = 'bg-secondary-subtle text-secondary-emphasis';
-                                if ($status === 'Active') {
+                                if ($status === 'active') {
                                     $badgeClass = 'bg-success-subtle text-success-emphasis';
-                                } elseif ($status === 'Inactive') {
+                                } elseif ($status === 'inactive') {
                                     $badgeClass = 'bg-danger-subtle text-danger-emphasis';
                                 }
                                 ?>
                                 <span class="badge <?php echo $badgeClass; ?>">
-                                    <?php echo htmlspecialchars($status); ?>
+                                    <?php echo htmlspecialchars(ucfirst($status)); ?>
                                 </span>
                             </td>
                             <td class="name">
