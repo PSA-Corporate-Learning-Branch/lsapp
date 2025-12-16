@@ -2475,6 +2475,21 @@ function getAllPlatforms () {
 
 }
 
+function getPlatformNames () {
+
+	$path = build_path(BASE_DIR, 'data', 'platforms.json');
+	$jsonData = file_get_contents($path);
+	$platforms = json_decode($jsonData, true);
+	
+	$platformNames = array();
+	foreach ($platforms as $platform) {
+		array_push($platformNames, $platform['name']);
+	}
+	
+	return $platformNames;
+
+}
+
 function getAllAudiences () {
 
 	return [

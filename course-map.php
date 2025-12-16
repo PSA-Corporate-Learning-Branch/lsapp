@@ -486,7 +486,7 @@ $audiences = getAllAudiences();
 $levels = getLevels();
 
 // Get all platforms using the existing function
-$platforms = getAllPlatforms();
+$platforms = getPlatformNames();
 sort($platforms);
 
 // Build corporate partners list with counts
