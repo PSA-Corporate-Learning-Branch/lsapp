@@ -2460,18 +2460,28 @@ function getAllTopics () {
 	];
 }
 
-function getAllPlatforms () {
+/**
+ * Get all platforms.
+ * 
+ * Includes values for id, name, description, and link
+ * 
+ * @return array of key-value pairs sorted on name
+ */
+function getAllPlatforms() {
 
 	$path = build_path(BASE_DIR, 'data', 'platforms.json');
+	if(!file_exists($path)) {
+		return null;
+	}
 	$jsonData = file_get_contents($path);
 	$platforms = json_decode($jsonData, true);
 	
-	$platformNames = array();
-	foreach ($platforms as $platform) {
-		array_push($platformNames, $platform['name']);
-	}
-	
-	return $platformNames;
+	// Sort by platform name
+    usort($platforms, function($a, $b) {
+        return $a['name'] <=> $b['name'];
+    });
+
+	return $platforms;
 
 }
 
