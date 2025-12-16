@@ -426,8 +426,7 @@ $stewsdevs = getCoursePeople($courseid);
 $partnersJson = file_get_contents('data/partners.json');
 $partners = json_decode($partnersJson, true);
 
-$platformsJson = file_get_contents('data/platforms.json');
-$platforms = json_decode($platformsJson, true);
+$platforms = getAllPlatforms();
 
 // Get taxonomy options
 $topics = getAllTopics();

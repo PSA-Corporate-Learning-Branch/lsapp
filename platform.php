@@ -3,8 +3,7 @@
 $platformId = (isset($_GET['id'])) ? $_GET['id'] : '';
 
 // Load platforms data
-$jsonContent = file_get_contents('data/platforms.json');
-$platforms = json_decode($jsonContent, true);
+$platforms = getAllPlatforms();
 
 // Find the specific platform
 $currentPlatform = null;
