@@ -108,10 +108,10 @@ foreach ($platforms as $platform) {
         <input class="search form-control mb-3" placeholder="Search all courses...">
         
         <p class="text-muted mb-3">
-            Active: <span class="badge badge-success" id="active-count"><?= count($activeCourses) ?></span>
-            Inactive: <span class="badge badge-secondary" id="inactive-count"><?= count($inactiveCourses) ?></span>
-            LearningHUB: <span class="badge badge-info" id="hub-count"><?= $hubCourses ?></span>
-            Total: <span class="badge badge-primary"><?= $totalCourses ?></span>
+            Active: <span class="badge bg-success-subtle text-success-emphasis" id="active-count"><?= count($activeCourses) ?></span>
+            Inactive: <span class="badge bg-secondary-subtle text-secondary-emphasis" id="inactive-count"><?= count($inactiveCourses) ?></span>
+            LearningHUB: <span class="badge bg-info-subtle text-info-emphasis" id="hub-count"><?= $hubCourses ?></span>
+            Total: <span class="badge bg-primary-subtle text-primary-emphasis"><?= $totalCourses ?></span>
         </p>
         
         <table class="table table-striped">
@@ -139,9 +139,9 @@ foreach ($platforms as $platform) {
                 <tr>
                     <td class="status">
                         <?php if ($isActive): ?>
-                            <span class="badge badge-success">Active</span>
+                            <span class="badge bg-success-subtle text-success-emphasis">Active</span>
                         <?php else: ?>
-                            <span class="badge badge-secondary">Inactive</span>
+                            <span class="badge bg-secondary-subtle text-secondary-emphasis">Inactive</span>
                         <?php endif; ?>
                     </td>
                     <td class="name">
@@ -151,7 +151,7 @@ foreach ($platforms as $platform) {
                     </td>
                     <td class="hub">
                         <?php if ($hubInclude): ?>
-                            <span class="badge badge-info">Learning<span class="fw-bold">HUB</span></span>
+                            <span class="badge bg-info-subtle text-info-emphasis">Learning<span class="fw-bold">HUB</span></span>
                         <?php else: ?>
                             <span class="text-muted">Not included</span>
                         <?php endif; ?>
