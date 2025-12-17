@@ -2,12 +2,8 @@
 opcache_reset();
 $path = '../inc/lsapp.php';
 require($path); 
-$partnersFile = "../data/partners.json";
-$partners = file_exists($partnersFile) ? json_decode(file_get_contents($partnersFile), true) : [];
-// Sort partners alphabetically by name
-usort($partners, function($a, $b) {
-    return strcasecmp($a['name'], $b['name']);
-});
+
+$partners = getAllPartners();
 ?>
 
 <?php if(canACcess()): ?>

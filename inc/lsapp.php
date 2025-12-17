@@ -806,7 +806,7 @@ function getPartnerNameById($partnerId) {
 /**
  * Get all partners from partners.json
  * 
- * @return array<string, mixed> of partners
+ * @return array<string,mixed> of partners
  */
 function getAllPartners() {
 	$path = build_path(BASE_DIR, 'data', 'partners.json');
