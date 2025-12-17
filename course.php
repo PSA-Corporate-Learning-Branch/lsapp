@@ -20,10 +20,6 @@ $devpartners = getDevPartnersByCourseID($courseid);
 
 $stewsdevs = getCoursePeople($courseid);
 
-// Load partners data
-$partnersJson = file_get_contents('data/partners.json');
-$partners = json_decode($partnersJson, true);
-
 // Load platforms data
 $platformsJson = file_get_contents('data/platforms.json');
 $platformsData = json_decode($platformsJson, true);
