@@ -75,8 +75,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "idir" => $contact["idir"],
                 "email" => $contact["email"],
                 "name" => $contact["name"],
-                "title" => $contact["title"],
-                "role" => $contact["role"],
+                "title" => $contact["title"] ?? '',
+                "role" => $contact["role"] ?? '',
                 "added_at" => $contact["added_at"] // Preserve added_at if already set
             ];
         }
