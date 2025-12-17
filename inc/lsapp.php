@@ -803,10 +803,11 @@ function getPartnerNameById($partnerId) {
 	return $partnerId;
 }
 
-//
-// Get all partners from partners.json
-// Returns array of partner objects
-//
+/**
+ * Get all partners from partners.json
+ * 
+ * @return array<string, mixed> of partners
+ */
 function getAllPartners() {
 	$path = build_path(BASE_DIR, 'data', 'partners.json');
 	if(!file_exists($path)) {
@@ -816,7 +817,12 @@ function getAllPartners() {
 	$json = file_get_contents($path);
 	$partners = json_decode($json, true);
 	
+	usort($partners, function($a, $b) {
+		return $a['name'] <=> $b['name'];
+	});
+
 	return $partners ? $partners : [];
+
 }
 
 //
