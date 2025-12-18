@@ -26,6 +26,40 @@ function updateConfig($new_config) {
 
 }
 
+function getNextConfigID($config_file) {
+    $id = 0;
+    foreach ($config_file as $config) {
+        if (isset($config['id']) && is_numeric($config['id'])) {
+            $id = max($id, (int)$config['id']);
+        }
+    }
+    return $id+1;
+}
+
+/**
+ * For initial implementation of adding survey id
+ * using getNextConfigID() to get initial value
+ * and then passing the return value to updateConfig()
+ * 
+ * @param array config file array to be updated
+ * @param int current max id + 1 as starting point
+ * 
+ * @return array updated config file array
+ */
+// function addConfigID($config_file, $start_id) {
+//     $id = $start_id;
+//     $new_config = [];
+//     foreach ($config_file as $config) {
+//         if (!isset($config['id'])) {
+//             $config['id'] = $id;
+//             $id++;
+//         }
+//         $new_config[] = $config;
+//     }
+//     return $new_config;
+// }
+
+
 function verifyFormID($form_id) {
     // verify our CHEFS form id matches the pattern
     $pattern = '/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/';
@@ -37,3 +71,5 @@ function verifyFormID($form_id) {
         return false;
     }
 }
+
+// random_bytes() 
