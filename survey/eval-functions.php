@@ -72,4 +72,3 @@ function verifyFormID($form_id) {
     }
 }
 
-// random_bytes() 

@@ -73,14 +73,14 @@ foreach ($courses as $course) {
                     <div><small>Another thing: #</small></div>
                 </div>
                 <div class="col-2">
-                    <div class="btn-group-vertical btn-group-sm float-end" role="group" aria-label="Vertical button group">
-                        <a href="#" type="button" class="btn btn-primary">Edit</a>
-                        <a href="#" type="button" class="btn btn-success">View Report</a>
+                    <div class="btn-group-vertical btn-group-sm float-end border" role="group" aria-label="Vertical button group">
+                        <a href="#" type="button" class="btn btn-light text-light-emphasis">Edit</a>
+                        <a href="#" type="button" class="btn btn-outline-info text-light-emphasis">View Report</a>
                     </div>
                 </div>
                 <hr class="my-1">
-                <div>
-                    <span class="badge mb-0 text-bg-<?= $survey['status'] == 'active' ? 'primary' : 'secondary' ?> float-start"><?= ucfirst($survey['status']) ?></span>
+                <div class="mt-1">
+                    <span class="float-start mb-0 badge <?= $survey['status'] == 'active' ? 'bg-primary-subtle text-primary-emphasis' : 'bg-secondary-subtle text-secondary-emphasis' ?>"><?= ucfirst($survey['status']) ?></span>
                 </div>
             </div> <!-- /row -->
             
