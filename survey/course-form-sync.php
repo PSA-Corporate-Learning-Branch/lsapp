@@ -16,7 +16,7 @@ foreach ($config as $c) {
     $surveys[] = $c['formId'];
 }
 
-// go through our courses lookive for active courses with form ids added
+// go through our courses looking for active courses with form ids added
 foreach ($courses as $course) {
     if ($course[1] == 'Active' && !empty($course[46])) {
         // if the form id doesn't exist in our config, add in pending status
