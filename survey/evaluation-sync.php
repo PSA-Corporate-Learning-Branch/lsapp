@@ -132,6 +132,22 @@ function processVersionQuestions(array $array, array &$return_array = []) {
                 }
                 // TODO: add select, checkbox types, possibly others
             }
+            # select questions don't have an inputType so we need to look for type value
+            else if (array_key_exists('type', $value)) {
+                if ($value['type'] == 'simpleselectadvanced') {
+                    $select_options = [];
+                    foreach ($value['data']['values'] as $option) {
+                        $select_options[$option['value']] = $option['label'];
+                    }
+                    $return_array[$value['key']] = [
+                        'label' => $value['label'],
+                        'values' => $select_options,
+                        'inputType' => 'select'
+                    ];
+                    continue;
+                }
+            }
+
             // if we determine it's not a question, process the array looking for
             // questions within as they can be nested in a layout component
             $return_array = processVersionQuestions($value, $return_array);
@@ -223,21 +239,16 @@ foreach ($config as $form_config) {
         $updated_config[] = $synced_response_config;
 
     }
+    # if form isn't active, add to new config as-is
+    else {
+        $updated_config[] = $form_config;
+    }
    
 }
 
 $json_config = json_encode($updated_config, JSON_PRETTY_PRINT);
 file_put_contents($config_file, $json_config);
 
-// testing version
-$version_contents = file_get_contents($data_path . 'test-version.json');
-$versionData = json_decode($version_contents, true);
-
-echo '<pre>';
-print_r($updated_config);
-echo '</pre>';
-
-// $test_result = processVersionQuestions($versionData);
 
 // $test_questions = processVersionQuestions($test_result);
 
