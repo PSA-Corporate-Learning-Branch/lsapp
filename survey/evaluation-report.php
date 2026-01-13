@@ -228,7 +228,19 @@ function compileResponses($response_data) {
                     $responses[$question]['total']++;
                 }
             }
-
+            // for select type responses add a count of the response option
+            elseif ($response_map[$question]['inputType'] == 'select') {
+                if (!array_key_exists($question, $responses)) {
+                    $responses[$question] = array();
+                    $responses[$question]['total'] = 0;
+                } elseif (!array_key_exists($answer, $responses[$question])) {
+                    $responses[$question][$answer] = 1;
+                    $responses[$question]['total']++;
+                } else {
+                    $responses[$question][$answer]++;
+                    $responses[$question]['total']++;
+                }
+            }
         }
     }
     return $responses;
@@ -301,6 +313,11 @@ function createChartForRadio($question, $responses) {
                 '#e3a82b',
                 '#007864',
                 '#234075',
+                '#917C78',
+                '#FB8B24',
+                '#A288E3',
+                '#DA4167',
+                '#6F9CEB'
                 ],
                 hoverOffset: 4
             }]
@@ -346,6 +363,12 @@ function createTextResponses($question, $responses) {
 
 <?php
 
+# #DA4167 Magenta Bloom 
+# #6F9CEB Cornflower Blue
+# #917C78 Taupe
+# #FB8B24 Princeton Orange
+# #A288E3 Soft Periwinkle
+
 
 
 ?>
@@ -353,7 +376,7 @@ function createTextResponses($question, $responses) {
 
 <pre>
     <?php //print_r(gettype($response_data)) ?>
-    <?php //print_r($classes); ?>
+    <?php print_r($compiled_responses); ?>
 </pre>
 
 <div class="container-fluid">
@@ -398,6 +421,13 @@ function createTextResponses($question, $responses) {
     <?php
     foreach($compiled_responses as $question => $response) {
         if ($response_map[$question]['inputType'] == 'radio') {
+            echo '<div class="row justify-content-md-center">';
+                echo '<div class="col-4">';
+                    echo createChartForRadio($question, $compiled_responses);
+                echo '</div>';
+            echo '</div>';
+        }
+        else if ($response_map[$question]['inputType'] == 'select') {
             echo '<div class="row justify-content-md-center">';
                 echo '<div class="col-4">';
                     echo createChartForRadio($question, $compiled_responses);
