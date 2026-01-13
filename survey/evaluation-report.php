@@ -295,6 +295,18 @@ function createChartForRadio($question, $responses) {
         $html .=    '</div>';
     }
 
+    // add total row
+    $html .=    '<div class="row align-items-center">';
+    $html .=        '<div class="col-4">';
+    $html .=            '<p style="font-size: smaller;" class="my-1"><strong>Total</strong></p>';
+    $html .=        '</div>';
+    $html .=        '<div class="col-2">';
+    $html .=            '<p style="font-size: smaller;" class="my-1"><strong>' . $responses[$question]['total'] . '</strong></p>';
+    $html .=        '</div>';
+    $html .=        '<div class="col-6">';       
+    $html .=        '</div>';
+    $html .=    '</div>';
+
     $html .=    '</div>'; // /card-body
     $html .= '</div>'; // /card
 
