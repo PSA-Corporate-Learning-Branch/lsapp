@@ -321,6 +321,22 @@ function createChartForRadio($question, $responses) {
                 ],
                 hoverOffset: 4
             }]
+        },
+        options: {
+            layout: {
+                padding: {
+                top: 0,
+                bottom: 0,
+                left: 20,
+                right: 20
+                }
+            },
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
         }
     });";
 
@@ -362,7 +378,7 @@ function createTextResponses($question, $responses) {
 <?php getNavigation() ?>
 
 <?php
-
+# Colour option possibilities 
 # #DA4167 Magenta Bloom 
 # #6F9CEB Cornflower Blue
 # #917C78 Taupe
@@ -422,14 +438,14 @@ function createTextResponses($question, $responses) {
     foreach($compiled_responses as $question => $response) {
         if ($response_map[$question]['inputType'] == 'radio') {
             echo '<div class="row justify-content-md-center">';
-                echo '<div class="col-4">';
+                echo '<div class="col-6">';
                     echo createChartForRadio($question, $compiled_responses);
                 echo '</div>';
             echo '</div>';
         }
         else if ($response_map[$question]['inputType'] == 'select') {
             echo '<div class="row justify-content-md-center">';
-                echo '<div class="col-4">';
+                echo '<div class="col-6">';
                     echo createChartForRadio($question, $compiled_responses);
                 echo '</div>';
             echo '</div>';
