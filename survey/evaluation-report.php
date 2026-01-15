@@ -292,7 +292,7 @@ function createChartForRadio($question, $responses) {
         $html .=                '<div class="progress-bar text-bg-success" style="width: ' . $percent_total . '%">' . $percent_total . '%</div>';
         $html .=            '</div>';
         $html .=        '</div>';
-        $html .=    '</div>';
+        $html .=    '</div><hr class="m-0 p-0">';
     }
 
     // add total row
@@ -390,21 +390,14 @@ function createTextResponses($question, $responses) {
 <?php getNavigation() ?>
 
 <?php
-# Colour option possibilities 
-# #DA4167 Magenta Bloom 
-# #6F9CEB Cornflower Blue
-# #917C78 Taupe
-# #FB8B24 Princeton Orange
-# #A288E3 Soft Periwinkle
 
 
 
 ?>
 
-
 <pre>
     <?php //print_r(gettype($response_data)) ?>
-    <?php print_r($compiled_responses); ?>
+    <?php //rint_r($class_code); ?>
 </pre>
 
 <div class="container-fluid">
@@ -418,7 +411,7 @@ function createTextResponses($question, $responses) {
 <div class="col-lg-2" name="side-nav">
     <div class="card sticky-top m-auto z-0 overflow-hidden" style="top: 65px; max-width: 310px;">
         <form action="evaluation-report.php" method="get">
-        <h5 class="card-header">Classes</h5>
+        <h5 class="card-header">Filter Results</h5>
         <ul class="list-group list-group-flush">
         <?php foreach($classes as $class): ?>
             <li class="list-group-item">
@@ -428,6 +421,12 @@ function createTextResponses($question, $responses) {
                 </div>
             </li>
         <?php endforeach ?>
+            <li class="list-group-item">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="classCode" id="all-radio" value="0" autocomplete="off" <?= $class_code == 0 ? 'checked=""' : '' ?>>
+                    <label class="form-check-label" for="all-radio">All</label>
+                </div>
+            </li>
         </ul>
         <input type="hidden" id="form-id" name="formid" value="<?= $form_id ?>">
         <div class="card-footer">
