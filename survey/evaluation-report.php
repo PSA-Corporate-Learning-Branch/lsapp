@@ -81,7 +81,7 @@ function getResponses($form_id) {
     return $response_data;
 
 }
-$response_data = getResponses($form_id, $class_code);
+$response_data = getResponses($form_id);
 
 /**
  * Return an array of unique class codes across responses
@@ -126,64 +126,66 @@ if ($class_code && in_array($class_code, $classes)) {
     $response_data_processed = $response_data;
 }
 
-$response_map_old = [
-    // 'classCode' => '',
-    // 'courseCode' => 'ITEM-2014',
-    'whatWasTricky' => [
-        'label' => 'What was tricky?',
-        'inputType' => 'text'
-    ],
-    'whatWorkedWell' => [
-        'label' => 'What worked well?',
-        'inputType' => 'text'
-    ],
-    'iWouldRecommendThisCourseToAColleague' => [
-        'label' => 'I would recommend this course to a colleague.',
-        'values' => [
-            'stronglyDisagree' => 'Strongly Disagree',
-            'disagree' => 'Disagree',
-            'neutral' => 'Neutral',
-            'agree' => 'Agree',
-            'stronglyAgree' => 'Strongly Agree'
-        ],
-        'inputType' => 'radio'
-    ],
-    'iIntendToApplyTheKnowledgeAndSkillsIGainedFromThisLearningBackOnTheJob' => [
-        'label' => 'I intend to apply the knowledge and skills I gained from this learning back on the job.',
-        'values' => [
-            'stronglyDisagree' => 'Strongly Disagree',
-            'disagree' => 'Disagree',
-            'neutral' => 'Neutral',
-            'agree' => 'Agree',
-            'stronglyAgree' => 'Strongly Agree'
-        ],
-        'inputType' => 'radio'
-    ],
-    'iGainedMorePersonalInsightIntoHowValuesPersonalityAndFactorsMayLeadToConflictInTheWorkplace' => [
-        'label' => 'I gained more personal insight into how values, personality, and factors may lead to conflict in the workplace.',
-        'values' => [
-            'stronglyDisagree' => 'Strongly Disagree',
-            'disagree' => 'Disagree',
-            'neutral' => 'Neutral',
-            'agree' => 'Agree',
-            'stronglyAgree' => 'Strongly Agree'
-        ],
-        'inputType' => 'radio'
-    ],
-    'iUnderstandOurResponsibilityAsPublicServiceEmployeesToCreateAndMaintainRespectfulAndInclusiveWorkplaces' => [
-        'label' => 'I understand our responsibility as public service employees to create and maintain respectful and inclusive workplaces.',
-        'values' => [
-            'stronglyDisagree' => 'Strongly Disagree',
-            'disagree' => 'Disagree',
-            'neutral' => 'Neutral',
-            'agree' => 'Agree',
-            'stronglyAgree' => 'Strongly Agree'
-        ],
-        'inputType' => 'radio'
-    ]
-];
 
-$chart_scripts = '';
+function filterResponsesByDate($response_data, $start_date = 0, $end_date = 0) {
+    
+    # if we aren't provided either date, immediately return
+    if ($start_date == 0 && $end_date == 0) {
+        return $response_data;
+    }
+
+    $responses_by_date = array();
+    $timezone = new DateTimeZone('UTC');
+
+    # If we have a start date, build and set to start of day
+    if ($start_date !== 0) {
+        $start_date_beginning = DateTimeImmutable::createFromFormat('Y-m-d|', $start_date, $timezone);
+    }
+
+    # If we have an end date, build and set to the end of the day
+    if ($end_date !== 0) {
+        $end_date_end = DateTimeImmutable::createFromFormat('Y-m-d|', $end_date, $timezone);
+        $end_date_end = $end_date_end->setTime(23, 59, 59, 999999);
+    }
+
+    # if we have both fields
+    if (isset($start_date_beginning) && isset($end_date_end)) {
+        foreach ($response_data as $response) {
+            $submitted_at = new DateTimeImmutable($response['form']['submittedAt']);
+            
+            if ($submitted_at >= $start_date_beginning && $submitted_at <= $end_date_end) {
+                array_push($responses_by_date, $response);
+            }
+        }
+        return $responses_by_date;
+    }
+    # if we have a start date but no end date
+    elseif (isset($start_date_beginning) && !isset($end_date_end)) {
+        foreach ($response_data as $response) {
+            $submitted_at = new DateTimeImmutable($response['form']['submittedAt']);
+            
+            # only check if we're greater than start date
+            if ($submitted_at >= $start_date_beginning) {
+                array_push($responses_by_date, $response);
+            }
+        }
+        return $responses_by_date;
+    }
+    # if we have an end date but no start date
+    elseif (!isset($start_date_beginning) && isset($end_date_end)) {
+        foreach ($response_data as $response) {
+            $submitted_at = new DateTimeImmutable($response['form']['submittedAt']);
+            
+            # only check if we're less than end date
+            if ($submitted_at <= $end_date_end) {
+                array_push($responses_by_date, $response);
+            }
+        }
+        return $responses_by_date;
+    }
+    
+}
+
 
 
 function compileResponses($response_data) {
@@ -245,6 +247,8 @@ function compileResponses($response_data) {
     }
     return $responses;
 }
+
+$chart_scripts = '';
 
 $compiled_responses = compileResponses($response_data_processed);
 
@@ -412,22 +416,37 @@ function createTextResponses($question, $responses) {
     <div class="card sticky-top m-auto z-0 overflow-hidden" style="top: 65px; max-width: 310px;">
         <form action="evaluation-report.php" method="get">
         <h5 class="card-header">Filter Results</h5>
-        <ul class="list-group list-group-flush">
-        <?php foreach($classes as $class): ?>
-            <li class="list-group-item">
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="classCode" id="<?= $class ?>-radio" value="<?= $class ?>" autocomplete="off" <?= $class === $class_code ? 'checked=""' : '' ?>>
-                    <label class="form-check-label" for="<?= $class ?>-radio"><?= $class ?></label>
-                </div>
-            </li>
-        <?php endforeach ?>
+        <div class="card-body">
+            <h6 class="card-title text-body-secondary mb-0">By Offering</h6>
+        </div> <!-- /card-body -->
+        <ul class="list-group">
             <li class="list-group-item">
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="classCode" id="all-radio" value="0" autocomplete="off" <?= $class_code == 0 ? 'checked=""' : '' ?>>
                     <label class="form-check-label" for="all-radio">All</label>
                 </div>
             </li>
+            <?php foreach($classes as $class): ?>
+            <li class="list-group-item">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="classCode" id="<?= $class ?>-radio" value="<?= $class ?>" autocomplete="off" <?= $class === $class_code ? 'checked=""' : '' ?>>
+                    <label class="form-check-label" for="<?= $class ?>-radio"><?= $class ?></label>
+                </div>
+            </li>
+            <?php endforeach ?>
+            
         </ul>
+        <div class="card-body">
+            <h6 class="card-title text-body-secondary mb-2">By Date Range</h6>
+            <div class="input-group input-group-sm mb-2">
+                <label class="input-group-text" for="startDate">Start Date</label>
+                <input type="date" class="form-control" name="startDate" id="startDate"> 
+            </div>
+            <div class="input-group input-group-sm mb-2">
+                <label class="input-group-text" for="endDate">End Date</label>
+                <input type="date" class="form-control" name="endDate" id="endDate"> 
+            </div>
+        </div>
         <input type="hidden" id="form-id" name="formid" value="<?= $form_id ?>">
         <div class="card-footer">
             <button type="submit" class="btn btn-primary">Apply</button>	
