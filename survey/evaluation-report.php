@@ -3,11 +3,7 @@ opcache_reset();
 $path = '../inc/lsapp.php';
 require($path); 
 
-$form_id = (isset($_GET['formid'])) ? $_GET['formid'] : 0;
-$class_code = (isset($_GET['classCode'])) ? $_GET['classCode'] : 0;
-$alert = '';
-$title = 'Course Survey Report';
-$data_path = '../data/surveys/';
+
 
 // testing link - http://localhost:8080/lsapp/survey/evaluation-report.php?formid=7b6cd68b-85b9-41c3-b725-97339b06cc6e
 // testing link with class - http://localhost:8080/lsapp/survey/evaluation-report.php?formid=7b6cd68b-85b9-41c3-b725-97339b06cc6e&classCode=ITEM-2014-55
@@ -15,6 +11,9 @@ $data_path = '../data/surveys/';
 /**
  * Take the form id, find the matching config
  * and return the corresponding questions map array
+ * 
+ * @param $form_id the CHEFS form id
+ * @return null
  */
 function getQuestionsConfig($form_id) {
     global $alert, $title, $data_path;
@@ -50,12 +49,12 @@ function getQuestionsConfig($form_id) {
     return;
 }
 
-// populate our response map from the url form id
-$response_map = getQuestionsConfig($form_id);
-
 /**
- * Take the form id, and return all
- * responses as an associative array
+ * Take the form id, find the responses json file
+ * and return all responses as an associative array
+ * 
+ * @param string $form_id the CHEFS form id
+ * @return array an associative array of responses
  */
 function getResponses($form_id) {
     global $alert, $data_path;
@@ -81,10 +80,13 @@ function getResponses($form_id) {
     return $response_data;
 
 }
-$response_data = getResponses($form_id);
+
 
 /**
- * Return an array of unique class codes across responses
+ * Find all of the unique class codes in our responses
+ * 
+ * @param array $response_data an associative array of responses
+ * @return array an array of class codes if provided or an empty array
  */
 function getResponseClasses($response_data) {
     global $alert;
@@ -99,10 +101,15 @@ function getResponseClasses($response_data) {
     return $classes;
 
 }
-$classes = getResponseClasses($response_data);
+
 
 /**
- * Returns a filtered array of responses
+ * Returns a filtered array of responses that contain the provided class code
+ * 
+ * @param array $response_data an associative array of responses
+ * @param string $class_code class code if provided else 0
+ * 
+ * @return array $response_data a filtered associative array of responses
  */
 function filterResponsesByClass($response_data, $class_code = 0) {
     $response_data_by_class = array();
@@ -120,13 +127,18 @@ function filterResponsesByClass($response_data, $class_code = 0) {
 
 }
 
-if ($class_code && in_array($class_code, $classes)) {
-    $response_data_processed = filterResponsesByClass($response_data, $class_code);
-} else {
-    $response_data_processed = $response_data;
-}
 
 
+/**
+ * Filter response data by greater than start date,
+ * less than end date, or both if provided
+ * 
+ * @param array $response_data an associative array of responses
+ * @param string $start_date a date string if provided or 0
+ * @param string $end_date a date string if provided or 0
+ * 
+ * @return array $response_data a filtered associative array of responses
+ */
 function filterResponsesByDate($response_data, $start_date = 0, $end_date = 0) {
     
     # if we aren't provided either date, immediately return
@@ -186,8 +198,14 @@ function filterResponsesByDate($response_data, $start_date = 0, $end_date = 0) {
     
 }
 
-
-
+/**
+ * Take our filtered raw responses array, and compile into 
+ * a summary array for display/export
+ * 
+ * @param array $response_data an associative array of responses
+ * 
+ * @return array $responses a compiled summary of the responses
+ */
 function compileResponses($response_data) {
     global $response_map;
     global $chart_scripts;
@@ -248,10 +266,17 @@ function compileResponses($response_data) {
     return $responses;
 }
 
-$chart_scripts = '';
-
-$compiled_responses = compileResponses($response_data_processed);
-
+/**
+ * Takes the question, and the compiled responses, and creates the
+ * html for the div containing the chart, totals, and percent bars
+ * 
+ * also populates the required javascript into $chart_scripts
+ * 
+ * @param string $question the question id/key
+ * @param array $responses the compiled responses
+ * 
+ * @return string $html the html for a response div and content within
+ */
 function createChartForRadio($question, $responses) {
     global $response_map;
     global $chart_scripts;
@@ -360,6 +385,15 @@ function createChartForRadio($question, $responses) {
     
 }
 
+/**
+ * Takes the question, and the compiled responses, and creates the
+ * html for the div containing the list of responses
+ * 
+ * @param string $question the question id/key
+ * @param array $responses the compiled responses
+ * 
+ * @return string $html the html for a response div and content within
+ */
 function createTextResponses($question, $responses) {
     global $response_map;
 
@@ -378,6 +412,34 @@ function createTextResponses($question, $responses) {
     return $html;
 
 }
+
+$form_id = (isset($_GET['formid'])) ? $_GET['formid'] : 0;
+$class_code = (isset($_GET['classCode'])) ? $_GET['classCode'] : 0;
+$alert = '';
+$title = 'Course Survey Report';
+$data_path = '../data/surveys/';
+
+// populate our response map from the url form id
+$response_map = getQuestionsConfig($form_id);
+
+$response_data = getResponses($form_id);
+
+$classes = getResponseClasses($response_data);
+
+if ($class_code && in_array($class_code, $classes)) {
+    $response_data_processed = filterResponsesByClass($response_data, $class_code);
+} else {
+    $response_data_processed = $response_data;
+}
+
+# filterResponsesByDate
+
+$chart_scripts = '';
+
+$compiled_responses = compileResponses($response_data_processed);
+
+
+
 
 
 
@@ -457,10 +519,24 @@ function createTextResponses($question, $responses) {
 
 
 <div class="col-9">
+
+<div class="container-lg">
+
+    <?php if (strlen($alert) > 0): ?>
+        <!-- Info alerts -->
+        <div class="alert alert-info" role="alert">
+            <?= $alert ?>
+        </div>
+        <!-- Warnngi alerts & Errors -->
+        <!-- TODO -->
+    <?php endif; ?>
+
+</div>
+
 <div class="container-lg p-lg-5 p-4 bg-secondary-subtle rounded">
      
-    <!-- Alerts & Errors -->
-    <span style="background-color: yellow;"><strong><?= $alert ?></strong></span>
+    
+    
     
 
    
