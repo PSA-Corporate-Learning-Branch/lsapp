@@ -150,12 +150,12 @@ function filterResponsesByDate($response_data, $start_date = 0, $end_date = 0) {
     $timezone = new DateTimeZone('UTC');
 
     # If we have a start date, build and set to start of day
-    if ($start_date !== 0) {
+    if (!empty($start_date)) {
         $start_date_beginning = DateTimeImmutable::createFromFormat('Y-m-d|', $start_date, $timezone);
     }
 
     # If we have an end date, build and set to the end of the day
-    if ($end_date !== 0) {
+    if (!empty($end_date)) {
         $end_date_end = DateTimeImmutable::createFromFormat('Y-m-d|', $end_date, $timezone);
         $end_date_end = $end_date_end->setTime(23, 59, 59, 999999);
     }
@@ -196,6 +196,8 @@ function filterResponsesByDate($response_data, $start_date = 0, $end_date = 0) {
         return $responses_by_date;
     }
     
+    return $responses_by_date;
+
 }
 
 /**
@@ -415,24 +417,39 @@ function createTextResponses($question, $responses) {
 
 $form_id = (isset($_GET['formid'])) ? $_GET['formid'] : 0;
 $class_code = (isset($_GET['classCode'])) ? $_GET['classCode'] : 0;
+$start_date = $_GET['startDate'] ?? 0;
+$end_date = $_GET['endDate'] ?? 0;
+
 $alert = '';
+$alert_warning = '';
+
 $title = 'Course Survey Report';
 $data_path = '../data/surveys/';
 
-// populate our response map from the url form id
+// get our response map from the config using form id
 $response_map = getQuestionsConfig($form_id);
 
+// load our responses json file
 $response_data = getResponses($form_id);
 
+// get an array of class codes that are included in the response data
 $classes = getResponseClasses($response_data);
 
-if ($class_code && in_array($class_code, $classes)) {
+// if a class code is provided, filter to responses from those classes
+if ($class_code != 0 && in_array($class_code, $classes)) {
     $response_data_processed = filterResponsesByClass($response_data, $class_code);
-} else {
+}
+// if a class code is provided, but we don't have any responses for it
+elseif ($class_code != 0 && !in_array($class_code, $classes)) {
+    $response_data_processed = array();
+    $alert_warning .= "No responses for this class (\"" . $class_code . "\").<br>";
+}
+// otherwise, pass along all the responses
+else {
     $response_data_processed = $response_data;
 }
 
-# filterResponsesByDate
+$responses_filtered_by_date = filterResponsesByDate($response_data_processed, $start_date, $end_date);
 
 $chart_scripts = '';
 
@@ -462,8 +479,8 @@ $compiled_responses = compileResponses($response_data_processed);
 ?>
 
 <pre>
-    <?php //print_r(gettype($response_data)) ?>
-    <?php //rint_r($class_code); ?>
+    <?php // print_r(gettype($responses_filtered_by_date)) ?>
+    <?php // print_r($responses_filtered_by_date); ?>
 </pre>
 
 <div class="container-fluid">
@@ -527,18 +544,22 @@ $compiled_responses = compileResponses($response_data_processed);
         <div class="alert alert-info" role="alert">
             <?= $alert ?>
         </div>
-        <!-- Warnngi alerts & Errors -->
+        <!-- Warning alerts & Errors -->
         <!-- TODO -->
+    <?php endif; ?>
+    <?php if (strlen($alert_warning) > 0): ?>
+        <div class="alert alert-warning" role="alert">
+            <?= $alert_warning ?>
+        </div>
     <?php endif; ?>
 
 </div>
 
+<!-- if we don't have any responses, don't show the chart area -->
+<?php if (count($compiled_responses) > 0): ?>
+
 <div class="container-lg p-lg-5 p-4 bg-secondary-subtle rounded">
      
-    
-    
-    
-
    
     <?php
     foreach($compiled_responses as $question => $response) {
@@ -568,6 +589,7 @@ $compiled_responses = compileResponses($response_data_processed);
     
 
 </div> <!-- /container -->
+<?php endif; // count if we have responses ?> 
 </div> <!-- /col -->
 
 
