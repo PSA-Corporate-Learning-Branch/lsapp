@@ -64,11 +64,22 @@ usort($inactiveCourses, function($a, $b) {
         <div class="card-header">
             <div class="mb-0">
             <?php 
-            $statustype = 'primary';
-            if($partner["status"] != 'active') $statustype = 'warning'; 
+            switch ($partner["status"]) {
+                case 'requested':
+                    $statustype = 'warning';
+                        break;
+                case 'active':
+                    $statustype = 'success';
+                    break;
+                case 'inactive':
+                    $statustype = 'danger';
+                    break;
+                default:
+                    $statustype = 'secondary';
+            }
             ?>
-                <span class="badge bg-<?= $statustype ?>">
-                    <?php echo htmlspecialchars($partner["status"]); ?>
+                <span class="badge bg-<?= $statustype ?>-subtle text-<?= $statustype ?>-emphasis">
+                    <?php echo htmlspecialchars(ucfirst($partner["status"])); ?>
                 </span>
             </div>
             <h2 class="mb-0"> <?php echo htmlspecialchars($partner["name"]); ?> </h2>
