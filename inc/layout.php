@@ -286,10 +286,10 @@ $teams = getTeams();
 			</a>
 			<div class="dropdown-menu" aria-labelledby="admindrop">
 			
-				<a class="dropdown-item" href="/lsapp/admin.php" class="">Admin Dashboard</a>
+				<a class="dropdown-item" href="/lsapp/admin.php">Admin Dashboard</a>
 				<a class="dropdown-item" href="/lsapp/shipping-outgoing.php">Shipping Dashboard</a>
-				<a class="dropdown-item" href="/lsapp/venues-dashboard.php" class="">Venues Dashboard</a>
-				<a class="dropdown-item" href="/lsapp/materials.php" class="">Materials Dashboard</a>
+				<a class="dropdown-item" href="/lsapp/venues-dashboard.php">Venues Dashboard</a>
+				<a class="dropdown-item" href="/lsapp/materials.php">Materials Dashboard</a>
 				<a class="dropdown-item" href="/lsapp/av-dashboard.php">AV Dashboard</a>
 				<a class="dropdown-item" href="/lsapp/elm-sync-upload.php">Learning System Synchronize</a>
 				<a class="dropdown-item" href="/lsapp/course-feed/">LearningHUB Synchronize</a>
