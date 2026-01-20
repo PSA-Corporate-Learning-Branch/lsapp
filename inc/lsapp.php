@@ -843,9 +843,6 @@ function getPartnerIdByName($partnerName) {
 	if($partnerName === 'CIRMO') {
 		return 78; // Maps to Corporate Information and Records Management Office
 	}
-	if($partnerName === 'Procurement Strategy and Governance Branch') {
-		return 372; // Maps to Unknown partner
-	}
 	
 	$partners = getAllPartners();
 	foreach($partners as $partner) {

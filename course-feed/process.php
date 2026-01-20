@@ -139,7 +139,7 @@ function mapPartnerCode($code) {
         'Priorities & Innovation' => 'Leadership, Engagement and Priority Initiatives',
         'CIRMO' => 'Corporate Information and Records Management Office',
         'DWCS' => 'Digital Workplace and Collaboration Services Branch',
-        'Procurement Strategy Gov' => 'Procurement Strategy and Governance Branch',
+        'Procurement Strategy Gov' => 'Procurement and Contract Management Learning (CITZ)',
         'Service BC Web Services Branch' => 'Service BC - Web Services Branch',
         'REDI' => 'PSA Reconciliation, Equity, Diversity, and Inclusion Branch (REDI)',
         // Add other mappings as needed

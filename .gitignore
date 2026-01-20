@@ -11,9 +11,7 @@
 /rosters
 /data
 /course-change/requests
-/course-feed/data/courses.csv
-/course-feed/data/bcps-corporate-learning-courses.json
-/course-feed/data/GBC_LEARNINGHUB_SYNC2.csv
+/course-feed/data
 # OS generated files #
 ######################
 .DS_Store
