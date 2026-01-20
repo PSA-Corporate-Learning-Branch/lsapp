@@ -100,13 +100,21 @@ echo getNavigation();
                             <dl class="row mb-0">
                                 <dt class="col-sm-4">Status</dt>
                                 <dd class="col-sm-8">
-                                    <span class="badge bg-<?= $partner['status'] === 'active' ? 'success' : 'secondary' ?>">
-                                        <?= htmlspecialchars($partner['status']) ?>
+                                    <?php
+                                    $badgeClass = 'bg-secondary-subtle text-secondary-emphasis';
+                                    if ($partner['status'] === 'active') {
+                                        $badgeClass = 'bg-success-subtle text-success-emphasis';
+                                    } elseif ($partner['status'] === 'inactive') {
+                                        $badgeClass = 'bg-danger-subtle text-danger-emphasis';
+                                    }
+                                    ?>
+                                    <span class="badge <?= $badgeClass ?>">
+                                        <?= htmlspecialchars(ucfirst($partner['status'])) ?>
                                     </span>
                                 </dd>
 
                                 <dt class="col-sm-4">Type</dt>
-                                <dd class="col-sm-8"><?= htmlspecialchars($partner['type']) ?></dd>
+                                <dd class="col-sm-8"><?= htmlspecialchars(ucfirst($partner['type'])) ?></dd>
 
                                 <?php if (!empty($partner['url'])): ?>
                                 <dt class="col-sm-4">Website</dt>
@@ -170,11 +178,19 @@ echo getNavigation();
                                                     <small class="text-muted"><?= htmlspecialchars($course['method']) ?></small>
                                                 </div>
                                                 <div class="text-end">
-                                                    <span class="badge bg-<?= $course['status'] === 'Active' ? 'success' : 'secondary' ?>">
+                                                    <?php
+                                                    $badgeClass = 'bg-secondary-subtle text-secondary-emphasis';
+                                                    if ($course['status'] === 'Active') {
+                                                        $courseBadgeClass = 'bg-success-subtle text-success-emphasis';
+                                                    } elseif ($course['status'] === 'Inactive') {
+                                                        $courseBadgeClass = 'bg-danger-subtle text-danger-emphasis';
+                                                    } 
+                                                    ?>
+                                                    <span class="badge <?= $courseBadgeClass ?> mb-1">
                                                         <?= htmlspecialchars($course['status']) ?>
                                                     </span>
                                                     <?php if ($course['hub_include'] === 'Yes'): ?>
-                                                        <br><small class="badge bg-dark">HUB</small>
+                                                        <br><small class="badge bg-dark-subtle text-dark-emphasis">HUB</small>
                                                     <?php endif; ?>
                                                 </div>
                                             </div>

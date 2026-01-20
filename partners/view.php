@@ -198,9 +198,9 @@ usort($inactiveCourses, function($a, $b) {
                                 </div>
                                 <div class="hub-status ms-2">
                                     <?php if ($course[53] == 'Yes' || $course[53] == 1): ?>
-                                        <span class="badge bg-success">Learning<strong>HUB</strong></span>
+                                        <span class="badge bg-success-subtle text-success-emphasis">Learning<strong>HUB</strong></span>
                                     <?php else: ?>
-                                        <span class="badge bg-light text-dark">Learning<strong>HUB</strong></span>
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis"><s>Learning<strong>HUB</strong></s></span>
                                     <?php endif ?>
                                 </div>
                             </div>
@@ -226,9 +226,9 @@ usort($inactiveCourses, function($a, $b) {
                                 </div>
                                 <div class="hub-status ms-2">
                                     <?php if ($course[53] == 'Yes' || $course[53] == 1): ?>
-                                        <span class="badge bg-success">Learning<strong>HUB</strong></span>
+                                        <span class="badge bg-success-subtle text-success-emphasis">Learning<strong>HUB</strong></span>
                                     <?php else: ?>
-                                        <span class="badge bg-light text-dark">Learning<strong>HUB</strong></span>
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis"><s>Learning<strong>HUB</strong></s></span>
                                     <?php endif ?>
                                 </div>
                             </div>

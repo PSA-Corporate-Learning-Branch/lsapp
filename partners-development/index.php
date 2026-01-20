@@ -93,11 +93,19 @@ echo getNavigation();
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <span class="badge bg-<?= $partner['status'] === 'active' ? 'success' : 'secondary' ?>">
-                                            <?= htmlspecialchars($partner['status']) ?>
+                                        <?php
+                                        $badgeClass = 'bg-secondary-subtle text-secondary-emphasis';
+                                        if ($partner['status'] === 'active') {
+                                            $badgeClass = 'bg-success-subtle text-success-emphasis';
+                                        } elseif ($partner['status'] === 'inactive') {
+                                            $badgeClass = 'bg-danger-subtle text-danger-emphasis';
+                                        }
+                                        ?>
+                                        <span class="badge <?= $badgeClass ?>">
+                                            <?= htmlspecialchars(ucfirst($partner['status'])) ?>
                                         </span>
                                     </td>
-                                    <td><?= htmlspecialchars($partner['type']) ?></td>
+                                    <td><?= htmlspecialchars(ucfirst($partner['type'])) ?></td>
                                     <td>
                                         <?php if (!empty($partner['url'])): ?>
                                             <a href="<?= htmlspecialchars($partner['url']) ?>" target="_blank" rel="noopener">
