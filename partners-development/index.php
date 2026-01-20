@@ -7,13 +7,14 @@ $error = $_GET['error'] ?? '';
 // Load development partners
 $partners = getAllDevPartners();
 
-
-getScripts();
-
-echo getHeader('Development Partners');
-echo getNavigation();
 ?>
+<?php getHeader(); ?>
+<title>Development Partners</title>
 
+<?php getScripts(); ?>
+
+<body>
+<?php getNavigation(); ?>
 <div class="container">
     <h1>Corporate Learning Partners</h1>
 
@@ -162,3 +163,4 @@ function confirmDelete(id, name) {
 include('../templates/javascript.php');
 include('../templates/footer.php');
 ?>
+</body>
