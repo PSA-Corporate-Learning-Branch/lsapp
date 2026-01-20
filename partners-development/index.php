@@ -163,4 +163,3 @@ function confirmDelete(id, name) {
 include('../templates/javascript.php');
 include('../templates/footer.php');
 ?>
-</body>

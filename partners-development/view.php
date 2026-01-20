@@ -8,29 +8,7 @@ if (empty($id)) {
 }
 
 // Load development partner
-$partnersFile = '../data/development-partners.csv';
-$partner = null;
-
-if (file_exists($partnersFile)) {
-    $data = array_map('str_getcsv', file($partnersFile));
-    array_shift($data); // Remove header
-    foreach ($data as $row) {
-        if (!empty($row[0]) && $row[0] == $id) {
-            $partner = [
-                'id' => $row[0] ?? '',
-                'status' => $row[1] ?? '',
-                'type' => $row[2] ?? '',
-                'name' => $row[3] ?? '',
-                'description' => $row[4] ?? '',
-                'url' => $row[5] ?? '',
-                'contact_name' => $row[6] ?? '',
-                'contact_email' => $row[7] ?? ''
-            ];
-            break;
-        }
-    }
-}
-
+$partner = getDevPartnerByID($id);
 if (!$partner) {
     header('Location: index.php?error=Partner not found');
     exit;
@@ -74,11 +52,14 @@ if (!empty($courseIds)) {
         return strcasecmp($a['name'], $b['name']);
     });
 }
-getScripts();
-echo getHeader('Development Partner: ' . $partner['name']);
-echo getNavigation();
 ?>
 
+<?php getHeader(); ?>
+<title>Development Partner: <?= $partner['name'] ?></title>
+<?php getScripts(); ?>
+
+<body>
+<?php getNavigation(); ?>
 <div class="container mt-4">
     <div class="row">
         <div class="col-12">

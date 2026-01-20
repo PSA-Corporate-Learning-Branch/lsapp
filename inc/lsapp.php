@@ -940,10 +940,36 @@ function getAllDevPartners() {
 }
 
 /**
+ * Get a single partner by id
  * 
+ * @return array associative array of dev partner details
  */
 function getDevPartnerByID($partnerid) {
+	// Load development partner
+	$partnersFile = '../data/development-partners.csv';
+	$partner = null;
 
+	if (file_exists($partnersFile)) {
+		$data = array_map('str_getcsv', file($partnersFile));
+		array_shift($data); // Remove header
+		foreach ($data as $row) {
+			if (!empty($row[0]) && $row[0] == $partnerid) {
+				$partner = [
+					'id' => $row[0] ?? '',
+					'status' => $row[1] ?? '',
+					'type' => $row[2] ?? '',
+					'name' => $row[3] ?? '',
+					'description' => $row[4] ?? '',
+					'url' => $row[5] ?? '',
+					'contact_name' => $row[6] ?? '',
+					'contact_email' => $row[7] ?? ''
+				];
+				break;
+			}
+		}
+	}
+
+	return $partner;
 }
 
 //
