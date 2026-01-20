@@ -903,9 +903,48 @@ function getCoursesByPartnerName($partnerIdentifier) {
 }
 
 
+/**
+ * Get an associative array of development partners
+ * 
+ * @return array 
+ */
+function getAllDevPartners() {
+	// Load development partners from CSV
+	$partnersFile = '../data/development-partners.csv';
+	$partners = [];
+	if (file_exists($partnersFile)) {
+		$data = array_map('str_getcsv', file($partnersFile));
+		$headers = array_shift($data); // Remove header row
+		foreach ($data as $row) {
+			if (!empty(array_filter($row))) {
+				$partners[] = [
+					'id' => $row[0] ?? '',
+					'status' => $row[1] ?? '',
+					'type' => $row[2] ?? '',
+					'name' => $row[3] ?? '',
+					'description' => $row[4] ?? '',
+					'url' => $row[5] ?? '',
+					'contact_name' => $row[6] ?? '',
+					'contact_email' => $row[7] ?? ''
+				];
+			}
+		}
+	}
 
+	// Sort by name
+	usort($partners, function($a, $b) {
+		return strcasecmp($a['name'], $b['name']);
+	});
 
+	return $partners;
+}
 
+/**
+ * 
+ */
+function getDevPartnerByID($partnerid) {
+
+}
 
 //
 // Return all development partners for a given course ID
