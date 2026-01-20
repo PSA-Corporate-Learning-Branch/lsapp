@@ -59,9 +59,9 @@
 <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
     <a href="https://corporatelearning.gww.gov.bc.ca/learninghub/" target="_blank" rel="noopener">LearningHUB - Course Catalog</a>
 </div>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+<!-- <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
     <a href="https://learningcurator.gww.gov.bc.ca/" target="_blank" rel="noopener">Learning Curator - Pathways</a>
-</div>
+</div> -->
 <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
     <a href="#" target="_blank" rel="noopener">RightNow (CRM)</a>
 </div>
@@ -114,14 +114,14 @@
     <a href="https://insider.gww.gov.bc.ca/privacy-security/psa-approved-web-applications/" target="_blank" rel="noopener">PSA-approved Web Apps</a>
 </div> -->
 <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://learningcentre.gww.gov.bc.ca/corporate-supply-arrangement/" target="_blank" rel="noopener">Corp. Supply Arrangement</a>
+    <a href="https://corporatelearning.gww.gov.bc.ca/corporate-supply-arrangement/" target="_blank" rel="noopener">Corp. Supply Arrangement</a>
 </div>
 
 
 <details class="mt-4 mb-5">
     <summary>Technical Links</summary>
     <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-        <a href="https://stackoverflow.developer.gov.bc.ca/" target="_blank" rel="noopener">BCGov Stack Overflow</a>
+        <a href="https://github.com/bcgov/bcgov-community-discussions/discussions" target="_blank" rel="noopener">BCGov Community Discussions</a> (new Stack Overflow)
     </div>
     <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
         <a href="https://chat.developer.gov.bc.ca/home" target="_blank" rel="noopener">Rocket.Chat - BCDevXHQ</a>
