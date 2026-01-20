@@ -24,37 +24,37 @@
 </div>
 <?php if(canAccess()): ?>
 <details class="mb-1">
-<summary>More ELM links</summary>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_COURSESTRUCTURE.LM_CI_LA_CMP.GBL">Maintain Courses</a>
-</div>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_COURSESTRUCTURE.LM_DMTHDS_LA_GBL.GBL">Maintain Delivery Methods</a>
-</div>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_RESOURCE_MANAGEMENT.LM_ACT.GBL">Maintain Classes</a>
-</div>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_ADMINISTRATIVE.LM_ROSTER.GBL?PAGE=LM_ROSTER_SRCH">Maintain Class Rosters</a>
-</div>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_RESOURCE_MANAGEMENT.LM_FCLTY_TBL.GBL">Facilities</a>
-</div>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/QUERY_MANAGER.QUERY_VIEWER.GBL?PAGE=QUERY_VIEWER">Query Viewer</a>
-</div>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://learning.gov.bc.ca/psc/CHIPSPLM_17/EMPLOYEE/ELM/q/?ICAction=ICQryNameURL=PUBLIC.GBC_ROSTER_EXPANDED">Expanded Roster Query</a>
-</div>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://learning.gov.bc.ca/psc/CHIPSPLM_1/EMPLOYEE/ELM/q/?ICAction=ICQryNameURL=PUBLIC.GBC_CURRENT_COURSE_INFO">Current Course Stats Query</a>
-</div>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_ADMIN_LEARNING.LM_ADMIN_LEARNING.GBL?PAGE=LM_ADM_FND_LRNR">View All Learning</a>
-</div>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_BUSINESS_OBJECTS.LM_PERSON_INT.GBL">Internal Learners</a>
-</div>
+    <summary>More ELM links</summary>
+    <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_COURSESTRUCTURE.LM_CI_LA_CMP.GBL">Maintain Courses</a>
+    </div>
+    <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_COURSESTRUCTURE.LM_DMTHDS_LA_GBL.GBL">Maintain Delivery Methods</a>
+    </div>
+    <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_RESOURCE_MANAGEMENT.LM_ACT.GBL">Maintain Classes</a>
+    </div>
+    <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_ADMINISTRATIVE.LM_ROSTER.GBL?PAGE=LM_ROSTER_SRCH">Maintain Class Rosters</a>
+    </div>
+    <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_RESOURCE_MANAGEMENT.LM_FCLTY_TBL.GBL">Facilities</a>
+    </div>
+    <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/QUERY_MANAGER.QUERY_VIEWER.GBL?PAGE=QUERY_VIEWER">Query Viewer</a>
+    </div>
+    <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="https://learning.gov.bc.ca/psc/CHIPSPLM_17/EMPLOYEE/ELM/q/?ICAction=ICQryNameURL=PUBLIC.GBC_ROSTER_EXPANDED">Expanded Roster Query</a>
+    </div>
+    <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="https://learning.gov.bc.ca/psc/CHIPSPLM_1/EMPLOYEE/ELM/q/?ICAction=ICQryNameURL=PUBLIC.GBC_CURRENT_COURSE_INFO">Current Course Stats Query</a>
+    </div>
+    <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_ADMIN_LEARNING.LM_ADMIN_LEARNING.GBL?PAGE=LM_ADM_FND_LRNR">View All Learning</a>
+    </div>
+    <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_BUSINESS_OBJECTS.LM_PERSON_INT.GBL">Internal Learners</a>
+    </div>
 </details>
 <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
     <a href="https://corporatelearning.gww.gov.bc.ca/learninghub/" target="_blank" rel="noopener">LearningHUB - Course Catalog</a>
@@ -68,7 +68,6 @@
 <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
     <a href="https://bcgov.sharepoint.com/teams/00440" target="_blank" rel="noopener">CL Branch SharePoint</a>
 </div>
-</details>
 <?php endif ?>
 
 </div>
@@ -120,31 +119,31 @@
 
 
 <details class="mt-4 mb-5">
-<summary>Technical Links</summary>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://stackoverflow.developer.gov.bc.ca/" target="_blank" rel="noopener">BCGov Stack Overflow</a>
-</div>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://chat.developer.gov.bc.ca/home" target="_blank" rel="noopener">Rocket.Chat - BCDevXHQ</a>
-</div>
-<!-- <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="#" target="_blank" rel="noopener">PSA / PSECI Help Jira</a>
-</div> -->
+    <summary>Technical Links</summary>
+    <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="https://stackoverflow.developer.gov.bc.ca/" target="_blank" rel="noopener">BCGov Stack Overflow</a>
+    </div>
+    <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="https://chat.developer.gov.bc.ca/home" target="_blank" rel="noopener">Rocket.Chat - BCDevXHQ</a>
+    </div>
+    <!-- <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="#" target="_blank" rel="noopener">PSA / PSECI Help Jira</a>
+    </div> -->
 
 
-<!-- <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="#" target="_blank" rel="noopener">Kepler Document Server</a>
-</div> -->
+    <!-- <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="#" target="_blank" rel="noopener">Kepler Document Server</a>
+    </div> -->
 
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://cloud.gov.bc.ca/private-cloud/" target="_blank" rel="noopener">BC Gov Private Cloud Platform as a Service</a>
-</div>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://github.com/bcgov" target="_blank" rel="noopener">GitHub BC Gov Org</a>
-</div>
-<div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
-    <a href="https://just-ask-web-bdec76-prod.apps.silver.devops.gov.bc.ca/" target="_blank" rel="noopener">Just Ask! - Add someone to BC Gov Github Org</a>
-</div>
+    <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="https://cloud.gov.bc.ca/private-cloud/" target="_blank" rel="noopener">BC Gov Private Cloud Platform as a Service</a>
+    </div>
+    <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="https://github.com/bcgov" target="_blank" rel="noopener">GitHub BC Gov Org</a>
+    </div>
+    <div class="resource p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
+        <a href="https://just-ask-web-bdec76-prod.apps.silver.devops.gov.bc.ca/" target="_blank" rel="noopener">Just Ask! - Add someone to BC Gov Github Org</a>
+    </div>
 </details>
 </div>
 </div>
