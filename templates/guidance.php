@@ -8,12 +8,14 @@
         </a>
     </div>
     <?php $thisdoer = ''; if($formData['assign_to'] == LOGGED_IN_IDIR) $thisdoer = 'open'; ?>
+    <?php if($guidance) : ?>
     <details class="mb-2" <?= $thisdoer ?>>
         <summary class="mb-2"><?= $cat ?> guidance</summary>
         <div class="p-2 rounded-3 bg-light-subtle">
-        <?= $Parsedown->text($guidance) ?>
+            <?= $Parsedown->text($guidance) ?>
         </div>
     </details>
+    <?php endif; ?>
     <details id="scopeguide">
     <summary class="mb-2">Scope guidance</summary>
         <div class="mb-2 p-2 bg-light-subtle rounded-2">

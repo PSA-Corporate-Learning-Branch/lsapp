@@ -513,6 +513,7 @@ $lockELMFields = ($deets[52] === 'PSA Learning System');
     <div><strong>Active PSA Learning System course</strong></div>
     Fields marked with <span class="text-danger fw-bold">*</span> are synchronized from PSA Learning System (ELM) and cannot be edited here.
     Please use the <a href="/lsapp/course-change/create.php?&courseid=<?= sanitize($deets[0]) ?>" class="alert-link">course update request process</a> to update these fields in ELM.
+    Once edited in ELM, LSApp will automatically sync those changes at 7am, 12pm, and 4pm daily.
 </div>
 <?php endif; ?>
 

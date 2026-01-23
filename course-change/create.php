@@ -36,7 +36,7 @@ if ($changeid) {
     }
 }
 
-function getGuidanceByCategory($cat, $categoriesFile) {
+function getGuidance($categoriesFile) {
     // Check if the JSON file exists
     if (!file_exists($categoriesFile)) {
         return "Error: Categories file not found.";
@@ -47,22 +47,20 @@ function getGuidanceByCategory($cat, $categoriesFile) {
     if (json_last_error() !== JSON_ERROR_NONE) {
         return "Error decoding JSON: " . json_last_error_msg();
     }
-
-    // Search for the category and return the guidance
-    foreach ($categories as $category) {
-        if (isset($category['category']) && $category['category'] === $cat) {
-            return $category['guidance'] ?? "Guidance not found.";
-        }
+    if (!is_array($categories)) {
+        return "Error: Invalid categories format.";
+    } else {
+        return $categories;
     }
 
-    // Return a message if the category was not found
-    return "Category not found.";
+    // return "Category not found.";
+    return false;
 }
 
 // Example usage
 $cat = isset($_GET['cat']) ? urldecode($_GET['cat']) : '';
 $categoriesFile = '../data/course-change-guidance.json';
-$guidance = getGuidanceByCategory($cat, $categoriesFile);
+$guidance = getGuidance($categoriesFile) ?? '';
 $peopleActive = getPeopleAll($filteractive = true);
 
 ?>
@@ -92,8 +90,8 @@ $peopleActive = getPeopleAll($filteractive = true);
 <div class="container">
     <div class="row justify-content-md-center">
         <div class="col-md-12">
-            <h1 class=""><a href="/lsapp/course.php?courseid=<?= $deets[0] ?>"><?= $deets[2] ?></a></h1>
-            <h2><?= $cat ?> Request <small><?= $formData['changeid'] ?? '' ?></small></h2>
+            <h1>Course Change Request <small><?= $formData['changeid'] ?? '' ?></small></h1>
+            <h2><a href="/lsapp/course.php?courseid=<?= $deets[0] ?>"><?= $deets[2] ?></a></h2>
             <?php if(!empty($formData['date_created'])): ?>
             <div>
                 Created <?php echo date('Y-m-d H:i:s', $formData['date_created']); ?> 
@@ -106,6 +104,19 @@ $peopleActive = getPeopleAll($filteractive = true);
     <div class="row justify-content-md-center">
     <div class="col-md-6">
         
+        <?php if($deets[52] == "PSA Learning System"): ?>
+        <div class="alert alert-primary">
+        <p>Please note: This is a PSA Learning System (ELM) course and requires special handling for certain types of changes.</p>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Changes to the Name, description, topic, audience, keywords, partner, MUST be made in ELM by LST. </li>
+            <li class="list-group-item">Changes made to those data points will automatically sync to LSApp (at 7,12,4 daily). </li>
+            <li class="list-group-item">Changes to the abstract need to manually made in both ELM and LSApp by LST.</li>
+            <li class="list-group-item">Changes to any other aspect of course should NOT been assigned to LST.</li>
+            <li class="list-group-item">Changes to any other aspect of course should be assigned to an available CL Specialist, preferably the developer assigned to the course.</li>
+        </ul>
+        </div>
+        <?php endif; ?>
+
         <?php if (empty($cat)): ?>
             <?php
             $categories = [];
@@ -116,9 +127,10 @@ $peopleActive = getPeopleAll($filteractive = true);
                 }
             }
             ?>
+            <div class="alert alert-warning">
             <form method="get" class="mb-3">
                 <input type="hidden" name="courseid" value="<?= htmlspecialchars($courseid) ?>">
-                <div class="alert alert-warning"><strong>Please select a category before proceeding.</strong></div>
+                <strong>Please select a category to proceed.</strong>
                 <label for="category-selector" class="form-label">Category</label>
                 <select id="category-selector" name="cat" class="form-select" required>
                     <option value="" selected>-- Choose a category --</option>
@@ -128,9 +140,10 @@ $peopleActive = getPeopleAll($filteractive = true);
                 </select>
                 <button type="submit" class="btn btn-primary mt-2" id="category-submit" disabled>Continue</button>
             </form>
+            </div>
         <?php endif; ?>
 
-        <div id="form-wrapper" style="opacity: <?= empty($cat) ? '0.5' : '1' ?>">
+        <div id="form-wrapper" style="opacity: <?= empty($cat) ? '0.0' : '1' ?>">
         <form action="controller.php" method="post" enctype="multipart/form-data" class="needs-validation mt-3" novalidate>
 
             <!-- Hidden Fields -->
@@ -422,9 +435,22 @@ $peopleActive = getPeopleAll($filteractive = true);
 
 </div>
 <div class="col-md-6">
-    
-<?php require('../templates/guidance.php') ?>
+    <h3>Category Guidance</h3>
+    <p>Refer to the list below for guidance on each category of change and what they each entail. If you have a change that you don't feel fits into the list 
+        caetgories, please contact the Operations & Technology team for assistance.
+    </p>
+    <div class="mb-3" id="category-guidance-container">
+<?php foreach ($guidance as $item): ?>
 
+    <details class="mb-2 p-2 border rounded bg-light-subtle">
+        <summary><strong><?= htmlspecialchars($item['category']) ?></strong></summary>
+        <div class="mt-2 p-3 rounded">
+            <?= $Parsedown->text($item['guidance']) ?>
+        </div>
+    </details>
+
+<?php endforeach; ?>
+</div>
 </div>
 </div>
 
@@ -465,6 +491,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
         selector.addEventListener('change', function () {
             submitButton.disabled = !this.value;
+        });
+    }
+
+    // Expand/Collapse all guidance details
+    const expandAllBtn = document.getElementById('expand-all-guidance');
+    const collapseAllBtn = document.getElementById('collapse-all-guidance');
+    const guidanceContainer = document.getElementById('category-guidance-container');
+
+    if (expandAllBtn && collapseAllBtn && guidanceContainer) {
+        expandAllBtn.addEventListener('click', function () {
+            guidanceContainer.querySelectorAll('details').forEach(function (details) {
+                details.open = true;
+            });
+        });
+
+        collapseAllBtn.addEventListener('click', function () {
+            guidanceContainer.querySelectorAll('details').forEach(function (details) {
+                details.open = false;
+            });
         });
     }
 });
