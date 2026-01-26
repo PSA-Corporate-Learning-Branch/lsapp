@@ -2,12 +2,8 @@
 opcache_reset();
 $path = '../inc/lsapp.php';
 require($path); 
-$partnersFile = "../data/partners.json";
-$partners = file_exists($partnersFile) ? json_decode(file_get_contents($partnersFile), true) : [];
-// Sort partners alphabetically by name
-usort($partners, function($a, $b) {
-    return strcasecmp($a['name'], $b['name']);
-});
+
+$partners = getAllPartners();
 ?>
 
 <?php if(canACcess()): ?>
@@ -72,14 +68,14 @@ usort($partners, function($a, $b) {
                                 <?php 
                                 $status = $partner["status"] ?? 'Unknown';
                                 $badgeClass = 'bg-secondary-subtle text-secondary-emphasis';
-                                if ($status === 'Active') {
+                                if ($status === 'active') {
                                     $badgeClass = 'bg-success-subtle text-success-emphasis';
-                                } elseif ($status === 'Inactive') {
+                                } elseif ($status === 'inactive') {
                                     $badgeClass = 'bg-danger-subtle text-danger-emphasis';
                                 }
                                 ?>
                                 <span class="badge <?php echo $badgeClass; ?>">
-                                    <?php echo htmlspecialchars($status); ?>
+                                    <?php echo htmlspecialchars(ucfirst($status)); ?>
                                 </span>
                             </td>
                             <td class="name">

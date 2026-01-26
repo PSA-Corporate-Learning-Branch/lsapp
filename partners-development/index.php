@@ -4,41 +4,18 @@ require('../inc/lsapp.php');
 $message = $_GET['message'] ?? '';
 $error = $_GET['error'] ?? '';
 
-// Load development partners from CSV
-$partnersFile = '../data/development-partners.csv';
-$partners = [];
-if (file_exists($partnersFile)) {
-    $data = array_map('str_getcsv', file($partnersFile));
-    $headers = array_shift($data); // Remove header row
-    foreach ($data as $row) {
-        if (!empty(array_filter($row))) {
-            $partners[] = [
-                'id' => $row[0] ?? '',
-                'status' => $row[1] ?? '',
-                'type' => $row[2] ?? '',
-                'name' => $row[3] ?? '',
-                'description' => $row[4] ?? '',
-                'url' => $row[5] ?? '',
-                'contact_name' => $row[6] ?? '',
-                'contact_email' => $row[7] ?? ''
-            ];
-        }
-    }
-}
+// Load development partners
+$partners = getAllDevPartners();
 
-// Sort by name
-usort($partners, function($a, $b) {
-    return strcasecmp($a['name'], $b['name']);
-});
-
-getScripts();
-
-echo getHeader('Development Partners');
-echo getNavigation();
 ?>
+<?php getHeader(); ?>
+<title>Development Partners</title>
 
+<?php getScripts(); ?>
+
+<body>
+<?php getNavigation(); ?>
 <div class="container">
-    
     <h1>Corporate Learning Partners</h1>
 
     <?php include('../templates/partner-nav.php'); ?>
@@ -93,11 +70,19 @@ echo getNavigation();
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <span class="badge bg-<?= $partner['status'] === 'active' ? 'success' : 'secondary' ?>">
-                                            <?= htmlspecialchars($partner['status']) ?>
+                                        <?php
+                                        $badgeClass = 'bg-secondary-subtle text-secondary-emphasis';
+                                        if ($partner['status'] === 'active') {
+                                            $badgeClass = 'bg-success-subtle text-success-emphasis';
+                                        } elseif ($partner['status'] === 'inactive') {
+                                            $badgeClass = 'bg-danger-subtle text-danger-emphasis';
+                                        }
+                                        ?>
+                                        <span class="badge <?= $badgeClass ?>">
+                                            <?= htmlspecialchars(ucfirst($partner['status'])) ?>
                                         </span>
                                     </td>
-                                    <td><?= htmlspecialchars($partner['type']) ?></td>
+                                    <td><?= htmlspecialchars(ucfirst($partner['type'])) ?></td>
                                     <td>
                                         <?php if (!empty($partner['url'])): ?>
                                             <a href="<?= htmlspecialchars($partner['url']) ?>" target="_blank" rel="noopener">

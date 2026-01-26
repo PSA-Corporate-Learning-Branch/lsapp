@@ -803,10 +803,11 @@ function getPartnerNameById($partnerId) {
 	return $partnerId;
 }
 
-//
-// Get all partners from partners.json
-// Returns array of partner objects
-//
+/**
+ * Get all partners from partners.json
+ * 
+ * @return array<string,mixed> of partners
+ */
 function getAllPartners() {
 	$path = build_path(BASE_DIR, 'data', 'partners.json');
 	if(!file_exists($path)) {
@@ -816,7 +817,12 @@ function getAllPartners() {
 	$json = file_get_contents($path);
 	$partners = json_decode($json, true);
 	
+	usort($partners, function($a, $b) {
+		return $a['name'] <=> $b['name'];
+	});
+
 	return $partners ? $partners : [];
+
 }
 
 //
@@ -897,9 +903,74 @@ function getCoursesByPartnerName($partnerIdentifier) {
 }
 
 
+/**
+ * Get an associative array of development partners
+ * 
+ * @return array 
+ */
+function getAllDevPartners() {
+	// Load development partners from CSV
+	$partnersFile = '../data/development-partners.csv';
+	$partners = [];
+	if (file_exists($partnersFile)) {
+		$data = array_map('str_getcsv', file($partnersFile));
+		$headers = array_shift($data); // Remove header row
+		foreach ($data as $row) {
+			if (!empty(array_filter($row))) {
+				$partners[] = [
+					'id' => $row[0] ?? '',
+					'status' => $row[1] ?? '',
+					'type' => $row[2] ?? '',
+					'name' => $row[3] ?? '',
+					'description' => $row[4] ?? '',
+					'url' => $row[5] ?? '',
+					'contact_name' => $row[6] ?? '',
+					'contact_email' => $row[7] ?? ''
+				];
+			}
+		}
+	}
 
+	// Sort by name
+	usort($partners, function($a, $b) {
+		return strcasecmp($a['name'], $b['name']);
+	});
 
+	return $partners;
+}
 
+/**
+ * Get a single partner by id
+ * 
+ * @return array associative array of dev partner details
+ */
+function getDevPartnerByID($partnerid) {
+	// Load development partner
+	$partnersFile = '../data/development-partners.csv';
+	$partner = null;
+
+	if (file_exists($partnersFile)) {
+		$data = array_map('str_getcsv', file($partnersFile));
+		array_shift($data); // Remove header
+		foreach ($data as $row) {
+			if (!empty($row[0]) && $row[0] == $partnerid) {
+				$partner = [
+					'id' => $row[0] ?? '',
+					'status' => $row[1] ?? '',
+					'type' => $row[2] ?? '',
+					'name' => $row[3] ?? '',
+					'description' => $row[4] ?? '',
+					'url' => $row[5] ?? '',
+					'contact_name' => $row[6] ?? '',
+					'contact_email' => $row[7] ?? ''
+				];
+				break;
+			}
+		}
+	}
+
+	return $partner;
+}
 
 //
 // Return all development partners for a given course ID
@@ -2457,7 +2528,32 @@ function getAllTopics () {
 	];
 }
 
-function getAllPlatforms () {
+/**
+ * Get all platforms.
+ * 
+ * Includes values for id, name, description, and link
+ * 
+ * @return array of key-value pairs sorted on name
+ */
+function getAllPlatforms() {
+
+	$path = build_path(BASE_DIR, 'data', 'platforms.json');
+	if(!file_exists($path)) {
+		return null;
+	}
+	$jsonData = file_get_contents($path);
+	$platforms = json_decode($jsonData, true);
+	
+	// Sort by platform name
+    usort($platforms, function($a, $b) {
+        return $a['name'] <=> $b['name'];
+    });
+
+	return $platforms;
+
+}
+
+function getPlatformNames () {
 
 	$path = build_path(BASE_DIR, 'data', 'platforms.json');
 	$jsonData = file_get_contents($path);

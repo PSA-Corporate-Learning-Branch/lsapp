@@ -246,36 +246,43 @@ $teams = getTeams();
 				<a class="dropdown-item" href="/lsapp/course-change/guidance-manage.php">Course Change Guidance</a>
       </div>
     </li>
-    <li class="nav-item">
+    <!-- <li class="nav-item">
 			<a class="nav-link" href="/lsapp/partners/">Partners</a>
-		</li>
+		</li> -->
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="peopledrop" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Colleagues
+      </a>
+      <div class="dropdown-menu" aria-labelledby="peopledrop">
+        <a class="dropdown-item" href="/lsapp/people.php"><strong>All People</strong></a>
+        <hr class="dropdown-divider">
+        <a class="dropdown-item" href="/lsapp/teams-all.php"><strong>CLB Teams</strong></a>
+        <?php foreach($teams as $teamId => $teamDeets): ?>
+          <?php if($teamDeets['isBranch'] == 0 || $teamDeets['name'] == 'Executive Director') continue; ?>
+          <a class="dropdown-item" href="/lsapp/teams-all.php?team=<?= $teamId ?>"><?= $teamDeets['name'] ?></a>
+        <?php endforeach; ?>
+        <hr class="dropdown-divider">
+        <a class="dropdown-item" href="/lsapp/partners/"><strong>Partners</strong></a>
+        <a class="dropdown-item" href="/lsapp/partners/dashboard.php">Partner Admin Dashboard</a>
+        <a class="dropdown-item" href="/lsapp/partners-development/">Development Partners</a>
+      </div>
+    </li>
 		<li class="nav-item dropdown">
 			<a class="nav-link dropdown-toggle" href="#" id="teamsdrop" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 				More 
 			</a>
 			<div class="dropdown-menu" aria-labelledby="teamsdrop">
-				<a class="dropdown-item" href="/lsapp/partners-development/">Development Partners</a>
-				<a class="dropdown-item" href="/lsapp/platforms.php">Platforms</a>
 				<a class="dropdown-item" href="https://bcgov.sharepoint.com/teams/00440" target="_blank">Corporate Learning SharePoint</a>
-				<a class="dropdown-item" href="/lsapp/course-changes.php">All Course Changes</a>
-				<a class="dropdown-item" href="/lsapp/venues.php">Venues</a>
-				<span class="dropdown-item-text fw-bold">Teams &amp; People</span>
-				<a class="dropdown-item" href="/lsapp/people.php">All People</a>
-				<a class="dropdown-item" href="/lsapp/teams-all.php">All Teams</a>
-        <?php foreach($teams as $teamId => $teamDeets): ?>
-          <?php if($teamDeets['isBranch'] == 0 || $teamDeets['name'] == 'Executive Director') continue; ?>
-          <a class="dropdown-item" href="/lsapp/teams-all.php?team=<?= $teamId ?>"><?= $teamDeets['name'] ?></a>
-        <?php endforeach; ?>
-				<hr class="dropdown-divider">
-				<span class="dropdown-item-text fw-bold">Miscellaneous</span>
-        <a class="dropdown-item" href="/lsapp/newsletters/">Newsletter Manager</a>
-				<!-- <a class="dropdown-item" href="/lsapp/learning-hub-partners.php">Learning Hub Partners</a> -->
-				<a class="dropdown-item" href="/lsapp/audits.php">Resource Reviews</a>
 				<a class="dropdown-item" href="/lsapp/function-map.php">Functions</a>
-				<a class="dropdown-item" href="/lsapp/snowplow.php">Snowplow (GDX) Analytics</a>
 				<a class="dropdown-item" href="/lsapp/kepler.php">Kepler Server Access</a>
+        <a class="dropdown-item" href="/lsapp/newsletters/">Newsletter Manager</a>
+				<a class="dropdown-item" href="/lsapp/audits.php">Resource Reviews</a>
+				<a class="dropdown-item" href="/lsapp/snowplow.php">Snowplow (GDX) Analytics</a>
+				<a class="dropdown-item" href="/lsapp/venues.php">Venues</a>
 				<a class="dropdown-item" href="/lsapp/video-embedding-guide.php">Video Embedding Guide</a>
-				<a class="dropdown-item" href="/lsapp/kiosk/">Kiosk</a>
+				<!-- Depricated -->
+        <!-- <a class="dropdown-item" href="/lsapp/course-changes.php">All Course Changes</a> -->
+				<!-- <a class="dropdown-item" href="/lsapp/kiosk/">Kiosk</a> -->
 			</div>
 		</li>
 		
@@ -286,10 +293,10 @@ $teams = getTeams();
 			</a>
 			<div class="dropdown-menu" aria-labelledby="admindrop">
 			
-				<a class="dropdown-item" href="/lsapp/admin.php" class="">Admin Dashboard</a>
+				<a class="dropdown-item" href="/lsapp/admin.php">Admin Dashboard</a>
 				<a class="dropdown-item" href="/lsapp/shipping-outgoing.php">Shipping Dashboard</a>
-				<a class="dropdown-item" href="/lsapp/venues-dashboard.php" class="">Venues Dashboard</a>
-				<a class="dropdown-item" href="/lsapp/materials.php" class="">Materials Dashboard</a>
+				<a class="dropdown-item" href="/lsapp/venues-dashboard.php">Venues Dashboard</a>
+				<a class="dropdown-item" href="/lsapp/materials.php">Materials Dashboard</a>
 				<a class="dropdown-item" href="/lsapp/av-dashboard.php">AV Dashboard</a>
 				<a class="dropdown-item" href="/lsapp/elm-sync-upload.php">Learning System Synchronize</a>
 				<a class="dropdown-item" href="/lsapp/course-feed/">LearningHUB Synchronize</a>

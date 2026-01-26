@@ -8,29 +8,7 @@ if (empty($id)) {
 }
 
 // Load development partner
-$partnersFile = '../data/development-partners.csv';
-$partner = null;
-
-if (file_exists($partnersFile)) {
-    $data = array_map('str_getcsv', file($partnersFile));
-    array_shift($data); // Remove header
-    foreach ($data as $row) {
-        if (!empty($row[0]) && $row[0] == $id) {
-            $partner = [
-                'id' => $row[0] ?? '',
-                'status' => $row[1] ?? '',
-                'type' => $row[2] ?? '',
-                'name' => $row[3] ?? '',
-                'description' => $row[4] ?? '',
-                'url' => $row[5] ?? '',
-                'contact_name' => $row[6] ?? '',
-                'contact_email' => $row[7] ?? ''
-            ];
-            break;
-        }
-    }
-}
-
+$partner = getDevPartnerByID($id);
 if (!$partner) {
     header('Location: index.php?error=Partner not found');
     exit;
@@ -74,11 +52,14 @@ if (!empty($courseIds)) {
         return strcasecmp($a['name'], $b['name']);
     });
 }
-getScripts();
-echo getHeader('Development Partner: ' . $partner['name']);
-echo getNavigation();
 ?>
 
+<?php getHeader(); ?>
+<title>Development Partner: <?= $partner['name'] ?></title>
+<?php getScripts(); ?>
+
+<body>
+<?php getNavigation(); ?>
 <div class="container mt-4">
     <div class="row">
         <div class="col-12">
@@ -100,13 +81,21 @@ echo getNavigation();
                             <dl class="row mb-0">
                                 <dt class="col-sm-4">Status</dt>
                                 <dd class="col-sm-8">
-                                    <span class="badge bg-<?= $partner['status'] === 'active' ? 'success' : 'secondary' ?>">
-                                        <?= htmlspecialchars($partner['status']) ?>
+                                    <?php
+                                    $badgeClass = 'bg-secondary-subtle text-secondary-emphasis';
+                                    if ($partner['status'] === 'active') {
+                                        $badgeClass = 'bg-success-subtle text-success-emphasis';
+                                    } elseif ($partner['status'] === 'inactive') {
+                                        $badgeClass = 'bg-danger-subtle text-danger-emphasis';
+                                    }
+                                    ?>
+                                    <span class="badge <?= $badgeClass ?>">
+                                        <?= htmlspecialchars(ucfirst($partner['status'])) ?>
                                     </span>
                                 </dd>
 
                                 <dt class="col-sm-4">Type</dt>
-                                <dd class="col-sm-8"><?= htmlspecialchars($partner['type']) ?></dd>
+                                <dd class="col-sm-8"><?= htmlspecialchars(ucfirst($partner['type'])) ?></dd>
 
                                 <?php if (!empty($partner['url'])): ?>
                                 <dt class="col-sm-4">Website</dt>
@@ -170,11 +159,19 @@ echo getNavigation();
                                                     <small class="text-muted"><?= htmlspecialchars($course['method']) ?></small>
                                                 </div>
                                                 <div class="text-end">
-                                                    <span class="badge bg-<?= $course['status'] === 'Active' ? 'success' : 'secondary' ?>">
+                                                    <?php
+                                                    $badgeClass = 'bg-secondary-subtle text-secondary-emphasis';
+                                                    if ($course['status'] === 'Active') {
+                                                        $courseBadgeClass = 'bg-success-subtle text-success-emphasis';
+                                                    } elseif ($course['status'] === 'Inactive') {
+                                                        $courseBadgeClass = 'bg-danger-subtle text-danger-emphasis';
+                                                    } 
+                                                    ?>
+                                                    <span class="badge <?= $courseBadgeClass ?> mb-1">
                                                         <?= htmlspecialchars($course['status']) ?>
                                                     </span>
                                                     <?php if ($course['hub_include'] === 'Yes'): ?>
-                                                        <br><small class="badge bg-dark">HUB</small>
+                                                        <br><small class="badge bg-dark-subtle text-dark-emphasis">HUB</small>
                                                     <?php endif; ?>
                                                 </div>
                                             </div>

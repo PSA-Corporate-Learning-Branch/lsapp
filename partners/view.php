@@ -2,8 +2,9 @@
 opcache_reset();
 $path = '../inc/lsapp.php';
 require($path);
-$partnersFile = "../data/partners.json";
-$partners = file_exists($partnersFile) ? json_decode(file_get_contents($partnersFile), true) : [];
+
+$partners = getAllPartners();
+
 $partnerSlug = $_GET['slug'] ?? null;
 $partner = null;
 
@@ -63,11 +64,22 @@ usort($inactiveCourses, function($a, $b) {
         <div class="card-header">
             <div class="mb-0">
             <?php 
-            $statustype = 'primary';
-            if($partner["status"] != 'active') $statustype = 'warning'; 
+            switch ($partner["status"]) {
+                case 'requested':
+                    $statustype = 'warning';
+                        break;
+                case 'active':
+                    $statustype = 'success';
+                    break;
+                case 'inactive':
+                    $statustype = 'danger';
+                    break;
+                default:
+                    $statustype = 'secondary';
+            }
             ?>
-                <span class="badge bg-<?= $statustype ?>">
-                    <?php echo htmlspecialchars($partner["status"]); ?>
+                <span class="badge bg-<?= $statustype ?>-subtle text-<?= $statustype ?>-emphasis">
+                    <?php echo htmlspecialchars(ucfirst($partner["status"])); ?>
                 </span>
             </div>
             <h2 class="mb-0"> <?php echo htmlspecialchars($partner["name"]); ?> </h2>
@@ -186,9 +198,9 @@ usort($inactiveCourses, function($a, $b) {
                                 </div>
                                 <div class="hub-status ms-2">
                                     <?php if ($course[53] == 'Yes' || $course[53] == 1): ?>
-                                        <span class="badge bg-success">Learning<strong>HUB</strong></span>
+                                        <span class="badge bg-success-subtle text-success-emphasis">Learning<strong>HUB</strong></span>
                                     <?php else: ?>
-                                        <span class="badge bg-light text-dark">Learning<strong>HUB</strong></span>
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis"><s>Learning<strong>HUB</strong></s></span>
                                     <?php endif ?>
                                 </div>
                             </div>
@@ -214,9 +226,9 @@ usort($inactiveCourses, function($a, $b) {
                                 </div>
                                 <div class="hub-status ms-2">
                                     <?php if ($course[53] == 'Yes' || $course[53] == 1): ?>
-                                        <span class="badge bg-success">Learning<strong>HUB</strong></span>
+                                        <span class="badge bg-success-subtle text-success-emphasis">Learning<strong>HUB</strong></span>
                                     <?php else: ?>
-                                        <span class="badge bg-light text-dark">Learning<strong>HUB</strong></span>
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis"><s>Learning<strong>HUB</strong></s></span>
                                     <?php endif ?>
                                 </div>
                             </div>

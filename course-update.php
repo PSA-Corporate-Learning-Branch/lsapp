@@ -423,11 +423,8 @@ if(!$deets) {
 $stewsdevs = getCoursePeople($courseid);
 
 // Load partners and platforms from JSON files
-$partnersJson = file_get_contents('data/partners.json');
-$partners = json_decode($partnersJson, true);
-
-$platformsJson = file_get_contents('data/platforms.json');
-$platforms = json_decode($platformsJson, true);
+$partners = getAllPartners();
+$platforms = getAllPlatforms();
 
 // Get taxonomy options
 $topics = getAllTopics();
