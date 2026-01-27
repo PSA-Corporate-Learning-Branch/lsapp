@@ -4,7 +4,37 @@ $path = '../inc/lsapp.php';
 require($path); 
 require('eval-functions.php');
 
+// Include encryption helper for decrypting API passwords
+require_once(dirname(__DIR__) . '/inc/encryption_helper.php');
 
+$alerts = array();
+
+// get form id
+$form_id = '';
+if (isset($_GET['formId'])) {
+    $form_id = $_GET['formId'];
+}
+
+// get config
+$config = getConfig();
+$survey_config = '';
+
+
+// If no form id provided
+if (empty($form_id)) {
+    array_push($alerts, 'No form ID provided.');
+} 
+else {
+    foreach ($config as $survey) {
+        if ($survey['formId'] == $form_id) {
+            $survey_config = $survey;
+        }
+    }
+    // if form id not in config
+    if (empty($survey_config)) {
+        array_push($alerts, 'Survey not found.');
+    }
+}
 
 
 ?>
@@ -40,41 +70,79 @@ require('eval-functions.php');
 
 <h1 class="mb-4">Edit {{ Survey Name }}</h1>
 
+<!-- Alerts -->
+<?php if (count($alerts) > 0): ?>
+    <div class="alert alert-warning" role="alert">
+        <?php foreach($alerts as $alert): ?>
+            <p><?= $alert ?></p>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
+
+
 <!-- <form> -->
 
 <div class="form-section">
     <div class="form-section-title">Survey Information</div>
 
-    <label for="" class="form-label">Form Id</label>
-    <input type="" name="" id="" class="form-control">
+    <label for="FormId" class="form-label">Form Id</label>
+    <input type="text" name="FormId" id="FormId" class="form-control" value="<?= $survey_config['formId'] ?? '' ?>">
 
     <!-- Should this field be limited to supers/admins? -->
-    <label for="" class="form-label">Form Secret</label>
-    <input type="" name="" id="" class="form-control">
+    <label for="FormSecret" class="form-label">Form Secret</label>
+    <input type="password" name="FormSecret" id="FormSecret" class="form-control" value="<?= $survey_config['formSecret'] ?? '' ?>">
 
     <label for="" class="form-label">Assigned Course</label>
     <input type="" name="" id="" class="form-control">
 
-    <label for="" class="form-label">Survey Name</label>
-    <input type="" name="" id="" class="form-control">
+    <label for="SurveyName" class="form-label">Survey Name</label>
+    <input type="text" name="SurveyName" id="SurveyName" class="form-control" value="<?= $survey_config['name'] ?? '' ?>" disabled>
 
-    <label for="" class="form-label">Survey Description</label>
-    <input type="" name="" id="" class="form-control">
+    <label for="SurveyDescription" class="form-label">Survey Description</label>
+    <input type="text" name="SurveyDescription" id="SurveyDescription" class="form-control" value="<?= $survey_config['description'] ?? '' ?>" disabled>
 
-    <label for="" class="form-label">Status</label>
-    <input type="" name="" id="" class="form-control">
+    <label for="Status" class="form-label">Status</label>
+    <select name="Status" id="Status" class="form-select">
+        <?php $statuses = ['pending', 'active', 'inactive']; ?>
+        <?php $config_status = $survey_config['status'] ?? ''; ?>
+        <?php foreach ($statuses as $status): ?>
+            <option value="<?= $status ?>" <?= $config_status == $status ? 'selected' : '' ?>><?= ucfirst($status) ?></option>
+        <?php endforeach; ?>
+    </select>
 
-    <label for="" class="form-label">Published Version</label>
-    <input type="" name="" id="" class="form-control">
+    <label for="PublishedVersion" class="form-label">Published Version</label>
+    <input type="number" name="PublishedVersion" id="PublishedVersion" class="form-control" value="<?= $survey_config['publishedVersion'] ?? '' ?>" disabled>
 
-    <label for="" class="form-label">Version Id</label>
-    <input type="" name="" id="" class="form-control">
+    <label for="PublishedVersionId" class="form-label">Version Id</label>
+    <input type="text" name="PublishedVersionId" id="PublishedVersionId" class="form-control" value="<?= $survey_config['publishedVersionId'] ?? '' ?>" disabled>
+    
 
-    <label for="" class="form-label">Last Sync</label>
-    <input type="" name="" id="" class="form-control">
+    <?php 
+        if (isset($survey_config['lastResponsesUpdated'])) {
+            $last_sync_formatted = date('Y-m-d H:i', $survey_config['lastResponsesUpdated']);
+        }
+    ?>
+    <label for="LastSync" class="form-label">Last Sync</label>
+    <input type="text" name="LastSync" id="LastSync" class="form-control" value="<?= $last_sync_formatted ?? 'Never' ?>" disabled>
 
-    <label for="" class="form-label">Questions</label>
-    <input type="" name="" id="" class="form-control">
+    <p>Questions</p>
+        
+            <?php 
+                $questions = $survey_config['questions'] ?? ''; 
+                //print_r($questions); 
+            ?>
+    <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Question</th>
+                    <th>Response Options</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+    </table>
 
 </div>
 
