@@ -68,7 +68,7 @@ else {
 <div class="row justify-content-md-center">
 <div class="col-md-10">
 
-<h1 class="mb-4">Edit {{ Survey Name }}</h1>
+<h1 class="mb-4">Edit <?= $survey_config['name'] ?? 'Survey' ?></h1>
 
 <!-- Alerts -->
 <?php if (count($alerts) > 0): ?>
@@ -127,11 +127,16 @@ else {
 
     <p>Questions</p>
         
-            <?php 
-                $questions = $survey_config['questions'] ?? ''; 
-                //print_r($questions); 
-            ?>
-    <table class="table table-hover">
+    <?php $questions = $survey_config['questions'] ?? ''; ?>
+    <?php if (!empty($questions)): ?>
+        <?php
+            // remove course and class code questions
+            $questions_filtered = array_filter($questions, function($q) {
+                return $q !== 'courseCode' && $q !== 'classCode';
+            }, ARRAY_FILTER_USE_KEY);
+        ?>
+
+        <table class="table table-striped table-hover">
             <thead>
                 <tr>
                     <th>Type</th>
@@ -140,9 +145,24 @@ else {
                 </tr>
             </thead>
             <tbody>
-
+                <?php foreach($questions_filtered as $question): ?>
+                <?php 
+                    $values = '';
+                    if (isset($question['values']) && is_array($question['values'])) {
+                        foreach($question['values'] as $option) {
+                            $values .= $option . '<br>';
+                        }
+                    }
+                ?>
+                <tr>
+                    <td><?= $question['inputType'] ?></td>
+                    <td><?= $question['label'] ?></td>
+                    <td><?= $values ?></td>
+                </tr>
+                <?php endforeach; ?>
             </tbody>
-    </table>
+        </table>
+    <?php endif; ?>
 
 </div>
 
