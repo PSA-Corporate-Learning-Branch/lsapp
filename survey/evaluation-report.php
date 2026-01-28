@@ -139,7 +139,7 @@ function filterResponsesByClass($response_data, $class_code = 0) {
 function filterResponsesByDate($response_data, $start_date = 0, $end_date = 0) {
     
     // if we aren't provided either date, immediately return
-    if ($start_date == 0 && $end_date == 0) {
+    if (empty($start_date) && empty($end_date)) {
         return $response_data;
     }
 
@@ -449,7 +449,7 @@ if (file_exists("../data/surveys/{$form_id}.json")) {
     // if a class code is provided, but we don't have any responses for it
     elseif ($class_code != 0 && !in_array($class_code, $classes)) {
         $response_data_processed = array();
-        $alert_warning .= "No responses for this class (\"" . $class_code . "\").<br>";
+        $alert_warning .= "<p>No responses found for this class (\"" . $class_code . "\").</p>";
     }
 
     // otherwise, pass along all the responses
@@ -459,36 +459,39 @@ if (file_exists("../data/surveys/{$form_id}.json")) {
 
     // pass through date date inputs and filter if provided
     $responses_filtered_by_date = filterResponsesByDate($response_data_processed, $start_date, $end_date);
+    if (count($responses_filtered_by_date) == 0) {
+        $alert_warning .= "<p>No responses found for the selected dates.</p>";
+    }
 
     // take our filtered raw responses and summarize
-    $compiled_responses = compileResponses($response_data_processed);
+    $compiled_responses = compileResponses($responses_filtered_by_date);
 
 } else {
     // if we don't have a responses file, we'll use this variable to 
     // prevent loading more content after the alerts are added
     $compiled_responses = array();
+    $alert_warning .= "<p>No responses found for this survey.</p>";
 }
 
-// Alerts and Info
 
 // Filtered classes info
 if (!empty($class_code) && count($classes) > 0) {
     $test = !empty($class_code);
-    $alert_info .= "Showing results for {$class_code}.<br>";
+    $alert_info .= "<p>Showing results for {$class_code}.</p>";
 }
 
 /** Filtered dates info */
 // If we have both dates
 if (!empty($start_date) && !empty($end_date)) {
-    $alert_info .= "Showing results between {$start_date} and {$end_date}.<br>";
+    $alert_info .= "<p>Showing results between {$start_date} and {$end_date}.</p>";
 } 
 // if we have a start date but no end date
 else if (!empty($start_date) && empty($end_date)) {
-    $alert_info .= "Showing results after {$start_date}.<br>";
+    $alert_info .= "<p>Showing results after {$start_date}.</p>";
 }
 // if we have an end date but no start date
 else if (empty($start_date) && !empty($end_date)) {
-    $alert_info .= "Showing results before {$end_date}.<br>";
+    $alert_info .= "<p>Showing results before {$end_date}.</p>";
 }
 
 
@@ -582,10 +585,16 @@ else if (empty($start_date) && !empty($end_date)) {
 
 <div class="container-lg">
 
-    <pre>
+    <!-- <pre> -->
         <!-- Testing -->
-        <?php //print_r($form_id); ?>
-    </pre>
+        <?php //print_r($responses_filtered_by_date); ?>
+    <!-- </pre> -->
+
+    <?php if (strlen($alert_warning) > 0): ?>
+        <div class="alert alert-warning" role="alert">
+            <?= $alert_warning ?>
+        </div>
+    <?php endif; ?>
 
     <?php if (strlen($alert_info) > 0): ?>
         <!-- Info alerts -->
@@ -593,11 +602,7 @@ else if (empty($start_date) && !empty($end_date)) {
             <?= $alert_info ?>
         </div>
     <?php endif; ?>
-    <?php if (strlen($alert_warning) > 0): ?>
-        <div class="alert alert-warning" role="alert">
-            <?= $alert_warning ?>
-        </div>
-    <?php endif; ?>
+    
 
 </div>
 
