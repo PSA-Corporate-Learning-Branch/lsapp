@@ -74,8 +74,8 @@ foreach ($courses as $course) {
                 </div>
                 <div class="col-2">
                     <div class="btn-group-vertical btn-group-sm float-end border" role="group" aria-label="Vertical button group">
-                        <a href="#" type="button" class="btn btn-light text-light-emphasis">Edit</a>
-                        <a href="#" type="button" class="btn btn-outline-info text-light-emphasis">View Report</a>
+                        <a href="./edit-survey.php?formId=<?= $survey['formId'] ?>" type="button" class="btn btn-light text-light-emphasis">Edit</a>
+                        <a href="./evaluation-report.php?formId=<?= $survey['formId'] ?>" type="button" class="btn btn-outline-info text-light-emphasis">View Report</a>
                     </div>
                 </div>
                 <hr class="my-1">
