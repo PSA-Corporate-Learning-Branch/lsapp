@@ -5,9 +5,6 @@ require($path);
 
 
 
-// testing link - http://localhost:8080/lsapp/survey/evaluation-report.php?formid=7b6cd68b-85b9-41c3-b725-97339b06cc6e
-// testing link with class - http://localhost:8080/lsapp/survey/evaluation-report.php?formid=7b6cd68b-85b9-41c3-b725-97339b06cc6e&classCode=ITEM-2014-55
-
 /**
  * Take the form id, find the matching config
  * and return the corresponding questions map array
@@ -57,10 +54,10 @@ function getQuestionsConfig($form_id) {
  * @return array an associative array of responses
  */
 function getResponses($form_id) {
-    global $alert, $data_path;
+    global $alert_warning, $data_path;
 
     if (!$form_id) {
-        $alert = 'Form ID not provided';
+        $alert_warning .= ' Form ID not provided. ';
         return;
     }
     
@@ -70,7 +67,7 @@ function getResponses($form_id) {
     $response_contents = file_get_contents($response_file);
     
     if (!$response_contents) {
-        $alert = 'Error opening file.';
+        $alert_warning = ' Error opening file. ';
         return;
     }
 
@@ -141,7 +138,7 @@ function filterResponsesByClass($response_data, $class_code = 0) {
  */
 function filterResponsesByDate($response_data, $start_date = 0, $end_date = 0) {
     
-    # if we aren't provided either date, immediately return
+    // if we aren't provided either date, immediately return
     if ($start_date == 0 && $end_date == 0) {
         return $response_data;
     }
@@ -149,18 +146,18 @@ function filterResponsesByDate($response_data, $start_date = 0, $end_date = 0) {
     $responses_by_date = array();
     $timezone = new DateTimeZone('UTC');
 
-    # If we have a start date, build and set to start of day
+    // If we have a start date, build and set to start of day
     if (!empty($start_date)) {
         $start_date_beginning = DateTimeImmutable::createFromFormat('Y-m-d|', $start_date, $timezone);
     }
 
-    # If we have an end date, build and set to the end of the day
+    // If we have an end date, build and set to the end of the day
     if (!empty($end_date)) {
         $end_date_end = DateTimeImmutable::createFromFormat('Y-m-d|', $end_date, $timezone);
         $end_date_end = $end_date_end->setTime(23, 59, 59, 999999);
     }
 
-    # if we have both fields
+    // if we have both fields
     if (isset($start_date_beginning) && isset($end_date_end)) {
         foreach ($response_data as $response) {
             $submitted_at = new DateTimeImmutable($response['form']['submittedAt']);
@@ -171,24 +168,24 @@ function filterResponsesByDate($response_data, $start_date = 0, $end_date = 0) {
         }
         return $responses_by_date;
     }
-    # if we have a start date but no end date
+    // if we have a start date but no end date
     elseif (isset($start_date_beginning) && !isset($end_date_end)) {
         foreach ($response_data as $response) {
             $submitted_at = new DateTimeImmutable($response['form']['submittedAt']);
             
-            # only check if we're greater than start date
+            // only check if we're greater than start date
             if ($submitted_at >= $start_date_beginning) {
                 array_push($responses_by_date, $response);
             }
         }
         return $responses_by_date;
     }
-    # if we have an end date but no start date
+    // if we have an end date but no start date
     elseif (!isset($start_date_beginning) && isset($end_date_end)) {
         foreach ($response_data as $response) {
             $submitted_at = new DateTimeImmutable($response['form']['submittedAt']);
             
-            # only check if we're less than end date
+            // only check if we're less than end date
             if ($submitted_at <= $end_date_end) {
                 array_push($responses_by_date, $response);
             }
@@ -210,7 +207,6 @@ function filterResponsesByDate($response_data, $start_date = 0, $end_date = 0) {
  */
 function compileResponses($response_data) {
     global $response_map;
-    global $chart_scripts;
 
     if (!$response_map) {
         return;
@@ -415,45 +411,91 @@ function createTextResponses($question, $responses) {
 
 }
 
-$form_id = (isset($_GET['formid'])) ? $_GET['formid'] : 0;
-$class_code = (isset($_GET['classCode'])) ? $_GET['classCode'] : 0;
+$form_id = $_GET['formId'] ?? 0;
+$class_code = $_GET['classCode'] ?? 0;
 $start_date = $_GET['startDate'] ?? 0;
 $end_date = $_GET['endDate'] ?? 0;
 
 $alert = '';
+$alert_info = '';
 $alert_warning = '';
 
-$title = 'Course Survey Report';
+$title = 'Course Survey';
 $data_path = '../data/surveys/';
+
+// class codes included in our responses
+$classes = array();
+
+// to hold our chart javascript
+$chart_scripts = '';
 
 // get our response map from the config using form id
 $response_map = getQuestionsConfig($form_id);
 
-// load our responses json file
-$response_data = getResponses($form_id);
+// check that we have a responses file for this survey
+if (file_exists("../data/surveys/{$form_id}.json")) {
+    
+    // load our responses json file
+    $response_data = getResponses($form_id);
 
-// get an array of class codes that are included in the response data
-$classes = getResponseClasses($response_data);
+    // get an array of class codes that are included in the response data
+    $classes = getResponseClasses($response_data);
 
-// if a class code is provided, filter to responses from those classes
-if ($class_code != 0 && in_array($class_code, $classes)) {
-    $response_data_processed = filterResponsesByClass($response_data, $class_code);
+    // if a class code is provided, filter to responses from those classes
+    if ($class_code != 0 && in_array($class_code, $classes)) {
+        $response_data_processed = filterResponsesByClass($response_data, $class_code);
+    }
+
+    // if a class code is provided, but we don't have any responses for it
+    elseif ($class_code != 0 && !in_array($class_code, $classes)) {
+        $response_data_processed = array();
+        $alert_warning .= "No responses for this class (\"" . $class_code . "\").<br>";
+    }
+
+    // otherwise, pass along all the responses
+    else {
+        $response_data_processed = $response_data;
+    }
+
+    // pass through date date inputs and filter if provided
+    $responses_filtered_by_date = filterResponsesByDate($response_data_processed, $start_date, $end_date);
+
+    // take our filtered raw responses and summarize
+    $compiled_responses = compileResponses($response_data_processed);
+
+} else {
+    // if we don't have a responses file, we'll use this variable to 
+    // prevent loading more content after the alerts are added
+    $compiled_responses = array();
 }
-// if a class code is provided, but we don't have any responses for it
-elseif ($class_code != 0 && !in_array($class_code, $classes)) {
-    $response_data_processed = array();
-    $alert_warning .= "No responses for this class (\"" . $class_code . "\").<br>";
+
+// Alerts and Info
+
+// Filtered classes info
+if (!empty($class_code) && count($classes) > 0) {
+    $test = !empty($class_code);
+    $alert_info .= "Showing results for {$class_code}.<br>";
 }
-// otherwise, pass along all the responses
-else {
-    $response_data_processed = $response_data;
+
+/** Filtered dates info */
+// If we have both dates
+if (!empty($start_date) && !empty($end_date)) {
+    $alert_info .= "Showing results between {$start_date} and {$end_date}.<br>";
+} 
+// if we have a start date but no end date
+else if (!empty($start_date) && empty($end_date)) {
+    $alert_info .= "Showing results after {$start_date}.<br>";
+}
+// if we have an end date but no start date
+else if (empty($start_date) && !empty($end_date)) {
+    $alert_info .= "Showing results before {$end_date}.<br>";
 }
 
-$responses_filtered_by_date = filterResponsesByDate($response_data_processed, $start_date, $end_date);
 
-$chart_scripts = '';
 
-$compiled_responses = compileResponses($response_data_processed);
+
+
+
 
 
 
@@ -465,7 +507,7 @@ $compiled_responses = compileResponses($response_data_processed);
 <?php if(canACcess()): ?>
 
 <?php getHeader() ?>
-    <title>Evaluation Report</title>
+    <title><?= $title ?> Evaluation Report</title>
     <script src="/lsapp/js/list.min.js"></script>
 
 <?php getScripts() ?>
@@ -489,6 +531,7 @@ $compiled_responses = compileResponses($response_data_processed);
     <div class="col-12">
         <h1 class="mb-5 text-center"><?= $title . ' Report' ?></h1>
     </div>
+
 
 
 <div class="col-lg-2" name="side-nav">
@@ -526,7 +569,7 @@ $compiled_responses = compileResponses($response_data_processed);
                 <input type="date" class="form-control" name="endDate" id="endDate"> 
             </div>
         </div>
-        <input type="hidden" id="form-id" name="formid" value="<?= $form_id ?>">
+        <input type="hidden" id="form-id" name="formId" value="<?= $form_id ?>">
         <div class="card-footer">
             <button type="submit" class="btn btn-primary">Apply</button>	
         </div>
@@ -539,13 +582,16 @@ $compiled_responses = compileResponses($response_data_processed);
 
 <div class="container-lg">
 
-    <?php if (strlen($alert) > 0): ?>
+    <pre>
+        <!-- Testing -->
+        <?php //print_r($form_id); ?>
+    </pre>
+
+    <?php if (strlen($alert_info) > 0): ?>
         <!-- Info alerts -->
         <div class="alert alert-info" role="alert">
-            <?= $alert ?>
+            <?= $alert_info ?>
         </div>
-        <!-- Warning alerts & Errors -->
-        <!-- TODO -->
     <?php endif; ?>
     <?php if (strlen($alert_warning) > 0): ?>
         <div class="alert alert-warning" role="alert">
