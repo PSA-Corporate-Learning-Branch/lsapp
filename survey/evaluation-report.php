@@ -562,11 +562,11 @@ else if (empty($start_date) && !empty($end_date)) {
             <h6 class="card-title text-body-secondary mb-2">By Date Range</h6>
             <div class="input-group input-group-sm mb-2">
                 <label class="input-group-text" for="startDate">Start Date</label>
-                <input type="date" class="form-control" name="startDate" id="startDate"> 
+                <input type="date" class="form-control" name="startDate" id="startDate" value="<?= $start_date ?? '' ?>"> 
             </div>
             <div class="input-group input-group-sm mb-2">
                 <label class="input-group-text" for="endDate">End Date</label>
-                <input type="date" class="form-control" name="endDate" id="endDate"> 
+                <input type="date" class="form-control" name="endDate" id="endDate" value="<?= $end_date ?? '' ?>"> 
             </div>
         </div>
         <input type="hidden" id="form-id" name="formId" value="<?= $form_id ?>">
