@@ -13,6 +13,24 @@ function getConfig() {
     return $config;
 }
 
+/**
+ * Return the config details for a single survey
+ */
+function getConfigSurvey($form_id) {
+    global $config_file;
+    
+    $file_contents = file_get_contents($config_file);
+    $config = json_decode($file_contents, true);
+    $survey_config = array();
+
+    foreach ($config as $survey) {
+        if ($survey['formId'] == $form_id) {
+            $survey_config = $survey;
+        }
+    }
+    return $survey_config;
+}
+
 function updateConfig($new_config) {
     global $config_file, $data_path;
 
@@ -59,7 +77,9 @@ function getNextConfigID($config_file) {
 //     return $new_config;
 // }
 
-
+/**
+ * Do a pattern match on the form id to ensure it's valid
+ */
 function verifyFormID($form_id) {
     // verify our CHEFS form id matches the pattern
     $pattern = '/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/';
