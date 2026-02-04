@@ -222,7 +222,7 @@ function compileResponses($response_data) {
                 continue;
             } 
             // don't capture the information from empty question responses
-            elseif (empty($answer)) {
+            elseif (empty($answer) || !isset($response_map[$question])) {
                 continue;
             } 
             // for text type responses store as an array of answers
@@ -396,7 +396,7 @@ function createTextResponses($question, $responses) {
     global $response_map;
 
     $html =    '<div class="card my-3" >';
-    $html .=        '<h2 class="m-3">' . $response_map[$question]['label'] . '</h2>';
+    $html .=        '<h2 class="m-3 mb-0">' . $response_map[$question]['label'] . '</h2>';
     $html .=        '<details>';
     $html .=            '<summary class="m-3">View responses <span class="badge text-bg-secondary">' . count($responses[$question]) . '</span></summary>';
     $html .=            '<ul class="list-group m-3">';
@@ -523,10 +523,10 @@ else if (empty($start_date) && !empty($end_date)) {
 
 ?>
 
-<pre>
+<!-- <pre> -->
     <?php // print_r(gettype($responses_filtered_by_date)) ?>
     <?php // print_r($responses_filtered_by_date); ?>
-</pre>
+<!-- </pre> -->
 
 <div class="container-fluid">
 <div class="row justify-content-md-center mb-3">
