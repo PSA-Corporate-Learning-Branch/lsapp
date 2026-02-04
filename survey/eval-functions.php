@@ -31,6 +31,9 @@ function getConfigSurvey($form_id) {
     return $survey_config;
 }
 
+/**
+ * Backup then save updated config to file
+ */
 function updateConfig($new_config) {
     global $config_file, $data_path;
 
@@ -43,6 +46,35 @@ function updateConfig($new_config) {
     file_put_contents($config_file, $json_config);
 
 }
+
+/**
+ * Update the survey in the config by the provided id
+ */
+function updateConfigByFormId($form_id, $new_survey_config) {
+    global $config_file, $data_path;
+
+    // back up config file
+    $file_contents = file_get_contents($config_file);
+    file_put_contents($data_path . 'config-backup.json', $file_contents);
+
+    $config = json_decode($file_contents, true);
+    $new_config = array();
+
+    // replace the config for the matching form id
+    foreach ($config as $survey) {
+        if ($survey['formId'] == $form_id) {
+            array_push($new_config, $new_survey_config);
+        } else {
+            array_push($new_config, $survey);
+        }
+    }
+    
+    // save updated config
+    $json_config = json_encode($new_config, JSON_PRETTY_PRINT);
+    file_put_contents($config_file, $json_config);
+
+}
+
 
 function getNextConfigID($config_file) {
     $id = 0;
@@ -92,3 +124,16 @@ function verifyFormID($form_id) {
     }
 }
 
+class AlertManager {
+    
+    public static function addAlert(string $type, string $message): void {
+        $_SESSION['flash'][] = ['type' => $type, 'message' => $message];
+    }
+
+    public static function getAlertsAll(): array {
+        $alerts = $_SESSION['flash'] ?? [];
+        unset($_SESSION['flash']);
+        return $alerts;
+    }
+
+}
