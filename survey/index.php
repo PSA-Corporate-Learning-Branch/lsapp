@@ -7,6 +7,17 @@ require('eval-functions.php');
 // Get our survey config
 $config = getConfig();
 
+// get a list of response files
+$response_files = glob("../data/surveys/*-*-*-*.json");
+// the list of form ids for which we have responses
+$response_form_ids = array();
+foreach ($response_files as $file) {
+    // separate on / and remove .json so we have the form id
+    $f = explode('/', $file);
+    $id = str_replace('.json', '', $f[count($f)-1]);
+    $response_form_ids[] = $id;
+}
+
 // Get all the courses
 $courses = getCourses();
 
@@ -55,6 +66,14 @@ foreach ($courses as $course) {
 
 <?php foreach($config as $survey): ?> 
 
+    <?php
+        // check if the survey has responses
+        $has_responses = false;
+        if ( in_array($survey['formId'], $response_form_ids)) {
+            $has_responses = true;
+        }
+    ?>
+
     <div class="card m-2">
         <div class="card-body pb-2">
             
@@ -74,13 +93,19 @@ foreach ($courses as $course) {
                 </div>
                 <div class="col-2">
                     <div class="btn-group-vertical btn-group-sm float-end border" role="group" aria-label="Vertical button group">
-                        <a href="./edit-survey.php?formId=<?= $survey['formId'] ?>" type="button" class="btn btn-light text-light-emphasis">Edit</a>
-                        <a href="./evaluation-report.php?formId=<?= $survey['formId'] ?>" type="button" class="btn btn-outline-info text-light-emphasis">View Report</a>
+                        <a href="./edit-survey.php?formId=<?= $survey['formId'] ?>" role="button" class="btn btn-light text-secondary-emphasis">Edit</a>
+                        <?php if ($has_responses): ?>
+                            <a href="./evaluation-report.php?formId=<?= $survey['formId'] ?>" role="button" 
+                            class="btn btn-outline-info text-secondary-emphasis">View Report</a>
+                        <?php else: // no responses available ?>
+                            <a href="./evaluation-report.php?formId=<?= $survey['formId'] ?>" role="button"
+                            class="btn btn-outline-secondary text-light-emphasis bg-secondary-subtle disabled" >View Report</a>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <hr class="my-1">
                 <div class="mt-1">
-                    <span class="float-start mb-0 badge <?= $survey['status'] == 'active' ? 'bg-primary-subtle text-primary-emphasis' : 'bg-secondary-subtle text-secondary-emphasis' ?>"><?= ucfirst($survey['status']) ?></span>
+                    <span class="float-start mb-0 badge <?= $survey['status'] == 'active' ? 'bg-success-subtle text-success-emphasis' : 'bg-secondary-subtle text-secondary-emphasis' ?>"><?= ucfirst($survey['status']) ?></span>
                 </div>
             </div> <!-- /row -->
             
