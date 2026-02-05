@@ -194,6 +194,11 @@ if (!empty($survey_config) && !empty($survey_config['courseId'])) {
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+                <?php else: ?>
+                    <div class="alert alert-info mt-2" role="alert">
+                        <p>Questions will be populated once the survey has been synchronized.</p>
+                        <p>A survey needs to have a <strong>Form Secret</strong> and be <strong>Active</strong> to be included in the sync.</p>
+                    </div>
                 <?php endif; ?>
 
             </div>
