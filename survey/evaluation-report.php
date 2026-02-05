@@ -205,9 +205,7 @@ function filterResponsesByDate($response_data, $start_date = 0, $end_date = 0) {
  * 
  * @return array $responses a compiled summary of the responses
  */
-function compileResponses($response_data) {
-    global $response_map;
-
+function compileResponses($response_data, $response_map) {
     if (!$response_map) {
         return;
     }
@@ -261,7 +259,17 @@ function compileResponses($response_data) {
             }
         }
     }
-    return $responses;
+
+    // Sort by the order provided in the map
+    $map_order = array_keys($response_map);
+    $sorted_responses = array();
+    foreach ($map_order as $key) {
+        if (array_key_exists($key, $responses)) {
+            $sorted_responses[$key] = $responses[$key];
+        }
+    }
+
+    return $sorted_responses;
 }
 
 /**
@@ -464,7 +472,7 @@ if (file_exists("../data/surveys/{$form_id}.json")) {
     }
 
     // take our filtered raw responses and summarize
-    $compiled_responses = compileResponses($responses_filtered_by_date);
+    $compiled_responses = compileResponses($responses_filtered_by_date, $response_map);
 
 } else {
     // if we don't have a responses file, we'll use this variable to 
