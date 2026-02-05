@@ -77,7 +77,8 @@ if (!empty($survey_config) && !empty($survey_config['courseId'])) {
     <div class="row justify-content-md-center">
         <div class="col-md-10">
             <form method="post" action="survey-update-process.php">
-            <button type="submit" class="float-end btn btn-success m-2">Save</button>
+            <a role="button" class="float-end btn btn-secondary m-2 ms-1" href="./index.php">Cancel</a>
+            <button type="submit" class="float-end btn btn-success m-2 me-0">Save</button>
         </div> <!-- /col -->
     </div> <!-- /row -->
 
