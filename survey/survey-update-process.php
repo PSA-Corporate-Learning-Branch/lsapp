@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // check our form id is valid before proceeding
     if (!verifyFormID($form_id)) {
         AlertManager::addAlert('danger', 'Invalid Form ID. Please correct and re-submit.');
-        header('Location: ' . $_SERVER['HTTP_REFERER']);
+        header('Location: ./edit-survey.php?formId=' . $form_id);
         exit;
     }
 
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $survey_config = getConfigSurvey($form_id);
     if (empty($survey_config)) {
         AlertManager::addAlert('danger', 'Survey not found.');
-        header('Location: ' . $_SERVER['HTTP_REFERER']);
+        header('Location: ./edit-survey.php?formId=' . $form_id);
         exit;
     }
 
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($survey_config['formSecret']) || $new_secret !== $survey_config['formSecret']) {
         if (strlen($new_secret) < 30) {
             AlertManager::addAlert('danger', 'Invalid Form Secret. Please correct and re-submit.');
-            header('Location: ' . $_SERVER['HTTP_REFERER']);
+            header('Location: ./edit-survey.php?formId=' . $form_id);
             exit;
         }
         $secret_encrypted = EncryptionHelper::encrypt($new_secret);
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // if we don't have a secret, or the new one isn't valid
         if (!isset($survey_config['formSecret']) || strlen($new_config['formSecret']) < 30) {
             AlertManager::addAlert('danger', 'Survey must have a valid secret before it can be made active. Please correct and re-submit.');
-            header('Location: ' . $_SERVER['HTTP_REFERER']);
+            header('Location: ./edit-survey.php?formId=' . $form_id);
             exit;
         } 
         $new_config['status'] = $new_status;
@@ -66,12 +66,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         header('Location: ./edit-survey.php?formId=' . $form_id);
     }
-    
-
-    
-   
-    
-
     
 
 }
