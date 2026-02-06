@@ -502,6 +502,77 @@ else if (empty($start_date) && !empty($end_date)) {
     $alert_info .= "<p>Showing results before {$end_date}.</p>";
 }
 
+// Download to csv
+if (isset($_POST['download_to_csv'])) {
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="export.csv"'); // update filename
+
+    $output_file = fopen('php://output', 'w');
+
+    // Create header row
+    fputcsv($output_file, [$title . ' Summary Report']);
+    fputcsv($output_file, []);
+
+    foreach($compiled_responses as $question=>$responses) {
+        // Question
+        fputcsv($output_file, [$response_map[$question]['label']]);
+
+        // Text questions
+        if ($response_map[$question]['inputType'] == 'text') {
+            // Column Headers
+            fputcsv($output_file, ['Response #', 'Value']);
+            foreach($responses as $index=>$response) {
+                fputcsv($output_file, [$index + 1, $response]);
+            }
+            fputcsv($output_file, []);
+        }
+        // Radio questions
+        else if ($response_map[$question]['inputType'] == 'radio') {
+            // Get the total value
+            $total = $compiled_responses[$question]['total'] ?? 0;
+            // Column Headers
+            fputcsv($output_file, ['Response', 'Value', 'Percent']);
+            foreach($response_map[$question]['values'] as $key=>$value) {
+                $num_values = $compiled_responses[$question][$key] ?? 0;
+                if ($total == 0 || $num_values == 0) {
+                    $percent_rounded = 0;
+                }
+                else if ($num_values > 0) {
+                    $percent_total = ($num_values / $total) * 100;
+                    $percent_rounded = round($percent_total);
+                }
+                fputcsv($output_file, [$value, $num_values, $percent_rounded . '%']);
+            }
+            fputcsv($output_file, ['Total', $compiled_responses[$question]['total']]);
+            fputcsv($output_file, []);
+        }
+        // Select questions
+        else if ($response_map[$question]['inputType'] == 'select') {
+            // Get the total value
+            $total = $compiled_responses[$question]['total'] ?? 0;
+            // Column Headers
+            fputcsv($output_file, ['Response', 'Value', 'Percent']);
+            foreach($response_map[$question]['values'] as $key=>$value) {
+                $num_values = $compiled_responses[$question][$key] ?? 0;
+                if ($total == 0 || $num_values == 0) {
+                    $percent_rounded = 0;
+                }
+                else if ($num_values > 0) {
+                    $percent_total = ($num_values / $total) * 100;
+                    $percent_rounded = round($percent_total);
+                }
+                fputcsv($output_file, [$value, $num_values, $percent_rounded . '%']);
+            }
+            fputcsv($output_file, ['Total', $compiled_responses[$question]['total']]);
+            fputcsv($output_file, []);
+        }
+    }
+    
+    fclose($output_file);
+    exit;
+    
+
+}
 
 
 
@@ -537,65 +608,79 @@ else if (empty($start_date) && !empty($end_date)) {
 <!-- </pre> -->
 
 <div class="container-fluid">
-<div class="row justify-content-md-center mb-3">
-
-    <div class="col-12">
-        <h1 class="mb-5 text-center"><?= $title . ' Report' ?></h1>
+    <div class="row justify-content-md-center mb-3">
+        <div class="col-md-10">
+            <h1 class="mb-2 text-center"><?= $title . ' Report' ?></h1>
+        </div>
     </div>
 
+    
 
+    <div class="row justify-content-md-center">
 
-<div class="col-lg-2" name="side-nav">
-    <div class="card sticky-top m-auto z-0 overflow-hidden" style="top: 65px; max-width: 310px;">
-        <form action="evaluation-report.php" method="get">
-        <h5 class="card-header">Filter Results</h5>
-        <div class="card-body">
-            <h6 class="card-title text-body-secondary mb-0">By Offering</h6>
-        </div> <!-- /card-body -->
-        <ul class="list-group">
-            <li class="list-group-item">
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="classCode" id="all-radio" value="0" autocomplete="off" <?= $class_code == 0 ? 'checked=""' : '' ?>>
-                    <label class="form-check-label" for="all-radio">All</label>
+        <div class="col-lg-2" name="side-nav">
+            <div class="card sticky-top m-auto z-0 overflow-hidden" style="top: 65px; max-width: 310px;">
+                <form action="evaluation-report.php" method="get">
+                <h5 class="card-header">Filter Results</h5>
+                <div class="card-body">
+                    <h6 class="card-title text-body-secondary mb-0">By Offering</h6>
+                </div> <!-- /card-body -->
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="classCode" id="all-radio" value="0" autocomplete="off" <?= $class_code == 0 ? 'checked=""' : '' ?>>
+                            <label class="form-check-label" for="all-radio">All</label>
+                        </div>
+                    </li>
+                    <?php foreach($classes as $class): ?>
+                    <li class="list-group-item">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="classCode" id="<?= $class ?>-radio" value="<?= $class ?>" autocomplete="off" <?= $class === $class_code ? 'checked=""' : '' ?>>
+                            <label class="form-check-label" for="<?= $class ?>-radio"><?= $class ?></label>
+                        </div>
+                    </li>
+                    <?php endforeach ?>
+                    
+                </ul>
+                <div class="card-body">
+                    <h6 class="card-title text-body-secondary mb-2">By Date Range</h6>
+                    <div class="input-group input-group-sm mb-2">
+                        <label class="input-group-text" for="startDate">Start Date</label>
+                        <input type="date" class="form-control" name="startDate" id="startDate" value="<?= $start_date ?? '' ?>"> 
+                    </div>
+                    <div class="input-group input-group-sm mb-2">
+                        <label class="input-group-text" for="endDate">End Date</label>
+                        <input type="date" class="form-control" name="endDate" id="endDate" value="<?= $end_date ?? '' ?>"> 
+                    </div>
                 </div>
-            </li>
-            <?php foreach($classes as $class): ?>
-            <li class="list-group-item">
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="classCode" id="<?= $class ?>-radio" value="<?= $class ?>" autocomplete="off" <?= $class === $class_code ? 'checked=""' : '' ?>>
-                    <label class="form-check-label" for="<?= $class ?>-radio"><?= $class ?></label>
+                <input type="hidden" id="form-id" name="formId" value="<?= $form_id ?>">
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Apply</button>	
                 </div>
-            </li>
-            <?php endforeach ?>
-            
-        </ul>
-        <div class="card-body">
-            <h6 class="card-title text-body-secondary mb-2">By Date Range</h6>
-            <div class="input-group input-group-sm mb-2">
-                <label class="input-group-text" for="startDate">Start Date</label>
-                <input type="date" class="form-control" name="startDate" id="startDate" value="<?= $start_date ?? '' ?>"> 
-            </div>
-            <div class="input-group input-group-sm mb-2">
-                <label class="input-group-text" for="endDate">End Date</label>
-                <input type="date" class="form-control" name="endDate" id="endDate" value="<?= $end_date ?? '' ?>"> 
+                </form>
             </div>
         </div>
-        <input type="hidden" id="form-id" name="formId" value="<?= $form_id ?>">
-        <div class="card-footer">
-            <button type="submit" class="btn btn-primary">Apply</button>	
-        </div>
-        </form>
-    </div>
-</div>
 
+    
 
 <div class="col-9">
 
+    
+
 <div class="container-lg">
+
+    <div class="row">
+    
+        <div class="col">
+            <form method="post">
+                <button type="submit" name="download_to_csv" class="float-end btn btn-success mb-2 mx-2">Export to CSV</button>
+            </form>
+        </div> <!-- /col -->
+    </div> <!-- /row -->
 
     <!-- <pre> -->
         <!-- Testing -->
-        <?php //print_r($responses_filtered_by_date); ?>
+        <?php //print_r($compiled_responses); ?>
     <!-- </pre> -->
 
     <?php if (strlen($alert_warning) > 0): ?>
@@ -611,7 +696,6 @@ else if (empty($start_date) && !empty($end_date)) {
         </div>
     <?php endif; ?>
     
-
 </div>
 
 <!-- if we don't have any responses, don't show the chart area -->
