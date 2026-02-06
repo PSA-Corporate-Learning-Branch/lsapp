@@ -505,9 +505,11 @@ else if (empty($start_date) && !empty($end_date)) {
 // Download to csv
 if (isset($_POST['download_to_csv'])) {
     header('Content-Type: text/csv');
-    header('Content-Disposition: attachment; filename="export.csv"'); // update filename
+    header('Content-Disposition: attachment; filename="survey-report-export.csv"'); 
 
     $output_file = fopen('php://output', 'w');
+    // Write UTF-8 BOM so Excel recognizes encoding
+    fwrite($output_file, "\xEF\xBB\xBF");
 
     // Create header row
     fputcsv($output_file, [$title . ' Summary Report']);
@@ -680,7 +682,7 @@ if (isset($_POST['download_to_csv'])) {
 
     <!-- <pre> -->
         <!-- Testing -->
-        <?php //print_r($compiled_responses); ?>
+        <?php //print_r($response_map); ?>
     <!-- </pre> -->
 
     <?php if (strlen($alert_warning) > 0): ?>
