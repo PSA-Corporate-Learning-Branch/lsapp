@@ -2,49 +2,8 @@
 opcache_reset();
 $path = '../inc/lsapp.php';
 require($path); 
+require('eval-functions.php');
 
-
-
-/**
- * Take the form id, find the matching config
- * and return the corresponding questions map array
- * 
- * @param $form_id the CHEFS form id
- * @return null
- */
-function getQuestionsConfig($form_id) {
-    global $alert, $title, $data_path;
-
-    if (!$form_id) {
-        $alert = 'Form ID not provided';
-        return;
-    }
-
-    // open config
-    $config_file = $data_path . 'config.json';
-    $config_content = file_get_contents($config_file);
-    $config_array = json_decode($config_content, true);
-
-    // find config with matching form id
-    foreach ($config_array as $config) {
-        if ($config['formId'] == $form_id) {
-            if (array_key_exists('name', $config)) {
-                $title = $config['name'];
-            }
-            if (array_key_exists('questions', $config)) {
-                return $config['questions'];
-            } else {
-                // if the questions key doesn't exist, we likely need to sync the form
-                $alert = 'Questions not found. Form may need sync.';
-            }
-            
-        } 
-    }
-
-    // if no forms match the provided id
-    $alert = 'Form not found.';
-    return;
-}
 
 /**
  * Take the form id, find the responses json file
@@ -206,7 +165,7 @@ function filterResponsesByDate($response_data, $start_date = 0, $end_date = 0) {
  * @return array $responses a compiled summary of the responses
  */
 function compileResponses($response_data, $response_map) {
-    if (!$response_map) {
+    if (empty($response_map)) {
         return;
     }
     
@@ -437,8 +396,15 @@ $classes = array();
 // to hold our chart javascript
 $chart_scripts = '';
 
-// get our response map from the config using form id
-$response_map = getQuestionsConfig($form_id);
+// get our form config information
+$survey_config = getConfigSurvey($form_id);
+$response_map = array();
+if (!empty($survey_config)) {
+    $response_map = $survey_config['questions'] ?? array();
+    $title = $survey_config['name'] ?? 'Course Survey';
+} else {
+    $alert_warning .= "<p>Form ID not found.</p>";
+}
 
 // check that we have a responses file for this survey
 if (file_exists("../data/surveys/{$form_id}.json")) {
@@ -674,16 +640,22 @@ if (isset($_POST['download_to_csv'])) {
     <div class="row">
     
         <div class="col">
-            <form method="post">
-                <button type="submit" name="download_to_csv" class="float-end btn btn-success mb-2 mx-2">Export to CSV</button>
-            </form>
+            <div class="d-flex justify-content-end bg-light-subtle rounded border mb-2">
+                <div class="d-inline-flex align-items-center rounded border m-2 px-2">
+                    
+                    <div>Last Sync: Date - Time</div>
+                    <button type="button" name="get_responses" class="btn btn-secondary m-2">Get Responses</button>
+                </div>
+                <div class="d-inline-flex align-items-center m-2">
+                    <form method="post">
+                        <button type="submit" name="download_to_csv" class="btn btn-success m-2">Export to CSV</button>
+                    </form>
+                </div>
+            </div> <!-- /card -->
         </div> <!-- /col -->
     </div> <!-- /row -->
 
-    <!-- <pre> -->
-        <!-- Testing -->
-        <?php //print_r($response_map); ?>
-    <!-- </pre> -->
+
 
     <?php if (strlen($alert_warning) > 0): ?>
         <div class="alert alert-warning" role="alert">
