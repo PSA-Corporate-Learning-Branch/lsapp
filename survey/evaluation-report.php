@@ -389,6 +389,7 @@ $alert_warning = '';
 
 $title = 'Course Survey';
 $data_path = '../data/surveys/';
+$last_sync = 'Unknown';
 
 // class codes included in our responses
 $classes = array();
@@ -404,6 +405,10 @@ if (!empty($survey_config)) {
     $title = $survey_config['name'] ?? 'Course Survey';
 } else {
     $alert_warning .= "<p>Form ID not found.</p>";
+}
+
+if (isset($survey_config['lastResponsesUpdated'])) {
+    $last_sync = date('Y-m-d H:i', $survey_config['lastResponsesUpdated']);
 }
 
 // check that we have a responses file for this survey
@@ -637,23 +642,7 @@ if (isset($_POST['download_to_csv'])) {
 
 <div class="container-lg">
 
-    <div class="row">
     
-        <div class="col">
-            <div class="d-flex justify-content-end bg-light-subtle rounded border mb-2">
-                <div class="d-inline-flex align-items-center rounded border m-2 px-2">
-                    
-                    <div>Last Sync: Date - Time</div>
-                    <button type="button" name="get_responses" class="btn btn-secondary m-2">Get Responses</button>
-                </div>
-                <div class="d-inline-flex align-items-center m-2">
-                    <form method="post">
-                        <button type="submit" name="download_to_csv" class="btn btn-success m-2">Export to CSV</button>
-                    </form>
-                </div>
-            </div> <!-- /card -->
-        </div> <!-- /col -->
-    </div> <!-- /row -->
 
 
 
@@ -670,12 +659,31 @@ if (isset($_POST['download_to_csv'])) {
         </div>
     <?php endif; ?>
     
+    
+
 </div>
 
 <!-- if we don't have any responses, don't show the chart area -->
 <?php if (count($compiled_responses) > 0): ?>
 
-<div class="container-lg p-lg-5 p-4 bg-secondary-subtle rounded">
+<div class="container-lg d-flex justify-content-end bg-light-subtle rounded-top border-secondary-subtle border-start border-top border-end">
+    <div class="row">
+        <div class="col p-1">
+                <div class="d-inline-flex align-items-center m-1">
+                    
+                    <div class="text-body-secondary m-1">Last Sync: <?= $last_sync ?></div>
+                    <button type="button" name="get_responses" class="btn btn-secondary m-1">Get Responses</button>
+                <!-- </div> -->
+                <!-- <div class="d-inline-flex align-items-center m-1"> -->
+                    <form method="post" onsubmit="return confirm('Are you sure you want to download the results with the current filters applied?')">
+                        <button type="submit" name="download_to_csv" class="btn btn-success m-1">Export to CSV</button>
+                    </form>
+                </div>
+        </div> <!-- /col -->
+    </div> <!-- /row -->
+</div>
+
+<div class="container-lg p-lg-5 p-4 border border-secondary-subtle bg-secondary-subtle rounded-bottom">
      
    
     <?php
@@ -719,35 +727,6 @@ if (isset($_POST['download_to_csv'])) {
 
     <?php echo $chart_scripts; ?>
 
-    // const compiledResponses = <?php //echo json_encode($test_compiled_responses) ?>
-
-    // console.log(compiledResponses);
-
-    // function updateCharts(classCodes) {
-    //     let newData = {};
-    //     // if none provided, show all the data
-
-    //     // if one or more selection provided compile and update the data
-    //     classCodes.forEach(classCode => {
-    //         if (classCode in compiledResponses) {
-    //             for (const [key, value] of Object.entries(compiledResponses[classCode])) {
-
-    //             }
-    //             compiledResponses[classCode].forEach((response) => {
-    //                 if (response in newData) {
-    //                     newData[response] = response; // todo
-    //                 } else {
-
-    //                 }
-    //             })
-    //         }
-    //     })
-    // }
-
-    // Listen for dropdown changes
-    // document.getElementById('dataSelector').addEventListener('change', function () {
-    //   updateCharts(this.value);
-    // });
 
 </script>
 
