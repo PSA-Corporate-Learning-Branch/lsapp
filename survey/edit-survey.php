@@ -113,16 +113,23 @@ if (!empty($survey_config) && !empty($survey_config['courseId'])) {
                 <input type="text" id="FormId" class="form-control" value="<?= $survey_config['formId'] ?? '' ?>" disabled>
                 <input type="hidden" name="FormId" id="FormIdValue" value="<?= $survey_config['formId'] ?? '' ?>">
 
-                <!-- Should this field be limited to supers/admins? -->
-                <label for="FormSecret" class="form-label">Form Secret</label>
-                <input type="password" name="FormSecret" id="FormSecret" class="form-control" value="<?= $survey_config['formSecret'] ?? '' ?>">
+                <!-- Only admins can update api secret -->
+                <?php if (isAdmin()): ?>
+                    <label for="FormSecret" class="form-label">Update Form Secret</label>
+                    <input type="password" name="FormSecret" id="FormSecret" class="form-control">
+                    <?php if (isset($survey_config['formId'])): ?>
+                        <div class="alert alert-info mt-2" role="alert">
+                            Form Secret has been set. Please provide a new secret if you wish to update.
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
 
                 <label for="" class="form-label">Assigned Course</label>
                 <input type="" name="" id="" class="form-control" value="<?= $course[2] ?? 'None' ?>" disabled>
                 <!-- Provide additional info if we have a matching CHEFS Form ID associated with the course -->
                 <?php if (!empty($course[46]) && $form_id == $course[46]): ?>
                     <div class="alert alert-info mt-2" role="alert">
-                        <p>This course is connected by the CHEFS Form ID field on the <a href="../course.php?courseid=<?= $course[0] ?>">course page</a>.</p>
+                        This course is connected by the CHEFS Form ID field on the <a href="../course.php?courseid=<?= $course[0] ?>">course page</a>.
                     </div>
                 <?php endif; ?>
 
@@ -131,15 +138,20 @@ if (!empty($survey_config) && !empty($survey_config['courseId'])) {
 
                 <label for="SurveyDescription" class="form-label">Survey Description</label>
                 <input type="text" id="SurveyDescription" class="form-control" value="<?= $survey_config['description'] ?? '' ?>" disabled>
-
-                <label for="Status" class="form-label">Status</label>
-                <select name="Status" id="Status" class="form-select">
-                    <?php $statuses = ['pending', 'active', 'inactive']; ?>
-                    <?php $config_status = $survey_config['status'] ?? ''; ?>
-                    <?php foreach ($statuses as $status): ?>
-                        <option value="<?= $status ?>" <?= $config_status == $status ? 'selected' : '' ?>><?= ucfirst($status) ?></option>
-                    <?php endforeach; ?>
-                </select>
+                
+                <?php if (isAdmin()): ?>
+                    <label for="Status" class="form-label">Status</label>
+                    <select name="Status" id="Status" class="form-select">
+                        <?php $statuses = ['pending', 'active', 'inactive']; ?>
+                        <?php $config_status = $survey_config['status'] ?? ''; ?>
+                        <?php foreach ($statuses as $status): ?>
+                            <option value="<?= $status ?>" <?= $config_status == $status ? 'selected' : '' ?>><?= ucfirst($status) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                <?php else: ?>
+                    <label for="Status" class="form-label">Status</label>
+                    <input type="text" name="status" id="status" class="form-control" value="<?= ucfirst($survey_config['status']) ?? '' ?>" disabled>
+                <?php endif;?>
 
                 <label for="PublishedVersion" class="form-label">Published Version</label>
                 <input type="number" name="PublishedVersion" id="PublishedVersion" class="form-control" value="<?= $survey_config['publishedVersion'] ?? '' ?>" disabled>
@@ -197,8 +209,10 @@ if (!empty($survey_config) && !empty($survey_config['courseId'])) {
                     </table>
                 <?php else: ?>
                     <div class="alert alert-info mt-2" role="alert">
-                        <p>Questions will be populated once the survey has been synchronized.</p>
-                        <p>A survey needs to have a <strong>Form Secret</strong> and be <strong>Active</strong> to be included in the sync.</p>
+                        Questions will be populated once the survey has been synchronized with CHEFS.<br>
+                        <?php if (isAdmin()): ?>
+                        <em>Admins</em>: A survey needs to have a <strong>Form Secret</strong> and be <strong>Active</strong> to be included in the sync. 
+                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
 
