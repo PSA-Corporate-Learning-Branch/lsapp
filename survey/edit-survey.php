@@ -4,7 +4,6 @@ $path = '../inc/lsapp.php';
 require($path); 
 require('eval-functions.php');
 
-// Include encryption helper for decrypting API passwords
 require_once(dirname(__DIR__) . '/inc/encryption_helper.php');
 
 $alerts = array();
@@ -204,7 +203,7 @@ if (!empty($survey_config) && !empty($survey_config['courseId'])) {
             </div>
 
     <div class="d-flex justify-content-center">
-        <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
+        <button type="submit" class="btn btn-success btn-lg">Save Changes</button>
     </div>
 
 </form>

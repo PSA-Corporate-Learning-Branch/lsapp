@@ -672,9 +672,10 @@ if (isset($_POST['download_to_csv'])) {
                 <div class="d-inline-flex align-items-center m-1">
                     
                     <div class="text-body-secondary m-1">Last Sync: <?= $last_sync ?></div>
-                    <button type="button" name="get_responses" class="btn btn-secondary m-1">Get Responses</button>
-                <!-- </div> -->
-                <!-- <div class="d-inline-flex align-items-center m-1"> -->
+                    <form method="post" action="get-responses.php">
+                        <input type="hidden" name="FormId" value="<?= $form_id ?>">
+                        <button type="submit" name="get_responses" class="btn btn-secondary m-1">Get Responses</button>
+                    </form>
                     <form method="post" onsubmit="return confirm('Are you sure you want to download the results with the current filters applied?')">
                         <button type="submit" name="download_to_csv" class="btn btn-success m-1">Export to CSV</button>
                     </form>
