@@ -404,7 +404,7 @@ if (!empty($survey_config)) {
     $response_map = $survey_config['questions'] ?? array();
     $title = $survey_config['name'] ?? 'Course Survey';
 } else {
-    $alert_warning .= "<p>Form ID not found.</p>";
+    $alert_warning .= "Form ID not found.<br>";
 }
 
 if (isset($survey_config['lastResponsesUpdated'])) {
@@ -428,7 +428,7 @@ if (file_exists("../data/surveys/{$form_id}.json")) {
     // if a class code is provided, but we don't have any responses for it
     elseif ($class_code != 0 && !in_array($class_code, $classes)) {
         $response_data_processed = array();
-        $alert_warning .= "<p>No responses found for this class (\"" . $class_code . "\").</p>";
+        $alert_warning .= "No responses found for this class (\"" . $class_code . "\").<br>";
     }
 
     // otherwise, pass along all the responses
@@ -439,7 +439,7 @@ if (file_exists("../data/surveys/{$form_id}.json")) {
     // pass through date date inputs and filter if provided
     $responses_filtered_by_date = filterResponsesByDate($response_data_processed, $start_date, $end_date);
     if (count($responses_filtered_by_date) == 0) {
-        $alert_warning .= "<p>No responses found for the selected dates.</p>";
+        $alert_warning .= "No responses found for the selected dates.<br>";
     }
 
     // take our filtered raw responses and summarize
@@ -449,28 +449,28 @@ if (file_exists("../data/surveys/{$form_id}.json")) {
     // if we don't have a responses file, we'll use this variable to 
     // prevent loading more content after the alerts are added
     $compiled_responses = array();
-    $alert_warning .= "<p>No responses found for this survey.</p>";
+    $alert_warning .= "No responses found for this survey.<br>";
 }
 
 
 // Filtered classes info
 if (!empty($class_code) && count($classes) > 0) {
     $test = !empty($class_code);
-    $alert_info .= "<p>Showing results for {$class_code}.</p>";
+    $alert_info .= "Showing results for {$class_code}.<br>";
 }
 
 /** Filtered dates info */
 // If we have both dates
 if (!empty($start_date) && !empty($end_date)) {
-    $alert_info .= "<p>Showing results between {$start_date} and {$end_date}.</p>";
+    $alert_info .= "Showing results between {$start_date} and {$end_date}.<br>";
 } 
 // if we have a start date but no end date
 else if (!empty($start_date) && empty($end_date)) {
-    $alert_info .= "<p>Showing results after {$start_date}.</p>";
+    $alert_info .= "Showing results after {$start_date}.<br>";
 }
 // if we have an end date but no start date
 else if (empty($start_date) && !empty($end_date)) {
-    $alert_info .= "<p>Showing results before {$end_date}.</p>";
+    $alert_info .= "Showing results before {$end_date}.<br>";
 }
 
 // Download to csv
