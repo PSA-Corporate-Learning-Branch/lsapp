@@ -2,7 +2,10 @@
 opcache_reset();
 $path = '../inc/lsapp.php';
 require($path); 
+require_once(dirname(__DIR__) . '/inc/encryption_helper.php');
+
 $data_path = '../data/surveys/';
+
 
 /**
  * Using the provided config, reach out to form endpoint
@@ -14,7 +17,7 @@ function syncForm($config) {
     // and determine if version needs to sync
     $return_config = $config;
     $form_id = $config['formId'];
-    $secret = $config['formSecret'];
+    $secret = EncryptionHelper::decrypt($config['formSecret']);
 
     $form_endpoint = 'https://submit.digital.gov.bc.ca/app/api/v1/forms/' . $form_id;
     $credentials = base64_encode($form_id . ':' . $secret);
@@ -76,7 +79,7 @@ function syncForm($config) {
 function getVersion($config) {
     
     $form_id = $config['formId'];
-    $secret = $config['formSecret'];
+    $secret = EncryptionHelper::decrypt($config['formSecret']);
     $version_id = $config['publishedVersionId'];
 
     $version_endpoint = 'https://submit.digital.gov.bc.ca/app/api/v1/forms/' . $form_id . '/versions/' . $version_id;
@@ -163,7 +166,7 @@ function getResponses($config) {
     // get responses.  requires additional parameters: format, type, and version
     
     $form_id = $config['formId'];
-    $secret = $config['formSecret'];
+    $secret = EncryptionHelper::decrypt($config['formSecret']);
     $responses_config = $config;
 
     $params = [
