@@ -34,15 +34,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // create a copy for updates
     $new_config = $survey_config;
 
-    // if we're provided a new/different form secret
-    if (!isset($survey_config['formSecret']) || $new_secret !== $survey_config['formSecret']) {
-        // nothing provided, go back to edit page
-        if (empty($new_secret)) {
-            header('Location: ./edit-survey.php?formId=' . $form_id);
-            exit;
-        }
-        // secret provided but not what expected
-        else if (strlen($new_secret) < 30) {
+    // if we're provided a new/different form secret that's not empty
+    if ((!isset($survey_config['formSecret']) || $new_secret !== $survey_config['formSecret']) && !empty($new_secret)) {
+        // secret provided but invalid format
+        if (strlen($new_secret) < 30) {
             AlertManager::addAlert('danger', 'Invalid Form Secret. Please correct and re-submit.');
             header('Location: ./edit-survey.php?formId=' . $form_id);
             exit;
@@ -57,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // if survey is being changed to active but wasn't before
     if ($new_status == 'active' && $survey_config['status'] !== 'active') {
         // if we don't have a secret, or the new one isn't valid
-        if (!isset($survey_config['formSecret']) || strlen($new_config['formSecret']) < 30) {
+        if (!isset($survey_config['formSecret']) && strlen($new_config['formSecret']) < 30) {
             AlertManager::addAlert('danger', 'Survey must have a valid secret before it can be made active. Please correct and re-submit.');
             header('Location: ./edit-survey.php?formId=' . $form_id);
             exit;
