@@ -41,6 +41,12 @@ if (!empty($survey_config) && !empty($survey_config['courseId'])) {
 
 ?>
 
+
+
+<?php if(canACcess()): ?>
+
+<?php getHeader() ?>
+
 <style>
     .form-section {
         background-color: var(--bs-light-bg-subtle);
@@ -57,9 +63,6 @@ if (!empty($survey_config) && !empty($survey_config['courseId'])) {
     }
 </style>
 
-<?php if(canACcess()): ?>
-
-<?php getHeader() ?>
 <title>Edit</title>
 
 <?php getScripts() ?>
@@ -76,8 +79,27 @@ if (!empty($survey_config) && !empty($survey_config['courseId'])) {
     <div class="row justify-content-md-center">
         <div class="col-md-10">
             <form method="post" action="survey-update-process.php">
-            <a role="button" class="float-end btn btn-secondary m-2 ms-1" href="./index.php">Back</a>
-            <button type="submit" class="float-end btn btn-success m-2 me-0">Save</button>
+            <!-- sync button -->
+            <div class="d-flex align-items-center">
+                <?php if (isAdmin()): ?>
+                    <!-- form must be active and have a secret set -->
+                    <?php if ($survey_config['status'] == 'active' && !empty($survey_config['formSecret'])): ?>
+                        <a role="button" class="me-auto btn btn-primary m-2" href="#">Sync Form</a>
+                    <?php else: ?>
+                        <a role="button" class="float-start btn btn-primary m-2 disabled" href="#" aria-disabled="true">Sync Form</a>
+                        <a href="#" class="link-secondary" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="right" data-bs-title="<small>Form must be Active with a valid Form Secret to sync</small>">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+                        </svg></a>
+                    </a>
+                    <?php endif; ?>
+                <?php endif; ?>
+                <div class="ms-auto">
+                    <a role="button" class="btn btn-secondary m-1" href="./index.php">Back</a>
+                    <button type="submit" class="btn btn-success m-1 ms-0">Save</button>
+                </div>
+            </div>
         </div> <!-- /col -->
     </div> <!-- /row -->
 
@@ -91,7 +113,7 @@ if (!empty($survey_config) && !empty($survey_config['courseId'])) {
                 <?php if (count($flash_alerts) > 0): ?>
                     <?php foreach ($flash_alerts as $falert): ?>
                         <div class="alert alert-<?= $falert['type'] ?>" role="alert">
-                        <p><?= $falert['message'] ?></p>
+                        <?= $falert['message'] ?><br>
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -99,7 +121,7 @@ if (!empty($survey_config) && !empty($survey_config['courseId'])) {
                 <?php if (count($alerts) > 0): ?>
                     <div class="alert alert-warning" role="alert">
                         <?php foreach($alerts as $alert): ?>
-                            <p><?= $alert ?></p>
+                            <?= $alert ?><br>
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
@@ -117,7 +139,7 @@ if (!empty($survey_config) && !empty($survey_config['courseId'])) {
                 <?php if (isAdmin()): ?>
                     <label for="FormSecret" class="form-label">Update Form Secret</label>
                     <input type="password" name="FormSecret" id="FormSecret" class="form-control">
-                    <?php if (isset($survey_config['formId'])): ?>
+                    <?php if (isset($survey_config['formSecret'])): ?>
                         <div class="alert alert-info mt-2" role="alert">
                             Form Secret has been set. Please provide a new secret if you wish to update.
                         </div>
@@ -228,8 +250,18 @@ if (!empty($survey_config) && !empty($survey_config['courseId'])) {
 </div> <!-- /row --> 
 </div> <!-- /container -->
 
+<?php require('../templates/javascript.php') ?>
+
+<script>
+
+    // tooltip functionality
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+</script>
+
 <?php endif; ?> <!-- /canACcess() -->
 
 </body>
-<?php require('../templates/javascript.php') ?>
+
 <?php require('../templates/footer.php') ?>

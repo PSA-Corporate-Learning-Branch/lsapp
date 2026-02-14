@@ -2,6 +2,7 @@
 opcache_reset();
 $path = '../inc/lsapp.php';
 require($path); 
+require('eval-functions.php');
 require_once(dirname(__DIR__) . '/inc/encryption_helper.php');
 
 $data_path = '../data/surveys/';
@@ -226,29 +227,72 @@ $config = json_decode($file_contents, true);
 // updated config data for file
 $updated_config = [];
 
-// sync the forms in the config file
-foreach ($config as $form_config) {
+$form_id = $_GET['formId'] ?? '';
+
+// sync a particular form if id is provided
+if (!empty($form_id)) {
     
-    // only sync active forms
-    if (isset($form_config['status']) && $form_config['status'] == 'active') {
-
-        // sync the form and return an updated config
-        $synced_form_config = syncForm($form_config);
+    foreach ($config as $form_config) {
         
-        // pass the updated config and get new responses
-        $synced_response_config = getResponses($synced_form_config);
+        // if it's the form we want to udpate
+        if (isset($form_config['formId']) && $form_config['formId'] == $form_id) {
 
-        // take the fully updated config and add to our array
-        $updated_config[] = $synced_response_config;
+            // only sync if active
+            if (isset($form_config['status']) && $form_config['status'] == 'active') {
 
+                // sync the form and return an updated config
+                $synced_form_config = syncForm($form_config);
+                
+                // pass the updated config and get new responses
+                $synced_response_config = getResponses($synced_form_config);
+
+                // take the fully updated config and add to our array
+                $updated_config[] = $synced_response_config;
+
+            }
+            // if not active return to edit with error
+            else {
+                AlertManager::addAlert('danger', 'Survey must be Active to sync');
+                header('Location: ./edit-survey.php?formId=' . $form_id);
+                exit;
+            }
+        }
+        // if it's not the form we want to sync add to the list and continue
+        else {
+            $updated_config[] = $form_config;
+        }
+    
     }
-    # if form isn't active, add to new config as-is
-    else {
-        $updated_config[] = $form_config;
-    }
-   
+
 }
 
+// otherwise sync the all forms in the config file
+else {
+    foreach ($config as $form_config) {
+        
+        // only sync active forms
+        if (isset($form_config['status']) && $form_config['status'] == 'active') {
+
+            // sync the form and return an updated config
+            $synced_form_config = syncForm($form_config);
+            
+            // pass the updated config and get new responses
+            $synced_response_config = getResponses($synced_form_config);
+
+            // take the fully updated config and add to our array
+            $updated_config[] = $synced_response_config;
+
+        }
+        # if form isn't active, add to new config as-is
+        else {
+            $updated_config[] = $form_config;
+        }
+    
+    }
+
+}
+
+// save our updated config to file
 $json_config = json_encode($updated_config, JSON_PRETTY_PRINT);
 file_put_contents($config_file, $json_config);
 
