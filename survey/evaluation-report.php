@@ -644,7 +644,14 @@ if (isset($_POST['download_to_csv'])) {
 
     
 
-
+    <?php $flash_alerts = AlertManager::getAlertsAll(); ?>
+    <?php if (count($flash_alerts) > 0): ?>
+        <?php foreach ($flash_alerts as $falert): ?>
+            <div class="alert alert-<?= $falert['type'] ?>" role="alert">
+                <?= $falert['message'] ?><br>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
 
     <?php if (strlen($alert_warning) > 0): ?>
         <div class="alert alert-warning" role="alert">
