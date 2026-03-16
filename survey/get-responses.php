@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $time_since_last_sync = time() - $survey_config['lastResponsesUpdated'];
     if ($time_since_last_sync < 60) {
         AlertManager::addAlert('warning', "Responses requested $time_since_last_sync seconds ago. Please wait a full minute before next sync.");
-        header('Location: ./evaluation-report.php?formId=' . $form_id);
+        header('Location: ./report.php?formId=' . $form_id);
         exit;
     }
     
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // update the config file for this form
     updateConfigByFormId($form_id, $survey_config);
 
-    header('Location: ./evaluation-report.php?formId=' . $form_id);
+    header('Location: ./report.php?formId=' . $form_id);
     exit;
 
 }

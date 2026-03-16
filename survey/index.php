@@ -93,12 +93,12 @@ foreach ($courses as $course) {
                 </div>
                 <div class="col-2">
                     <div class="btn-group-vertical btn-group-sm float-end border" role="group" aria-label="Vertical button group">
-                        <a href="./edit.php?formId=<?= $survey['formId'] ?>" role="button" class="btn btn-light text-secondary-emphasis">Edit</a>
+                        <a href="./edit.php?formId=<?= $survey['formId'] ?>" role="button" class="btn btn-outline-secondary">Edit</a>
                         <?php if ($has_responses): ?>
-                            <a href="./evaluation-report.php?formId=<?= $survey['formId'] ?>" role="button" 
+                            <a href="./report.php?formId=<?= $survey['formId'] ?>" role="button" 
                             class="btn btn-outline-info text-secondary-emphasis">View Report</a>
                         <?php else: // no responses available ?>
-                            <a href="./evaluation-report.php?formId=<?= $survey['formId'] ?>" role="button"
+                            <a href="./report.php?formId=<?= $survey['formId'] ?>" role="button"
                             class="btn btn-outline-secondary text-light-emphasis bg-secondary-subtle disabled" >View Report</a>
                         <?php endif; ?>
                     </div>

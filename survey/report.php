@@ -593,7 +593,7 @@ if (isset($_POST['download_to_csv'])) {
 
         <div class="col-lg-2" name="side-nav">
             <div class="card sticky-top m-auto z-0 overflow-hidden" style="top: 65px; max-width: 310px;">
-                <form action="evaluation-report.php" method="get">
+                <form action="report.php" method="get">
                 <h5 class="card-header">Filter Results</h5>
                 <div class="card-body">
                     <h6 class="card-title text-body-secondary mb-0">By Offering</h6>
