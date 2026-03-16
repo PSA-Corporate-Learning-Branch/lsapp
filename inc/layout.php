@@ -276,6 +276,7 @@ $teams = getTeams();
 				<a class="dropdown-item" href="/lsapp/function-map.php">Functions</a>
 				<a class="dropdown-item" href="/lsapp/kepler.php">Kepler Server Access</a>
         <a class="dropdown-item" href="/lsapp/newsletters/">Newsletter Manager</a>
+        <a class="dropdown-item" href="/lsapp/platforms.php">Platforms</a>
 				<a class="dropdown-item" href="/lsapp/audits.php">Resource Reviews</a>
 				<a class="dropdown-item" href="/lsapp/snowplow.php">Snowplow (GDX) Analytics</a>
 				<a class="dropdown-item" href="/lsapp/venues.php">Venues</a>
