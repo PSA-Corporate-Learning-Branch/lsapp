@@ -69,7 +69,7 @@ $levels = getLevels ();
 $reportinglist = getReportingList();
 // $userreviews = getUserReviews($idir);
 $partners = getPartners();
-$platforms = getAllPlatforms();
+$platforms = getPlatformNames();
 
 $courseData = [
   'LearningHubPartner' => '',

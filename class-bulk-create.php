@@ -15,7 +15,9 @@ $allclasses = [];
 foreach($dates as $date) {
 	
 	$classid = date('YmdHis') . '-' . $count;
-	$combinedtimes = h($_POST['StartTime'][$count]) . ' - ' . h($_POST['EndTime'][$count]);	
+	$starttime = h($_POST['StartTime'][$count] ?? '08:30');
+	$endtime = h($_POST['EndTime'][$count] ?? '16:30');
+	$combinedtimes = $starttime . ' - ' . $endtime;	
 	$status = 'Requested';
 	
 	// EndDate calculation
@@ -34,29 +36,37 @@ foreach($dates as $date) {
 	}
 
 	$facilitatorsclean = '';
-	$fac = $_POST['Facilitating'] ?? '';
-	if(!empty($fac)) { 
-		$fa = strip_tags(trim($fac));
-		$facilitators = str_replace('@','',$fa);
-		$facilitatorsclean = str_replace(',','',$facilitators);
+	// Facilitators added by idir
+	$facilitatorsadded = $_POST['Facilitating'][$count] ?? '';
+	// Facilitators from the text input field
+	$facilitorsinput = $_POST['AddFacilitating'][$count] ?? '';
+	
+	if (!empty($facilitatorsadded)) { 
+		$fa = strip_tags(trim($facilitatorsadded));
+		$facilitatorsclean .= str_replace(',',' ',$fa);
+	} 
+	if (!empty($facilitorsinput)) {
+		$faci = strip_tags(trim($facilitorsinput));
+		$facil = $facilitatorsclean . ' ' . str_replace(',',' ',$faci);
+		$facilitatorsclean = trim($facil);
 	}
 
 	$newclass = Array($classid,
 				$status,
 				$now,
 				$currentuser,
-				'ELM',
+				$_POST['Dedicated'][$count] ?? 'ELM', // Dedicated ( ELM || Dedicated )
 				$course[0],
 				$course[2],
 				'', // ITEM code
 				$date, // StartDate
 				$enddate, // EndDate
 				$combinedtimes,
-				$_POST['MinEnroll'][$count], //$course[28], //MinEnroll
-				$_POST['MaxEnroll'][$count], //$course[29], //MaxEnroll
+				$_POST['MinEnroll'][$count] ?? 1, //$course[28], //MinEnroll
+				$_POST['MaxEnroll'][$count] ?? 1000, //$course[29], //MaxEnroll
 				$shipdate,
 				$facilitatorsclean,
-				h($_POST['WebinarLink'][$count]),
+				h($_POST['WebinarLink'][$count] ?? ''),
 				$date,
 				$coursedays,
 				'0', // Enrolled
@@ -86,7 +96,7 @@ foreach($dates as $date) {
 				$now,
 				$currentuser,
 				'', // Assigned
-				$course[21],
+				$course[21], // Method / Delivery Method
 				$course[20], //h($_POST['CourseCategory']),
 				'', // Region
 				'', // CheckedBy
@@ -95,8 +105,8 @@ foreach($dates as $date) {
 				'', // avAssigned
 				0, // venueCost
 				'', // venueBEO
-				h($_POST['StartTime'][$count]), // StartTime
-				h($_POST['EndTime'][$count]), // EndTime
+				$starttime, // StartTime
+				$endtime, // EndTime
 				$course[32], // CourseColor,
 				'', // EvaluationsSent
 				'' // EvaluationsLink

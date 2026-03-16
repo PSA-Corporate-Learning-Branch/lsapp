@@ -23,8 +23,7 @@
 <input class="search form-control mb-3" placeholder="Search platforms...">
 
 <?php 
-$jsonContent = file_get_contents('data/platforms.json');
-$platforms = json_decode($jsonContent, true);
+$platforms = getAllPlatforms();
 
 if ($platforms === null) {
     echo '<div class="alert alert-danger" role="alert">Failed to load platform data. Please try again later.</div>';

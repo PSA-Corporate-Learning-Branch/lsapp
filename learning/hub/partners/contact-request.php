@@ -73,7 +73,7 @@ try {
 
     // Send email
     $result = $ches->sendEmail(
-        ['allan.haggett@gov.bc.ca'],
+        ['allan.haggett@gov.bc.ca','clip@gov.bc.ca'],
         $subject,
         $bodyText,
         $bodyHtml,

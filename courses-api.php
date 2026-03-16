@@ -23,9 +23,3 @@ foreach($courses as $course):
 	endif;
 endforeach;
 
-
-else:
-
-require('templates/noaccess.php')
-
-endif;

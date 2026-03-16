@@ -46,7 +46,7 @@ if($_POST):
 					h($fromform['RequestedBy']),
 					$ded,
 					h($fromform['CourseID']),
-					h($fromform['CourseName']),
+					sanitize($fromform['CourseName']),
 					h(trim(strtoupper($fromform['ItemCode']))),
 					h($fromform['StartDate']),
 					h($fromform['EndDate']),
@@ -72,7 +72,7 @@ if($_POST):
 					h($fromform['VenuePhone']),
 					h($fromform['VenueEmail']),
 					h($fromform['VenueAttention']),
-					h($fromform['RequestNotes']),
+					sanitize($fromform['RequestNotes']),
 					h($fromform['Shipper']),
 					h($fromform['Boxes']),
 					h($fromform['Weight']),
@@ -160,7 +160,7 @@ else:
 <input type="hidden" name="ClassID" value="<?= h($deets[0]) ?>">
 <input type="hidden" name="cid" value="<?= h($deets[0]) ?>">
 <input type="hidden" name="CourseID" id="CourseID" value="<?= h($deets[5]) ?>">
-<input type="hidden" name="CourseName" id="CourseName" value="<?= h($deets[6]) ?>">
+<input type="hidden" name="CourseName" id="CourseName" value="<?= sanitize($deets[6]) ?>">
 <input type="hidden" name="CourseColor" id="CourseColor" value="<?= h($deets[56]) ?>">
 
 <div class="">

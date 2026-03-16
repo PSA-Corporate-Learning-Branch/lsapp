@@ -71,7 +71,7 @@ $deliverymethods = getDeliveryMethods ();
 $levels = getLevels ();
 $reportinglist = getReportingList();
 $partners = getPartners();
-$platforms = getAllPlatforms();
+$platforms = getPlatformNames();
 
 $courseData = [
   'LearningHubPartner' => '',

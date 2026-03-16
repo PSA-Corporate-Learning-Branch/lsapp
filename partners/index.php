@@ -2,12 +2,8 @@
 opcache_reset();
 $path = '../inc/lsapp.php';
 require($path); 
-$partnersFile = "../data/partners.json";
-$partners = file_exists($partnersFile) ? json_decode(file_get_contents($partnersFile), true) : [];
-// Sort partners alphabetically by name
-usort($partners, function($a, $b) {
-    return strcasecmp($a['name'], $b['name']);
-});
+
+$partners = getAllPartners();
 ?>
 
 <?php if(canACcess()): ?>
@@ -38,20 +34,10 @@ usort($partners, function($a, $b) {
 <body>
 <?php getNavigation() ?>
 
-<div class="container-lg p-lg-5 p-4 bg-light-subtle">
+<div class="container">
         <h1>Corporate Learning Partners</h1>
 
-        <ul class="nav nav-tabs mb-4">
-            <li class="nav-item">
-                <a class="nav-link" href="dashboard.php">Partner Admin Dashboard</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active" href="index.php">Partner List</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="form.php">Add New Partner</a>
-            </li>
-        </ul>
+        <?php include('../templates/partner-nav.php'); ?>
         
         
         <div id="partner-list">
@@ -82,14 +68,14 @@ usort($partners, function($a, $b) {
                                 <?php 
                                 $status = $partner["status"] ?? 'Unknown';
                                 $badgeClass = 'bg-secondary-subtle text-secondary-emphasis';
-                                if ($status === 'Active') {
+                                if ($status === 'active') {
                                     $badgeClass = 'bg-success-subtle text-success-emphasis';
-                                } elseif ($status === 'Inactive') {
+                                } elseif ($status === 'inactive') {
                                     $badgeClass = 'bg-danger-subtle text-danger-emphasis';
                                 }
                                 ?>
                                 <span class="badge <?php echo $badgeClass; ?>">
-                                    <?php echo htmlspecialchars($status); ?>
+                                    <?php echo htmlspecialchars(ucfirst($status)); ?>
                                 </span>
                             </td>
                             <td class="name">

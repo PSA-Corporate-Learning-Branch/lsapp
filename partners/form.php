@@ -52,7 +52,11 @@ if (isset($_GET["id"])) {
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Role</label>
-                            <input type="text" name="contacts[${index}][role]" class="form-control">
+                            <select name="contacts[${index}][role]" class="form-select">
+                                <option value="">Select a role...</option>
+                                <option value="CLP Committee member">CLP Committee member</option>
+                                <option value="CLP Admin">CLP Admin</option>
+                            </select>
                         </div>
                     </div>
                     <button type="button" class="btn btn-danger btn-sm mt-2" onclick="removeContactField(this)">Remove</button>
@@ -114,20 +118,10 @@ if (isset($_GET["id"])) {
 <body>
 <?php getNavigation() ?>
 
-<div class="container-lg p-lg-5 p-4 bg-light-subtle">
+<div class="container">
         <h1>Corporate Learning Partners</h1>
 
-        <ul class="nav nav-tabs mb-4">
-            <li class="nav-item">
-                <a class="nav-link" href="dashboard.php">Partner Admin Dashboard</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="index.php">Partner List</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active" href="form.php">Add New Partner</a>
-            </li>
-        </ul>
+        <?php include('../templates/partner-nav.php'); ?>
 
     <div class="row justify-content-md-center">
     <div class="col-md-6">
@@ -239,7 +233,11 @@ if (isset($_GET["id"])) {
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Role</label>
-                                    <input type="text" name="contacts[<?php echo $index; ?>][role]" class="form-control" value="<?php echo htmlspecialchars($contact["role"]); ?>">
+                                    <select name="contacts[<?php echo $index; ?>][role]" class="form-select">
+                                        <option value="">Select a role...</option>
+                                        <option value="CLP Committee member" <?php echo ($contact["role"] ?? "") === "CLP Committee member" ? "selected" : ""; ?>>CLP Committee member</option>
+                                        <option value="CLP Admin" <?php echo ($contact["role"] ?? "") === "CLP Admin" ? "selected" : ""; ?>>CLP Admin</option>
+                                    </select>
                                 </div>
                             </div>
                             <input type="hidden" name="contacts[<?php echo $index; ?>][added_at]" value="<?php echo htmlspecialchars($contact["added_at"] ?? ''); ?>">
@@ -291,7 +289,11 @@ if (isset($_GET["id"])) {
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Role</label>
-                                <input type="text" name="contacts[0][role]" class="form-control">
+                                <select name="contacts[0][role]" class="form-select">
+                                    <option value="">Select a role...</option>
+                                    <option value="CLP Committee member">CLP Committee member</option>
+                                    <option value="CLP Admin">CLP Admin</option>
+                                </select>
                             </div>
                         </div>
                     </div>

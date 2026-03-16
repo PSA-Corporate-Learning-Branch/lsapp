@@ -81,17 +81,13 @@ if (isset($_GET["id"])) {
                             <label class="form-label">Email</label>
                             <input type="email" name="contacts[${index}][email]" class="form-control" required>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label">IDIR</label>
                             <input type="text" name="contacts[${index}][idir]" class="form-control" required>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label">Title</label>
                             <input type="text" name="contacts[${index}][title]" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Role</label>
-                            <input type="text" name="contacts[${index}][role]" class="form-control">
                         </div>
                     </div>
                     <button type="button" class="btn btn-danger btn-sm mt-2" onclick="removeContactField(this)">Remove</button>
@@ -125,9 +121,14 @@ if (isset($_GET["id"])) {
     <div class="row justify-content-md-center">
     <div class="col-md-4">
         <h2>Welcome</h2>
-        <p>In the BC Public Service, corporate learning is a shared space. <a href="https://corporatelearning.gww.gov.bc.ca/learninghub/corporate-learning-partners/">Corporate learning partners</a> are all committed to offering learning, development and growth opportunities for all our employees.</p>
-        <p>To be a corporate learning partner, you must have developed or designed a course that is aligned with the <a href="https://corporatelearning.gww.gov.bc.ca/learninghub/what-is-corp-learning-framework/">Corporate Learning Framework</a> and beneficial to all BC Public Service employees regardless of their ministry.</p>
+        <p>In the BC Public Service, corporate learning is developed and offered by the PSA Corporate Learning Branch and partners across the BC Public Service. 
+            Corporate Learning Partners are all committed to offering learning, development and growth opportunities for all our employees. </p>
+        <p>To be a Corporate Learning Partner, you must have developed or designed a course that is aligned with the Corporate Learning Framework and beneficial to all BC Public Service employees regardless of their ministry. 
+            If you have accountability for the subject matter in the course, you are able to add the course to the LearningHUB catalogue. 
+            If you do not have corporate accountability, or you share accountability, you must work with the Corporate Learning Partner who holds responsibility for this area for the BC Public Service. </p>
+        <p>If you suspect you are not the accountability holder and you aren’t sure who is, please contact the Corporate Learning Branch.</p>
         <p>If you're ready, fill out the form to the right and we'll get back to you with next steps.</p>
+        
     </div>
     <div class="col-md-6">
     <div class="p-4 bg-light-subtle rounded-3">
@@ -207,18 +208,18 @@ if (isset($_GET["id"])) {
                                     <label class="form-label">Email</label>
                                     <input type="email" name="contacts[<?php echo $index; ?>][email]" class="form-control" required value="<?php echo htmlspecialchars($contact["email"]); ?>">
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <label class="form-label">IDIR</label>
                                     <input type="text" name="contacts[<?php echo $index; ?>][idir]" class="form-control" required value="<?php echo htmlspecialchars($contact["idir"]); ?>">
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <label class="form-label">Title</label>
                                     <input type="text" name="contacts[<?php echo $index; ?>][title]" class="form-control" value="<?php echo htmlspecialchars($contact["title"]); ?>">
                                 </div>
-                                <div class="col-md-4">
+                                <!-- <div class="col-md-4"> internal use only, so hiding for now
                                     <label class="form-label">Role</label>
                                     <input type="text" name="contacts[<?php echo $index; ?>][role]" class="form-control" value="<?php echo htmlspecialchars($contact["role"]); ?>">
-                                </div>
+                                </div> -->
                             </div>
                             <input type="hidden" name="contacts[<?php echo $index; ?>][added_at]" value="<?php echo htmlspecialchars($contact["added_at"] ?? ''); ?>">
 
@@ -246,18 +247,18 @@ if (isset($_GET["id"])) {
                                 <label class="form-label">Email</label>
                                 <input type="email" name="contacts[0][email]" class="form-control" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">IDIR</label>
                                 <input type="text" name="contacts[0][idir]" class="form-control">
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Title</label>
                                 <input type="text" name="contacts[0][title]" class="form-control">
                             </div>
-                            <div class="col-md-4">
+                            <!-- <div class="col-md-4"> internal use only, so hiding for now
                                 <label class="form-label">Role</label>
                                 <input type="text" name="contacts[0][role]" class="form-control">
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 <?php endif; ?>
