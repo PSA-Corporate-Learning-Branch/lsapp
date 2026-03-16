@@ -78,7 +78,7 @@ if (!empty($survey_config) && !empty($survey_config['courseId'])) {
 
     <div class="row justify-content-md-center">
         <div class="col-md-10">
-            <form method="post" action="survey-update-process.php">
+            <form method="post" action="update.php">
             <!-- sync button -->
             <div class="d-flex align-items-center">
                 <?php if (isAdmin()): ?>
