@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // check our form id is valid before proceeding
     if (!verifyFormID($form_id)) {
         AlertManager::addAlert('danger', 'Invalid Form ID. Please correct and re-submit.');
-        header('Location: ./edit-survey.php?formId=' . $form_id);
+        header('Location: ./edit.php?formId=' . $form_id);
         exit;
     }
 
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $survey_config = getConfigSurvey($form_id);
     if (empty($survey_config)) {
         AlertManager::addAlert('danger', 'Survey not found.');
-        header('Location: ./edit-survey.php?formId=' . $form_id);
+        header('Location: ./edit.php?formId=' . $form_id);
         exit;
     }
 
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // secret provided but invalid format
         if (strlen($new_secret) < 30) {
             AlertManager::addAlert('danger', 'Invalid Form Secret. Please correct and re-submit.');
-            header('Location: ./edit-survey.php?formId=' . $form_id);
+            header('Location: ./edit.php?formId=' . $form_id);
             exit;
         }
         // good to update
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // if we don't have a secret, or the new one isn't valid
         if (!isset($survey_config['formSecret']) && strlen($new_config['formSecret']) < 30) {
             AlertManager::addAlert('danger', 'Survey must have a valid secret before it can be made active. Please correct and re-submit.');
-            header('Location: ./edit-survey.php?formId=' . $form_id);
+            header('Location: ./edit.php?formId=' . $form_id);
             exit;
         } 
         $new_config['status'] = $new_status;
@@ -66,10 +66,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($new_config !== $survey_config) {
         updateConfigByFormId($form_id, $new_config);
         AlertManager::addAlert('success', 'Survey details successfully updated.');
-        header('Location: ./edit-survey.php?formId=' . $form_id);
+        header('Location: ./edit.php?formId=' . $form_id);
         exit;
     } else {
-        header('Location: ./edit-survey.php?formId=' . $form_id);
+        header('Location: ./edit.php?formId=' . $form_id);
         exit;
     }
     

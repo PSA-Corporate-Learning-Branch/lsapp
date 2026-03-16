@@ -244,7 +244,7 @@ if (!empty($form_id)) {
                 $time_since_last_sync = time() - $form_config['lastResponsesUpdated'];
                 if ($time_since_last_sync < 60) {
                     AlertManager::addAlert('warning', "Sync run $time_since_last_sync seconds ago. Please wait a full minute before next sync.");
-                    header('Location: ./edit-survey.php?formId=' . $form_id);
+                    header('Location: ./edit.php?formId=' . $form_id);
                     exit;
                 }
             
@@ -261,7 +261,7 @@ if (!empty($form_id)) {
             // if not active return to edit with error
             else {
                 AlertManager::addAlert('danger', 'Survey must be Active to sync');
-                header('Location: ./edit-survey.php?formId=' . $form_id);
+                header('Location: ./edit.php?formId=' . $form_id);
                 exit;
             }
         }
