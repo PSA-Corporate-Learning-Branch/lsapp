@@ -2,6 +2,7 @@
 opcache_reset();
 require('inc/lsapp.php');
 require('inc/Parsedown.php');
+require('survey/functions.php');
 $Parsedown = new Parsedown();
 ?>
 <?php //opcache_reset() ?>
@@ -377,8 +378,11 @@ $openAccessCode = $accessCodeData[0]['code'] ?? '';
 		<?php if(!empty($deets[9])): ?>
 			<a href="<?= $deets[9] ?>" target="_blank" class="btn btn-primary">PostWork</a>
 		<?php endif ?>
-		<?php if(!empty($deets[35])): ?>
-			<a href="<?= $deets[35] ?>" target="_blank" class="btn btn-primary">Evaluation Report</a>
+		<?php //if(!empty($deets[35])): ?>
+			<!-- <a href="<?= $deets[35] ?>" target="_blank" class="btn btn-primary">Evaluation Report</a> -->
+		<?php //endif ?>
+		<?php if(!empty($deets[46]) && hasResponses($deets[46])): ?>
+			<a href="/survey/report.php?formId=<?= $deets[46] ?>" target="_blank" class="btn btn-primary">Survey Report</a>
 		<?php endif ?>
 		<!-- <a href="https://learning.gov.bc.ca/psc/CHIPSPLM/EMPLOYEE/ELM/c/LM_OD_EMPLOYEE_FL.LM_FND_LRN_FL.GBL?Page=LM_FND_LRN_RSLT_FL&Action=U&MODE=ADV&TITLE=<?php echo urlencode($deets[2]) ?>"
 			target="_blank" 
