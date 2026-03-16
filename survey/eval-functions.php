@@ -86,28 +86,6 @@ function getNextConfigID($config_file) {
     return $id+1;
 }
 
-/**
- * For initial implementation of adding survey id
- * using getNextConfigID() to get initial value
- * and then passing the return value to updateConfig()
- * 
- * @param array config file array to be updated
- * @param int current max id + 1 as starting point
- * 
- * @return array updated config file array
- */
-// function addConfigID($config_file, $start_id) {
-//     $id = $start_id;
-//     $new_config = [];
-//     foreach ($config_file as $config) {
-//         if (!isset($config['id'])) {
-//             $config['id'] = $id;
-//             $id++;
-//         }
-//         $new_config[] = $config;
-//     }
-//     return $new_config;
-// }
 
 /**
  * Do a pattern match on the form id to ensure it's valid
