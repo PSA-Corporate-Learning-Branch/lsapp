@@ -2,7 +2,7 @@
 opcache_reset();
 $path = '../inc/lsapp.php';
 require($path); 
-require('eval-functions.php');
+require('functions.php');
 
 // Include encryption helper for decrypting API passwords
 require_once(dirname(__DIR__) . '/inc/encryption_helper.php');

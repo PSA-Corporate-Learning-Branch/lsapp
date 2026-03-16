@@ -2,7 +2,7 @@
 opcache_reset();
 $path = '../inc/lsapp.php';
 require($path); 
-require('eval-functions.php');
+require('functions.php');
 
 
 /**
