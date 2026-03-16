@@ -84,7 +84,7 @@ if (!empty($survey_config) && !empty($survey_config['courseId'])) {
                 <?php if (isAdmin()): ?>
                     <!-- form must be active and have a secret set -->
                     <?php if ($survey_config['status'] == 'active' && !empty($survey_config['formSecret'])): ?>
-                        <a role="button" class="me-auto btn btn-primary m-2" href="#">Sync Form</a>
+                        <a role="button" class="me-auto btn btn-primary m-2" href="./evaluation-sync.php?formId=<?= $form_id ?>">Sync Form</a>
                     <?php else: ?>
                         <a role="button" class="float-start btn btn-primary m-2 disabled" href="#" aria-disabled="true">Sync Form</a>
                         <a href="#" class="link-secondary" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="right" data-bs-title="<small>Form must be Active with a valid Form Secret to sync</small>">
