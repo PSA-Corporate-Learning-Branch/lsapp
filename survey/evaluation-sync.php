@@ -234,12 +234,20 @@ if (!empty($form_id)) {
     
     foreach ($config as $form_config) {
         
-        // if it's the form we want to udpate
+        // if it's the form we want to sync
         if (isset($form_config['formId']) && $form_config['formId'] == $form_id) {
 
             // only sync if active
             if (isset($form_config['status']) && $form_config['status'] == 'active') {
 
+                // check lastResponsesUpdated
+                $time_since_last_sync = time() - $form_config['lastResponsesUpdated'];
+                if ($time_since_last_sync < 60) {
+                    AlertManager::addAlert('warning', "Sync run $time_since_last_sync seconds ago. Please wait a full minute before next sync.");
+                    header('Location: ./edit-survey.php?formId=' . $form_id);
+                    exit;
+                }
+            
                 // sync the form and return an updated config
                 $synced_form_config = syncForm($form_config);
                 
