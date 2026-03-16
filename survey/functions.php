@@ -1,7 +1,8 @@
 <?php
 
-$data_path = '../data/surveys/';
-$config_file = $data_path . 'config.json';
+// $data_path = '../data/surveys/';
+$data_path = build_path(BASE_DIR, 'data', 'surveys/');
+$config_file = build_path($data_path, 'config.json');
 
 function getConfig() {
     global $config_file;
@@ -86,6 +87,31 @@ function getNextConfigID($config_file) {
     return $id+1;
 }
 
+/**
+ * Check that we have responses for a given form id
+ * 
+ * @param string $form_id the chefs form id
+ * 
+ * @return bool whether we have a corresponding response file
+ */
+function hasResponses($form_id) {
+    global $data_path;
+    $response_files = glob($data_path . "*-*-*-*.json");
+    foreach ($response_files as $file) {
+        
+    $without_path = str_replace($data_path, '', $file);
+        $without_extension = str_replace('.json', '', $without_path);
+        // if we find a matching form id, return
+        if (trim($without_extension) == trim($form_id)) {
+            return true;
+        }
+
+    }
+    
+    // if we don't find a matching form id
+    return false;
+
+}
 
 /**
  * Do a pattern match on the form id to ensure it's valid
