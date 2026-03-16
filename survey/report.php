@@ -452,6 +452,7 @@ if (file_exists("../data/surveys/{$form_id}.json")) {
     $alert_warning .= "No responses found for this survey.<br>";
 }
 
+$have_responses = count($compiled_responses) > 0 ? true : false;
 
 // Filtered classes info
 if (!empty($class_code) && count($classes) > 0) {
@@ -659,7 +660,7 @@ if (isset($_POST['download_to_csv'])) {
         </div>
     <?php endif; ?>
 
-    <?php if (strlen($alert_info) > 0): ?>
+    <?php if (strlen($alert_info) > 0 && $have_responses): ?>
         <!-- Info alerts -->
         <div class="alert alert-info" role="alert">
             <?= $alert_info ?>
@@ -669,9 +670,6 @@ if (isset($_POST['download_to_csv'])) {
     
 
 </div>
-
-<!-- if we don't have any responses, don't show the chart area -->
-<?php if (count($compiled_responses) > 0): ?>
 
 <div class="container-lg d-flex justify-content-end bg-light-subtle rounded-top border-secondary-subtle border-start border-top border-end">
     <div class="row">
@@ -683,9 +681,11 @@ if (isset($_POST['download_to_csv'])) {
                         <input type="hidden" name="FormId" value="<?= $form_id ?>">
                         <button type="submit" name="get_responses" class="btn btn-secondary m-1">Get Responses</button>
                     </form>
+                    <?php if ($have_responses): ?>
                     <form method="post" onsubmit="return confirm('Are you sure you want to download the results with the current filters applied?')">
                         <button type="submit" name="download_to_csv" class="btn btn-success m-1">Export to CSV</button>
                     </form>
+                    <?php endif; ?>
                 </div>
         </div> <!-- /col -->
     </div> <!-- /row -->
@@ -693,6 +693,8 @@ if (isset($_POST['download_to_csv'])) {
 
 <div class="container-lg p-lg-5 p-4 border border-secondary-subtle bg-secondary-subtle rounded-bottom">
      
+    <!-- if we don't have any responses, don't show charts -->
+    <?php if (count($compiled_responses) > 0): ?>
    
     <?php
     foreach($compiled_responses as $question => $response) {
@@ -720,6 +722,11 @@ if (isset($_POST['download_to_csv'])) {
     }
     ?>
     
+    <?php else: ?>
+        <div class="alert alert-warning" role="alert">
+            No responses available for the currently selected filters. Please either adjust filters, 
+            or select <strong>Get Responses</strong> to check for new responses.
+        </div>
 
 </div> <!-- /container -->
 <?php endif; // count if we have responses ?> 
