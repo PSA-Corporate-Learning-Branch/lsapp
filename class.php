@@ -1,4 +1,5 @@
 <?php require('inc/lsapp.php') ?>
+<?php require('survey/functions.php'); ?>
 <?php opcache_reset() ?>
 <?php $user = LOGGED_IN_IDIR; ?>
 <?php if(canAccess()): ?>
@@ -141,15 +142,26 @@ if($deets[45] === 'eLearning' || $deets[45] === 'Curated Pathway') {
 			$match = preg_match($pattern, $course[46]); // returns 1 on match
 		?>
 		
-		<div class="my-3 p-2 bg-light-subtle border border-secondary-subtle rounded-3">
-			<!-- Invalid form id, then show an error --> 
-			<?php if ($match !== 1): ?>
-				<div class="alert alert-warning" role="alert">Course Survey Link Error: Invalid Form Id on course page</div>
-			<?php else: ?>
-				<?php $chefsurl = "https://submit.digital.gov.bc.ca/app/form/submit?f=" . h($course[46]) . "&classCode=" . h(trim($deets[7])); ?>
-				<a href="<?= $chefsurl ?>" target="_blank" class="">CHEFS Class Survey </a> 
-				<button class="copy btn btn-sm bg-secondary-subtle" data-clipboard-text="<?= $chefsurl ?>">Copy Class Survey URL</button>
-			<?php endif; ?>
+		<div class="container my-3 p-2 bg-light-subtle border border-secondary-subtle rounded-3">
+			<div class="row">
+				<div class="col">
+					<!-- Invalid form id, then show an error --> 
+					<?php if ($match !== 1): ?>
+						<div class="alert alert-warning" role="alert">Course Survey Link Error: Invalid Form Id on course page</div>
+					<?php else: ?>
+						<?php $chefsurl = "https://submit.digital.gov.bc.ca/app/form/submit?f=" . h($course[46]) . "&classCode=" . h(trim($deets[7])); ?>
+						<a href="<?= $chefsurl ?>" target="_blank" class="">CHEFS Class Survey </a> 
+						<button class="copy btn btn-sm bg-secondary-subtle" data-clipboard-text="<?= $chefsurl ?>">Copy Class Survey URL</button>
+					<?php endif; ?>
+				</div>
+				<div class="col">
+					<?php if (hasResponses($course[46]) && $deets[8] <= $today): ?>
+						<a href="./survey/report.php?formId=<?= $course[46] ?>&classCode=<?= $deets[7] ?>">View Survey Results</a>
+					<?php else: ?>
+						<span class="text-body-secondary">Results available on or after the start date</span>
+					<?php endif; ?>
+				</div>
+			</div>
 		</div>
 	<?php endif; ?>
 	
