@@ -679,6 +679,9 @@ if (isset($_POST['download_to_csv'])) {
                     <div class="text-body-secondary m-1">Last Sync: <?= $last_sync ?></div>
                     <form method="post" action="get-responses.php">
                         <input type="hidden" name="FormId" value="<?= $form_id ?>">
+                        <input type="hidden" name="ClassCode" value="<?= $class_code ?>">
+                        <input type="hidden" name="StartDate" value="<?= $start_date ?>">
+                        <input type="hidden" name="EndDate" value="<?= $end_date ?>">
                         <button type="submit" name="get_responses" class="btn btn-secondary m-1">Get Responses</button>
                     </form>
                     <?php if ($have_responses): ?>
