@@ -10,14 +10,31 @@ require_once(dirname(__DIR__) . '/inc/encryption_helper.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+    // Grab our form field values
     $form_id = $_POST['FormId'];
+    $class_code = $_POST['ClassCode'];
+    $start_date = $_POST['StartDate'];
+    $end_date = $_POST['EndDate'];
+    
+    // Create our filter parameters if they had been set
+    $filters = '';
+    if ($class_code !== 0) {
+        $filters .= "&classCode=$class_code";
+    }
+    if ($start_date !== 0) {
+        $filters .= "&startDate=$start_date";
+    }
+    if ($end_date !== 0) {
+        $filters .= "&endDate=$end_date";
+    }
+
     $survey_config = getConfigSurvey($form_id);
 
     // check lastResponsesUpdated
     $time_since_last_sync = time() - $survey_config['lastResponsesUpdated'];
     if ($time_since_last_sync < 60) {
         AlertManager::addAlert('warning', "Responses requested $time_since_last_sync seconds ago. Please wait a full minute before next sync.");
-        header('Location: ./report.php?formId=' . $form_id);
+        header('Location: ./report.php?formId=' . $form_id . $filters);
         exit;
     }
     
@@ -62,7 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // update the config file for this form
     updateConfigByFormId($form_id, $survey_config);
 
-    header('Location: ./report.php?formId=' . $form_id);
+
+    header('Location: ./report.php?formId=' . $form_id . $filters);
     exit;
 
 }
