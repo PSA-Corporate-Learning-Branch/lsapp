@@ -35,7 +35,7 @@ function syncForm($config) {
     $form_data = json_decode($response, true);
 
     // update from form
-    $return_config['lastUpdated'] = $form_data['updatedAt'];
+    $return_config['lastFormUpdatedAt'] = $form_data['updatedAt'];
 
     $return_config['name'] = $form_data['name'];
     
@@ -59,6 +59,7 @@ function syncForm($config) {
                 
                 // reach out to version endpoint get the form version json
                 $version_data = getVersion($return_config);
+                $return_config['lastVersionUpdatedAt'] = $version_data['updatedAt'];
 
                 // process the version and extract questions to create our questions map
                 $questions_map = processVersionQuestions($version_data);
