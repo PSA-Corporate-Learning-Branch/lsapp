@@ -6,6 +6,20 @@ require('functions.php');
 
 // Get our survey config
 $config = getConfig();
+usort($config, function($a, $b) {
+    $a_has_name = isset($a['name']);
+    $b_has_name = isset($b['name']);
+
+    // without name first
+    if ($a_has_name !== $b_has_name) {
+        return $a_has_name <=> $b_has_name;
+    }
+    if (!$a_has_name && !$b_has_name) {
+        return 0;
+    }
+    // sort by name
+    return $a['name'] <=> $b['name'];
+});
 
 // get a list of response files
 $response_files = glob("../data/surveys/*-*-*-*.json");
