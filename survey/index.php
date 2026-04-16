@@ -6,6 +6,20 @@ require('functions.php');
 
 // Get our survey config
 $config = getConfig();
+usort($config, function($a, $b) {
+    $a_has_name = isset($a['name']);
+    $b_has_name = isset($b['name']);
+
+    // without name first
+    if ($a_has_name !== $b_has_name) {
+        return $a_has_name <=> $b_has_name;
+    }
+    if (!$a_has_name && !$b_has_name) {
+        return 0;
+    }
+    // sort by name
+    return $a['name'] <=> $b['name'];
+});
 
 // get a list of response files
 $response_files = glob("../data/surveys/*-*-*-*.json");
@@ -79,17 +93,17 @@ foreach ($courses as $course) {
             
             <div class="container">
             <div class="row align-items-center">
-                <div class="col-8">
+                <div class="col-7">
                     <h5 class="card-title"><?= $survey['name'] ?? '' ?></h5>
                     <h6 class="card-subtitle text-body-secondary">
                         <?= !empty($survey['courseId']) ? $course_map[$survey['courseId']]['name'] . ' (' . $course_map[$survey['courseId']]['code'] . ')' : '' ?>
                     </h6>
                     <p class="card-text"><small class="text-body-secondary">Form ID: <?= $survey['formId'] ?></small></p>
                 </div>
-                <div class="col-2">
-                    <div><small>Last Sync: <?= isset($survey['lastResponsesUpdated']) ? date('Y-m-d', $survey['lastResponsesUpdated']) : 'n/a'  ?></small></div>
-                    <div><small>Recent Responses: #</small></div>
-                    <div><small>Another thing: #</small></div>
+                <div class="col-3">
+                    <div><small>Last Form Sync: <?= isset($survey['lastFormSync']) ? date('Y-m-d', $survey['lastFormSync']) : 'n/a' ?></small></div>
+                    <div><small>Last Version Sync: <?= isset($survey['lastVersionSync']) ? date('Y-m-d', $survey['lastVersionSync']) : 'n/a' ?></small></div>
+                    <div><small>Last Responses Sync: <?= isset($survey['lastResponsesUpdated']) ? date('Y-m-d', $survey['lastResponsesUpdated']) : 'n/a' ?></small></div>
                 </div>
                 <div class="col-2">
                     <div class="btn-group-vertical btn-group-sm float-end border" role="group" aria-label="Vertical button group">

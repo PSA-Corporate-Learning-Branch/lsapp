@@ -35,7 +35,7 @@ function syncForm($config) {
     $form_data = json_decode($response, true);
 
     // update from form
-    $return_config['lastUpdated'] = $form_data['updatedAt'];
+    $return_config['lastFormUpdatedAt'] = $form_data['updatedAt'];
 
     $return_config['name'] = $form_data['name'];
     
@@ -59,15 +59,20 @@ function syncForm($config) {
                 
                 // reach out to version endpoint get the form version json
                 $version_data = getVersion($return_config);
+                $return_config['lastVersionUpdatedAt'] = $version_data['updatedAt'];
+                $return_config['lastVersionSync'] = time();
 
                 // process the version and extract questions to create our questions map
                 $questions_map = processVersionQuestions($version_data);
 
                 // add questions map to config
                 $return_config['questions'] = $questions_map;
+
             }
         }
     }
+
+    $return_config['lastFormSync'] = time();
 
     return $return_config;
 
@@ -207,12 +212,6 @@ function getResponses($config) {
 
 }
 
-// $response = file_get_contents($endpoint_form_details, false, $context);
-// $formData = json_decode($response, true);
-
-// // testing form
-// $form_contents = file_get_contents('data/surveys/test-form.json');
-// $formData = json_decode($form_contents, true);
 
 
 // open and decode config file
@@ -278,12 +277,35 @@ if (!empty($form_id)) {
 
 }
 
-// otherwise sync the all forms in the config file
+// otherwise sync the set number of forms in the config file
 else {
+
+    $sync_max = 10;
+    $sync_count = 0;
+    $sync_logs = [];
+
+    usort($config, function($a, $b) {
+
+        $a_has_timestamp = isset($a['lastFormSync']);
+        $b_has_timestamp = isset($b['lastFormSync']);
+
+        // never synced first
+        if ($a_has_timestamp !== $b_has_timestamp) {
+            return $a_has_timestamp <=> $b_has_timestamp;
+        }
+        // both never synced, maintain order
+        if (!$a_has_timestamp && !$b_has_timestamp) {
+            return 0;
+        }
+        // order by last sync
+        return $a['lastFormSync'] <=> $b['lastFormSync'];
+
+    });
+
     foreach ($config as $form_config) {
         
-        // only sync active forms
-        if (isset($form_config['status']) && $form_config['status'] == 'active') {
+        // only sync active forms and while less than max syncs
+        if (isset($form_config['status']) && $form_config['status'] == 'active' && $sync_count < $sync_max ) {
 
             // sync the form and return an updated config
             $synced_form_config = syncForm($form_config);
@@ -294,8 +316,11 @@ else {
             // take the fully updated config and add to our array
             $updated_config[] = $synced_response_config;
 
+            $sync_logs[] = date('c') . ' - ' . $synced_form_config['name'] . ' has been updated';
+            $sync_count++;            
+
         }
-        # if form isn't active, add to new config as-is
+        // if form isn't active, add to new config as-is
         else {
             $updated_config[] = $form_config;
         }
@@ -309,17 +334,18 @@ $json_config = json_encode($updated_config, JSON_PRETTY_PRINT);
 file_put_contents($config_file, $json_config);
 
 
-// $test_questions = processVersionQuestions($test_result);
+$logs_file = $data_path . 'logs.txt';
+$max_logs = 100;
+$logs = file_exists($logs_file) ? file($logs_file, FILE_IGNORE_NEW_LINES) : [];
 
+$logs = array_merge($logs, $sync_logs);
 
+// if we're over max logs
+if (count($logs) > $max_logs) {
+    $logs = array_slice($logs, -$max_logs);
+}
 
-echo '<pre>';
-// print_r($test_result);
-echo '</pre>';
+file_put_contents($logs_file, implode(PHP_EOL, $logs) . PHP_EOL, LOCK_EX);
 
-echo '<pre>';
-// print_r($test_questions);
-echo '</pre>';
-
-
-
+AlertManager::addAlert('success', 'Survey synchronization complete');
+header('Location: ./sync.php');
