@@ -223,27 +223,23 @@ thead {
 	if(!$row[7] && $row[4] != 'Dedicated' && $row[1] != 'Requested' && $row[1] != 'Inactive' && $row[1] != 'Draft') {
 		$issueflag = '<span class="badge text-bg-danger">???</span>';
 	}
-//Ben's Updates
-	//Only does this if delivery method is Webinar
-	//Checks webinar link for URL string associated with platform
-	//Assigns value to platform variable
-	if($row[45] == 'Webinar' && $row[1] != 'Inactive') {
-		if(strpos($row[15], 'https://unite.gov.bc.ca') !== false) {
-			$platform = 'Skype for Business';
-		}
-		elseif(strpos($row[15], 'https://teams.microsoft.com/l/meetup-join/') !== false) {
+
+	// Check the type of link for commonly known platforms
+	if($row[1] != 'Inactive' && ($row[45] == 'Webinar' || $row[45] == 'Blended')) {
+		if(strpos($row[15], 'https://teams.microsoft.com/') !== false) {
 			$platform = 'Microsoft Teams';
 		}
 		elseif(strpos($row[15], 'web.zoom.us/') !== false) {
 			$platform = 'Zoom Meeting';
+		}
+		elseif(!empty($row[15])) {
+			$platform = '<span class="badge text-bg-warning">Other</span>';
 		}
 		else { //If not one of the above links, add the No Link badge
 			$platform = '<span class="badge text-bg-danger">No Link</span>';
 		}	
 		
 	}
-// </Ben's Updates>
-
 
 	//if($row[1] == 'Pending') {
 	//	$statrow = 'table-primary';
@@ -280,28 +276,26 @@ thead {
 		</td>
 		<td class="course"><a href="course.php?courseid=<?= h($row[5]) ?>"><?= h($row[6]) ?></a></td>
 		<td class="venue">
-		<?php if($row[23]): ?>
-		<a href="venue.php?vid=<?= h($row[23]) ?>"><?= h($row[24]) ?></a>
-		<?php else: ?>
-		<span title="One off venue; no page create for it yet."><?= h($row[24]) ?></span>
-		<?php endif ?>
-		<div style="display: none">
-			<?= h($row[28]) ?><br>
-			<?= h($row[29]) ?><br>
-			<?= h($row[30]) ?><br>
-			<?= h($row[26]) ?><br>
-			<?= h($row[25]) ?><br>
-			<?= h($row[27]) ?>
-		</div>
-<!-- Ben's Updates - Only show the No Ship badge if the class is No Ship AND not a Webinar or eLearning -->
-		<?php if($row[49] == 'No Ship' and $row[45] !== 'Webinar' and $row[45] !== 'eLearning'): ?>
-			<span class="badge bg-light-subtle text-primary-emphasis"><?= h($row[49]) ?></span>
-		
-		<!-- If they are Webinars, show the platform variable as the badge instead of no ship	-->	
-		<?php elseif($row[45] == 'Webinar'): ?>
-			<?= h($platform) ?>
-<!-- End of Ben's Updates -->
-		<?php endif ?>
+			<!-- Venue id -->
+			<?php if($row[23]): ?>
+				<a href="venue.php?vid=<?= h($row[23]) ?>"><?= h($row[24]) ?></a>
+			<!-- Show No Ship badge if the class is No Ship with a venue id -->
+			<?php elseif($row[49] == 'No Ship' && !empty($row[23])): ?>
+				<span class="badge bg-light-subtle text-primary-emphasis"><?= h($row[49]) ?></span>
+			<!-- If there isn't a venue id show the platform value -->	
+			<?php elseif(empty($row[23])): ?>
+				<?= h($platform) ?>
+			<?php else: ?>
+				<span title="One off venue; no page create for it yet."><?= h($row[24]) ?></span>
+			<?php endif ?>
+			<div style="display: none">
+				<?= h($row[28]) ?><br>
+				<?= h($row[29]) ?><br>
+				<?= h($row[30]) ?><br>
+				<?= h($row[26]) ?><br>
+				<?= h($row[25]) ?><br>
+				<?= h($row[27]) ?>
+			</div>
 		</td>
 		<td class="city">
 			<a href="city.php?name=<?= h($row[25]) ?>"><?= h($row[25]) ?></a>
