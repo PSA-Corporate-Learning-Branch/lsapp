@@ -29,7 +29,8 @@ function processCsvFile($filename) {
     $csvData = [];
     $columnNames = fgetcsv($handle);
     while (($row = fgetcsv($handle)) !== false) {
-        $csvData[] = array_combine($columnNames, $row);
+        $rowUtfEncoded = mb_convert_encoding($row, 'UTF-8', 'Windows-1252');
+        $csvData[] = array_combine($columnNames, $rowUtfEncoded);
     }
     fclose($handle);
     return $csvData;
