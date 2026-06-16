@@ -1,5 +1,9 @@
 # LSApp
 
+# AS JUNE 16 2026 THIS APP IS OFFICIALLY DEPRECATED
+
+> It is technically still running as the production system but it is no longer accepting any code updates. It is superceded by [LSApp 5000](https://github.com/PSA-Corporate-Learning-Branch/lsapp5000/) and that is where all development will happening in the future. This repo will be archived.
+
 **Learning Support Administration Application**
 
 A "Meta-ELM" system for managing course and class session metadata. LSApp integrates Development, Delivery, and Operations with a central repository of metadata and communications for all aspects of course creation and delivery.
